@@ -85,3 +85,8 @@ def login_user(
 @router.get("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+def logout_user(response: Response):
+    response.delete_cookie(key="access_token")
+    return {"message": "Logout successful."}
