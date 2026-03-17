@@ -1,17 +1,28 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+
+from app.core.config import settings
 
 
-class Settings(BaseSettings):
-    app_name: str = "Music Events Platform"
-    debug: bool = True
-    database_url: str
-    secret_key: str
-    frontend_url: str = "http://localhost:5173"
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        extra="ignore",
-    )
+class Base(DeclarativeBase):
+    pass
 
 
-settings = Settings()
+engine = create_engine(
+    settings.database_url,
+    echo=settings.debug,
+)
+
+SessionLocal = sessionmaker(
+    bind=engine,
+    autocommit=False,
+    autoflush=False,
+)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
