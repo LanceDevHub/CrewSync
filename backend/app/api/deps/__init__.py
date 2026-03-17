@@ -1,0 +1,1 @@
+from app.api.deps.auth import get_current_user

@@ -8,6 +8,7 @@ from app.core.security import create_access_token, get_password_hash, verify_pas
 from app.models.user import User
 from app.schemas.auth import LoginRequest
 from app.schemas.user import UserCreate, UserRead
+from app.api.deps.auth import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -80,3 +81,7 @@ def login_user(
     )
 
     return user
+
+@router.get("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
+def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
