@@ -1,15 +1,10 @@
 from fastapi import FastAPI
 
+from app.api.auth import router as auth_router
 from app.core.config import settings
-from app.core.database import Base, engine
-from app.models import User, Event, EventParticipant
-from app.schemas import UserCreate
 
 app = FastAPI(title=settings.app_name)
 
-@app.post("/test-user")
-def test_user(user: UserCreate):
-    return user
 
 @app.get("/")
 def root():
@@ -18,3 +13,6 @@ def root():
         "app_name": settings.app_name,
         "debug": settings.debug,
     }
+
+
+app.include_router(auth_router)
