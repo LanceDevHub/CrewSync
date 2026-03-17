@@ -7,11 +7,6 @@ from app.models import User, Event, EventParticipant
 app = FastAPI(title=settings.app_name)
 
 
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
-
-
 @app.get("/")
 def root():
     return {
