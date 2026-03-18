@@ -23,3 +23,11 @@ class EventRead(BaseModel):
     max_participants: int | None
     created_at: datetime
     updated_at: datetime
+
+class EventUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=3, max_length=150)
+    description: str | None = Field(default=None, min_length=10, max_length=2000)
+    location: str | None = Field(default=None, min_length=2, max_length=255)
+    genre: str | None = Field(default=None, max_length=100)
+    event_date: datetime | None = None
+    max_participants: int | None = Field(default=None, gt=0)

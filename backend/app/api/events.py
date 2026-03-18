@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.models.event import Event
 from app.models.event_participant import EventParticipant
 from app.models.user import User
-from app.schemas.event import EventCreate, EventRead
+from app.schemas.event import EventCreate, EventRead, EventUpdate
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -170,3 +170,33 @@ def get_event_by_id(
 
     return event
 
+@router.patch("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
+def update_event(
+    event_id: int,
+    event_data: EventUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    event = db.get(Event, event_id)
+
+    if event is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found.",
+        )
+
+    if event.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to edit this event.",
+        )
+
+    update_data = event_data.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(event, field, value)
+
+    db.commit()
+    db.refresh(event)
+
+    return event
