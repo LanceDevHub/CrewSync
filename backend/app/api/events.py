@@ -203,6 +203,7 @@ def update_event(
 
 
 ## spaeter maybe mit cascade loesen
+# WICHTIG: eventParticipants Eintraege werden ebenfalls geloescht
 @router.delete("/{event_id}", status_code=status.HTTP_200_OK)
 def delete_event(
     event_id: int,
