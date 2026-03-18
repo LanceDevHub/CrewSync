@@ -110,3 +110,18 @@ def leave_event(
     db.commit()
 
     return {"message": "Successfully left event."}
+
+@router.get("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
+def get_event_by_id(
+    event_id: int,
+    db: Session = Depends(get_db),
+):
+    event = db.get(Event, event_id)
+
+    if event is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found.",
+        )
+
+    return event
