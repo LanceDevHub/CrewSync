@@ -200,3 +200,37 @@ def update_event(
     db.refresh(event)
 
     return event
+
+
+## spaeter maybe mit cascade loesen
+@router.delete("/{event_id}", status_code=status.HTTP_200_OK)
+def delete_event(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    event = db.get(Event, event_id)
+
+    if event is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found.",
+        )
+
+    if event.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to delete this event.",
+        )
+
+    participations = db.scalars(
+        select(EventParticipant).where(EventParticipant.event_id == event_id)
+    ).all()
+
+    for participation in participations:
+        db.delete(participation)
+
+    db.delete(event)
+    db.commit()
+
+    return {"message": "Event deleted successfully."}
