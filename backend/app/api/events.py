@@ -84,3 +84,35 @@ def join_event(
     db.refresh(new_participation)
 
     return {"message": "Successfully joined event."}
+
+@router.delete("/{event_id}/leave", status_code=status.HTTP_200_OK)
+def leave_event(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    event = db.get(Event, event_id)
+
+    if event is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found.",
+        )
+
+    participation = db.scalar(
+        select(EventParticipant).where(
+            EventParticipant.event_id == event_id,
+            EventParticipant.user_id == current_user.id,
+        )
+    )
+
+    if participation is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have not joined this event.",
+        )
+
+    db.delete(participation)
+    db.commit()
+
+    return {"message": "Successfully left event."}
