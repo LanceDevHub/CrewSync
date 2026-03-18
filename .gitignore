@@ -1,15 +1,40 @@
-# frontend
+# =========================
+# FRONTEND
+# =========================
 frontend/node_modules
 frontend/dist
+frontend/.vite
 
-# backend
+# =========================
+# BACKEND
+# =========================
 backend/.venv
+backend/__pycache__/
+backend/*.pyc
+
+# =========================
+# GLOBAL PYTHON
+# =========================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# environment files
+# =========================
+# ENV FILES (SEHR WICHTIG)
+# =========================
 backend/.env
 frontend/.env
 
-# misc
+# =========================
+# OS / EDITOR
+# =========================
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =========================
+# OPTIONAL (LOGS ETC.)
+# =========================
+*.log
