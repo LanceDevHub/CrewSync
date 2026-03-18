@@ -55,12 +55,6 @@ def join_event(
             detail="Event not found.",
         )
 
-    if event.creator_id == current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot join your own event.",
-        )
-
     existing_participation = db.scalar(
         select(EventParticipant).where(
             EventParticipant.event_id == event_id,
