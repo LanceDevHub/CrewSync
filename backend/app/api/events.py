@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from app.api.deps.auth import get_current_user
 from app.core.database import get_db
 from app.models.event import Event
 from app.models.event_participant import EventParticipant
-from app.schemas.event import EventCreate, EventRead
-from app.api.deps.auth import get_current_user
 from app.models.user import User
+from app.schemas.event import EventCreate, EventRead
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -34,10 +36,52 @@ def create_event(
     return new_event
 
 @router.get("", response_model=list[EventRead], status_code=status.HTTP_200_OK)
-def list_events(db: Session = Depends(get_db)):
-    events = db.scalars(
-        select(Event).order_by(Event.event_date.asc())
-    ).all()
+def list_events(
+    q: str | None = Query(default=None),
+    genre: str | None = Query(default=None),
+    location: str | None = Query(default=None),
+    date_from: datetime | None = Query(default=None),
+    date_to: datetime | None = Query(default=None),
+    only_future: bool = Query(default=False),
+    db: Session = Depends(get_db),
+):
+    query = select(Event)
+
+    if q:
+        search_term = f"%{q}%"
+        query = query.where(
+            or_(
+                Event.title.ilike(search_term),
+                Event.description.ilike(search_term),
+                Event.location.ilike(search_term),
+            )
+        )
+
+    if genre:
+        query = query.where(Event.genre.ilike(f"%{genre}%"))
+
+    if location:
+        query = query.where(Event.location.ilike(f"%{location}%"))
+
+    if date_from:
+        query = query.where(Event.event_date >= date_from)
+
+    if date_to:
+        query = query.where(Event.event_date <= date_to)
+
+    if only_future:
+        query = query.where(Event.event_date >= datetime.utcnow())
+
+    query = query.order_by(Event.event_date.asc())
+
+    print("q:", q)
+    print("genre:", genre)
+    print("location:", location)
+    print("date_from:", date_from)
+    print("date_to:", date_to)
+    print("only_future:", only_future)
+    print(query)
+    events = db.scalars(query).all()
 
     return events
 
@@ -125,3 +169,4 @@ def get_event_by_id(
         )
 
     return event
+
