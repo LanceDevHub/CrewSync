@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import EventsPage from "./pages/EventsPage";
 import EventDetailPage from "./pages/EventDetailPage";
+import CreateEventPage from "./pages/CreateEventPage";
 import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
@@ -54,6 +55,7 @@ export default function App() {
         <Link to="/login">Login</Link>
         <Link to="/register">Register</Link>
         <Link to="/events">Events</Link>
+        <Link to="/events/new">Create Event</Link>
         <Link to="/me">Profile</Link>
       </nav>
 
@@ -79,6 +81,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
+        <Route path="/events/new" element={<CreateEventPage />} />
         <Route path="/me" element={<ProfilePage />} />
       </Routes>
     </div>

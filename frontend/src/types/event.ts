@@ -10,3 +10,12 @@ export type Event = {
   created_at: string;
   updated_at: string;
 };
+
+export type EventCreatePayload = {
+  title: string;
+  description: string;
+  location: string;
+  genre?: string | null;
+  event_date: string;
+  max_participants?: number | null;
+};
