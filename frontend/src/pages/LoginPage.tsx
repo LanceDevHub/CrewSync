@@ -2,8 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { loginUser } from "../api/auth";
+import type { User } from "../types/user";
 
-export default function LoginPage() {
+type LoginPageProps = {
+  onLoginSuccess: (user: User) => void;
+};
+
+export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -18,11 +23,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await loginUser({
+      const user = await loginUser({
         email,
         password,
       });
 
+      onLoginSuccess(user);
       navigate("/events");
     } catch (err) {
       if (err instanceof Error) {
