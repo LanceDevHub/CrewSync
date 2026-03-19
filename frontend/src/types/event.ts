@@ -19,3 +19,12 @@ export type EventCreatePayload = {
   event_date: string;
   max_participants?: number | null;
 };
+
+export type EventUpdatePayload = {
+  title?: string;
+  description?: string;
+  location?: string;
+  genre?: string | null;
+  event_date?: string;
+  max_participants?: number | null;
+};
