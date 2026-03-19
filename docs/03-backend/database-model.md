@@ -191,7 +191,7 @@ Damit bleibt klar unterscheidbar:
 - wer das Event erstellt hat
 - wer dem Event beigetreten ist
 
-Der Ersteller ist im MVP **nicht automatisch Teilnehmer**.
+Der Ersteller ist im MVP **nicht automatisch Teilnehmer** kann aber teilnehmen.
 
 ---
 

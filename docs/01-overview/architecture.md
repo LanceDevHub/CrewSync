@@ -84,7 +84,7 @@ Das Backend bildet die zentrale Logikschicht des Systems.
 
 ## 3.3 Datenbank
 
-Als Datenbank wird **PostgreSQL** verwendet.
+Als Datenbank wird **PostgreSQL** verwendet. (in Entwicklung zu Beginn SQLite)
 
 Aufgaben der Datenbank:
 
