@@ -23,13 +23,19 @@ Dazu wurden folgende Funktionen implementiert:
 - Events bearbeiten
 - Events löschen
 
+Zusätzlich wurden später erweitert:
+
+- Start- und Endzeit für Events
+- Teilnehmerinformationen im Event-Detail
+- Join-Status für aktuellen Nutzer
+
 ---
 
 # 2. Event-Schemas
 
 Datei:
 
-```text
+```
 backend/app/schemas/event.py
 ```
 
@@ -47,10 +53,41 @@ Wird für API-Responses verwendet.
 
 Wird für das Bearbeiten von Events verwendet.
 
-Wichtig:
+---
 
-- Beim Update sind alle Felder optional
-- nur tatsächlich gesendete Felder werden geändert
+## 2.1 Zeitstruktur (neu)
+
+Ein Event besitzt jetzt:
+
+- `start_datetime` (Pflichtfeld)
+- `end_datetime` (optional)
+
+Damit können Events mit Start- und Endzeit abgebildet werden.
+
+---
+
+## 2.2 Validierung der Zeitlogik
+
+Es wurde eine fachliche Validierung ergänzt:
+
+```text
+end_datetime >= start_datetime
+```
+
+Diese wird über `model_validator` im Schema sichergestellt.
+
+---
+
+## 2.3 Erweiterung von EventRead (neu)
+
+Das Response-Schema wurde erweitert um:
+
+- `creator_username`
+- `participants_count`
+- `participants`
+- `is_joined`
+
+Diese Felder werden hauptsächlich im Detail-Endpunkt genutzt.
 
 ---
 
@@ -58,7 +95,7 @@ Wichtig:
 
 Alle Event-Endpunkte befinden sich in:
 
-```text
+```
 backend/app/api/events.py
 ```
 
@@ -66,7 +103,7 @@ backend/app/api/events.py
 
 ## 3.1 Event erstellen
 
-```text
+```
 POST /events
 ```
 
@@ -78,7 +115,7 @@ POST /events
 
 ## 3.2 Events abrufen
 
-```text
+```
 GET /events
 ```
 
@@ -108,45 +145,51 @@ Dieser Endpunkt wurde erweitert um:
 
 Beispiel:
 
-```text
+```
 /events?q=techno&location=berlin&only_future=true
 ```
 
 ---
 
-## 3.3 Event Details
+## 3.3 Event Details (erweitert)
 
-```text
+```
 GET /events/{event_id}
 ```
 
 - liefert ein einzelnes Event
 - gibt `404` zurück, wenn Event nicht existiert
 
+### Erweiterungen:
+
+Dieser Endpoint liefert zusätzlich:
+
+- Teilnehmerliste (`participants`)
+- Teilnehmeranzahl (`participants_count`)
+- Join-Status (`is_joined`)
+- Username des Erstellers (`creator_username`)
+
 ---
 
 ## 3.4 Event beitreten
 
-```text
+```
 POST /events/{event_id}/join
 ```
 
 - nur für eingeloggte Nutzer
+
 - prüft:
   - Event existiert
   - Nutzer ist noch nicht beigetreten
 
 - erstellt Eintrag in `event_participants`
 
-Wichtig:
-
-- der Event-Ersteller darf sein eigenes Event joinen
-
 ---
 
 ## 3.5 Event verlassen
 
-```text
+```
 DELETE /events/{event_id}/leave
 ```
 
@@ -157,7 +200,7 @@ DELETE /events/{event_id}/leave
 
 ## 3.6 Event bearbeiten
 
-```text
+```
 PATCH /events/{event_id}
 ```
 
@@ -165,11 +208,15 @@ PATCH /events/{event_id}
 - verwendet `EventUpdate`
 - nur gesendete Felder werden aktualisiert
 
+Zusätzliche Validierung:
+
+- `end_datetime >= start_datetime`
+
 ---
 
 ## 3.7 Event löschen
 
-```text
+```
 DELETE /events/{event_id}
 ```
 
@@ -186,7 +233,7 @@ Aktuelle Implementierung:
 
 Datei:
 
-```text
+```
 backend/app/api/users.py
 ```
 
@@ -194,7 +241,7 @@ backend/app/api/users.py
 
 ## 4.1 Eigene Events
 
-```text
+```
 GET /users/me/events-created
 ```
 
@@ -204,19 +251,87 @@ GET /users/me/events-created
 
 ## 4.2 Beigetretene Events
 
-```text
+```
 GET /users/me/events-joined
 ```
 
 - liefert alle Events, denen der Nutzer beigetreten ist
 
-Hinweis:
+---
 
-Ein Event kann in beiden Listen erscheinen, wenn der Ersteller auch Teilnehmer ist.
+# 5. Teilnehmer-Logik (neu)
+
+Teilnehmer werden über die Tabelle `event_participants` verwaltet.
+
+Für Event-Details wird:
+
+1. alle Teilnehmer geladen
+2. deren Usernames extrahiert
+3. Join-Status berechnet
 
 ---
 
-# 5. Datenbanklogik
+## 5.1 Join-Status
+
+```text
+is_joined = True / False
+```
+
+Dieser Wert gibt an, ob der aktuelle Nutzer bereits Teilnehmer ist.
+
+---
+
+## 5.2 Teilnehmerliste
+
+```text
+participants = ["max", "anna", "john"]
+```
+
+---
+
+## 5.3 Teilnehmeranzahl
+
+```text
+participants_count = len(participants)
+```
+
+---
+
+# 6. Wichtige Architekturentscheidung (sehr wichtig)
+
+## Teilnehmer nur im Detail-Endpunkt
+
+Teilnehmerdaten werden **nur in `GET /events/{id}` geladen**.
+
+Nicht in:
+
+```
+GET /events
+```
+
+---
+
+## Grund
+
+Vermeidung des **N+1 Query Problems**:
+
+```text
+1 Query → Events
++ N Queries → Teilnehmer pro Event
+```
+
+Das würde zu massiven Performance-Problemen führen.
+
+---
+
+## Konsequenz
+
+- Event-Liste bleibt schnell und leichtgewichtig
+- Detailseite enthält vollständige Informationen
+
+---
+
+# 7. Datenbanklogik
 
 Verwendete Tabellen:
 
@@ -230,145 +345,120 @@ Beziehung:
 
 ---
 
-# 6. Wichtige Implementierungsdetails
+# 8. Wichtige Implementierungsdetails
 
-## 6.1 Trennung von Verantwortlichkeiten
+## 8.1 Trennung von Verantwortlichkeiten
 
 - `events.py` → Event-Logik
 - `users.py` → nutzerspezifische Event-Daten
 
-Diese Trennung ist wichtig für eine skalierbare Architektur.
+---
+
+## 8.2 Verwendung von Depends
+
+Dependencies:
+
+- `get_db`
+- `get_current_user`
 
 ---
 
-## 6.2 Verwendung von Depends
+## 8.3 Serialisierung
 
-Dependencies werden genutzt für:
+Eine zentrale Helper-Funktion (`serialize_event`) wird verwendet, um:
 
-- Datenbankzugriff (`get_db`)
-- Authentifizierung (`get_current_user`)
-
-Dadurch:
-
-- saubere Endpunkte
-- keine doppelte Logik
-- automatische Sicherheitsprüfung
+- Datenbankmodelle in API-Responses zu transformieren
+- zusätzliche Felder zu ergänzen
 
 ---
 
-## 6.3 Validierung über Pydantic
+## 8.4 Validierung über Pydantic
 
-- Eingaben werden automatisch validiert
-- ungültige Daten führen zu Fehlern
-- verhindert fehlerhafte Daten in der DB
+- automatische Validierung
+- saubere Fehlerbehandlung
+- konsistente Datenstruktur
 
 ---
 
-# 7. Wichtige Hinweise & zukünftige Verbesserungen
+# 9. Wichtige Hinweise & zukünftige Verbesserungen
 
-## 7.1 Löschen von Events (Cascade)
+## 9.1 Cascade Delete
+
+Aktuell manuell umgesetzt → später:
+
+- SQLAlchemy cascade
+- ON DELETE CASCADE
+
+---
+
+## 9.2 SQLite vs PostgreSQL
+
+- aktuell SQLite
+- Produktion → PostgreSQL
+
+---
+
+## 9.3 Filter & Pagination
+
+Erweiterungen möglich:
+
+- Pagination (`limit`, `offset`)
+- Sortierung
+- komplexe Suche
+
+---
+
+## 9.4 Teilnehmer im Event-Response
 
 Aktuell:
 
-- Teilnehmer-Einträge werden manuell gelöscht
-
-Später sollte dies verbessert werden durch:
-
-- SQLAlchemy Relationships
-- `cascade="all, delete-orphan"`
-- oder Datenbank-seitiges `ON DELETE CASCADE`
-
-Vorteil:
-
-- weniger Code im Endpoint
-- konsistentere Datenbanklogik
-
----
-
-## 7.2 SQLite vs PostgreSQL
-
-Aktuell wird SQLite verwendet.
-
-Für Produktion:
-
-- Umstieg auf PostgreSQL empfohlen
-- bessere Performance
-- bessere Integrität
-- bessere Skalierbarkeit
-
----
-
-## 7.3 Filter-Logik erweitern
-
-Aktuell:
-
-- einfache Filter
+- nur im Detail-Endpunkt
 
 Später möglich:
 
-- Sortierung (`asc` / `desc`)
-- Pagination (`limit`, `offset`)
-- komplexere Suche
+- `participants_preview` (erste 3 Nutzer)
+- ohne Performanceverlust
 
 ---
 
-## 7.4 Teilnehmerinformationen
+## 9.5 Zeitzonen
 
-Aktuell fehlen im Response:
-
-- Teilnehmeranzahl
-- ob aktueller Nutzer beigetreten ist
-
-Diese können später ergänzt werden.
+- aktuell UTC (`datetime.utcnow`)
+- später: echte Zeitzonen
 
 ---
 
-## 7.5 Zeitzonen
-
-Aktuell wird mit `datetime.utcnow()` gearbeitet.
-
-Später sollte geprüft werden:
-
-- Zeitzonenunterstützung
-- lokale Zeiten vs UTC
-
----
-
-# 8. Ergebnis dieses Abschnitts
-
-Nach Abschluss dieses Abschnitts verfügt die Anwendung über:
+# 10. Ergebnis dieses Abschnitts
 
 ✔ vollständige Event-Verwaltung (CRUD)
 ✔ Teilnahme-Logik (Join / Leave)
 ✔ persönliche Event-Übersichten
 ✔ Such- und Filterfunktion
-✔ saubere Trennung der API-Struktur
-
-Damit ist der zentrale Funktionskern der Plattform implementiert.
+✔ Zeitstruktur (Start/Ende)
+✔ Teilnehmer-Logik
+✔ Join-Status
+✔ performante API-Struktur
 
 ---
 
-# 9. Nächste mögliche Schritte
-
-Mögliche nächste Entwicklungsrichtungen:
+# 11. Nächste Schritte
 
 ## Backend
 
 - Pagination
-- Sortierung
-- Teilnehmeranzahl im Response
-- Rollen / Berechtigungen
+- Teilnehmer-Preview in Liste
+- Optimierungen (Joins)
 
 ## Frontend
 
-- Event-Liste anzeigen
-- Login integrieren
-- persönliche Seite aufbauen
+- EventDetailPage mit Teilnehmeranzeige
+- Join/Leave UI
+- Profilseite (eigene Events)
 
 ## Infrastruktur
 
-- PostgreSQL einführen
-- Deployment vorbereiten
+- PostgreSQL
+- Deployment
 
 ---
 
@@ -382,5 +472,6 @@ Die Anwendung ermöglicht nun:
 - Teilnahme an Events
 - Verwaltung eigener Events
 - Suche und Filterung
+- Anzeige von Teilnehmern und Join-Status
 
-Damit ist ein funktionaler MVP der Plattform erreicht.
+Damit ist ein funktionaler und technisch sauber strukturierter MVP erreicht.
