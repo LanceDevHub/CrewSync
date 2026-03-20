@@ -11,6 +11,8 @@ import EventDetailPage from "./pages/EventDetailPage";
 import CreateEventPage from "./pages/CreateEventPage";
 import ProfilePage from "./pages/ProfilePage";
 
+import AppLayout from "./components/layout/AppLayout";
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -50,30 +52,11 @@ export default function App() {
   }
 
   return (
-    <div>
-      <nav style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
-        <Link to="/login">Login</Link>
-        <Link to="/register">Register</Link>
-        <Link to="/events">Events</Link>
-        <Link to="/events/new">Create Event</Link>
-        <Link to="/me">Profile</Link>
-      </nav>
-
-      <div style={{ marginBottom: "1rem" }}>
-        {currentUser ? (
-          <>
-            <p>Eingeloggt als: {currentUser.username}</p>
-            <button onClick={handleLogout}>Logout</button>
-          </>
-        ) : (
-          <p>Nicht eingeloggt</p>
-        )}
-      </div>
-
+    <AppLayout currentUser={currentUser} onLogout={handleLogout}>
       {authError && <p style={{ color: "red" }}>{authError}</p>}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/events" replace />} />
         <Route
           path="/login"
           element={<LoginPage onLoginSuccess={setCurrentUser} />}
@@ -84,6 +67,6 @@ export default function App() {
         <Route path="/events/new" element={<CreateEventPage />} />
         <Route path="/me" element={<ProfilePage />} />
       </Routes>
-    </div>
+    </AppLayout>
   );
 }
