@@ -11,7 +11,16 @@ from app.models.event_participant import EventParticipant
 from app.models.user import User
 from app.schemas.event import EventCreate, EventRead, EventUpdate
 
-def serialize_event(event: Event, creator_username: str) -> EventRead:
+router = APIRouter(prefix="/events", tags=["events"])
+
+## helper funcs
+
+def serialize_event(
+    event: Event,
+    creator_username: str,
+    participants: list[str],
+    is_joined: bool,
+) -> EventRead:
     return EventRead(
         id=event.id,
         creator_id=event.creator_id,
@@ -24,9 +33,17 @@ def serialize_event(event: Event, creator_username: str) -> EventRead:
         end_datetime=event.end_datetime,
         created_at=event.created_at,
         updated_at=event.updated_at,
+        participants_count=len(participants),
+        participants=participants,
+        is_joined=is_joined,
     )
 
-router = APIRouter(prefix="/events", tags=["events"])
+def get_event_participants(db: Session, event_id: int) -> list[User]:
+    return db.scalars(
+        select(User)
+        .join(EventParticipant, EventParticipant.user_id == User.id)
+        .where(EventParticipant.event_id == event_id)
+    ).all()
 
 @router.post("", response_model=EventRead, status_code=status.HTTP_201_CREATED)
 def create_event(
@@ -48,7 +65,7 @@ def create_event(
     db.commit()
     db.refresh(new_event)
 
-    return serialize_event(new_event, current_user.username)
+    return serialize_event(new_event, current_user.username, [], False)
 
 @router.get("", response_model=list[EventRead], status_code=status.HTTP_200_OK)
 def list_events(
@@ -103,7 +120,7 @@ def list_events(
     for event in events:
         creator = db.get(User, event.creator_id)
         creator_username = creator.username if creator else "Unknown"
-        result.append(serialize_event(event, creator_username))
+        result.append(serialize_event(event, creator_username, [], False))
 
     return result
 
@@ -194,7 +211,17 @@ def get_event_by_id(
     creator = db.get(User, event.creator_id)
     creator_username = creator.username if creator else "Unknown"
 
-    return serialize_event(event, creator_username)
+    participants_users = get_event_participants(db, event.id)
+    participant_names = [user.username for user in participants_users]
+
+    is_joined = any(user.id == current_user.id for user in participants_users)
+
+    return serialize_event(
+        event,
+        creator_username,
+        participant_names,
+        is_joined,
+    )
 
 @router.patch("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
 def update_event(
@@ -234,7 +261,16 @@ def update_event(
     creator = db.get(User, event.creator_id)
     creator_username = creator.username if creator else "Unknown"
 
-    return serialize_event(event, creator_username)
+    participants_users = get_event_participants(db, event.id)
+    participant_names = [user.username for user in participants_users]
+    is_joined = any(user.id == current_user.id for user in participants_users)
+
+    return serialize_event(
+        event,
+        creator_username,
+        participant_names,
+        is_joined,
+    )
 
 
 ## spaeter maybe mit cascade loesen

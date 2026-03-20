@@ -10,7 +10,15 @@ from app.models.user import User
 from app.schemas.event import EventRead
 
 
-def serialize_event(event: Event, creator_username: str) -> EventRead:
+router = APIRouter(prefix="/users", tags=["users"])
+
+## helper functions
+def serialize_event(
+    event: Event,
+    creator_username: str,
+    participants: list[str],
+    is_joined: bool,
+) -> EventRead:
     return EventRead(
         id=event.id,
         creator_id=event.creator_id,
@@ -23,10 +31,10 @@ def serialize_event(event: Event, creator_username: str) -> EventRead:
         end_datetime=event.end_datetime,
         created_at=event.created_at,
         updated_at=event.updated_at,
+        participants_count=len(participants),
+        participants=participants,
+        is_joined=is_joined,
     )
-
-
-router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/me/events-created", response_model=list[EventRead], status_code=status.HTTP_200_OK)
@@ -42,7 +50,7 @@ def get_my_created_events(
 
     result = []
     for event in events:
-        result.append(serialize_event(event, current_user.username))
+        result.append(serialize_event(event, current_user.username, [], False))
 
     return result
 
@@ -63,6 +71,6 @@ def get_my_joined_events(
     for event in events:
         creator = db.get(User, event.creator_id)
         creator_username = creator.username if creator else "Unknown"
-        result.append(serialize_event(event, creator_username))
+        result.append(serialize_event(event, creator_username, [], False))
 
     return result
