@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  Alert,
+  Box,
+  Button,
+  Field,
+  Heading,
+  Input,
+  Stack,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 
 import { getCurrentUser } from "../api/auth";
 import {
@@ -132,8 +143,8 @@ export default function EventDetailPage() {
     }
   }
 
-  async function handleUpdate(eventForm: React.FormEvent<HTMLFormElement>) {
-    eventForm.preventDefault();
+  async function handleUpdate(formEvent: React.FormEvent<HTMLFormElement>) {
+    formEvent.preventDefault();
     if (!id || !event) return;
 
     setActionMessage("");
@@ -191,15 +202,27 @@ export default function EventDetailPage() {
   }
 
   if (isLoading) {
-    return <p>Event wird geladen...</p>;
+    return (
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <Text>Event wird geladen...</Text>
+      </Box>
+    );
   }
 
   if (error && !event) {
-    return <p style={{ color: "red" }}>{error}</p>;
+    return (
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <Text color="red.500">{error}</Text>
+      </Box>
+    );
   }
 
   if (!event) {
-    return <p>Event nicht gefunden.</p>;
+    return (
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <Text>Event nicht gefunden.</Text>
+      </Box>
+    );
   }
 
   const isCreator = currentUser?.id === event.creator_id;
@@ -208,205 +231,259 @@ export default function EventDetailPage() {
     : event.participants.slice(0, 3);
 
   return (
-    <div>
+    <Stack gap="6">
       {isEditing ? (
-        <form onSubmit={handleUpdate}>
-          <h1>Event bearbeiten</h1>
+        <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
+          <Stack gap="6">
+            <Heading size="lg">Event bearbeiten</Heading>
 
-          <div>
-            <label htmlFor="title">Titel</label>
-            <br />
-            <input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
+            <form onSubmit={handleUpdate}>
+              <Stack gap="4">
+                <Field.Root required>
+                  <Field.Label>Titel</Field.Label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </Field.Root>
 
-          <div style={{ marginTop: "1rem" }}>
-            <label htmlFor="description">Beschreibung</label>
-            <br />
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
+                <Field.Root required>
+                  <Field.Label>Beschreibung</Field.Label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </Field.Root>
 
-          <div style={{ marginTop: "1rem" }}>
-            <label htmlFor="location">Ort</label>
-            <br />
-            <input
-              id="location"
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-            />
-          </div>
+                <Field.Root required>
+                  <Field.Label>Ort</Field.Label>
+                  <Input
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                </Field.Root>
 
-          <div style={{ marginTop: "1rem" }}>
-            <label htmlFor="genre">Genre</label>
-            <br />
-            <input
-              id="genre"
-              type="text"
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-            />
-          </div>
+                <Field.Root>
+                  <Field.Label>Genre</Field.Label>
+                  <Input
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                  />
+                </Field.Root>
 
-          <div style={{ marginTop: "1rem" }}>
-            <label htmlFor="startDatetime">Beginn</label>
-            <br />
-            <input
-              id="startDatetime"
-              type="datetime-local"
-              value={startDatetime}
-              onChange={(e) => setStartDatetime(e.target.value)}
-              required
-            />
-          </div>
+                <Field.Root required>
+                  <Field.Label>Beginn</Field.Label>
+                  <Input
+                    type="datetime-local"
+                    value={startDatetime}
+                    onChange={(e) => setStartDatetime(e.target.value)}
+                  />
+                </Field.Root>
 
-          <div style={{ marginTop: "1rem" }}>
-            <label htmlFor="endDatetime">Ende (optional)</label>
-            <br />
-            <input
-              id="endDatetime"
-              type="datetime-local"
-              value={endDatetime}
-              onChange={(e) => setEndDatetime(e.target.value)}
-            />
-          </div>
+                <Field.Root>
+                  <Field.Label>Ende (optional)</Field.Label>
+                  <Input
+                    type="datetime-local"
+                    value={endDatetime}
+                    onChange={(e) => setEndDatetime(e.target.value)}
+                  />
+                </Field.Root>
 
-          <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
-            <button type="submit" disabled={actionLoading}>
-              {actionLoading ? "Speichert..." : "Änderungen speichern"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              disabled={actionLoading}
-            >
-              Abbrechen
-            </button>
-          </div>
-        </form>
+                <Stack direction={{ base: "column", sm: "row" }} gap="3">
+                  <Button
+                    type="submit"
+                    colorPalette="teal"
+                    loading={actionLoading}
+                  >
+                    Änderungen speichern
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                    disabled={actionLoading}
+                  >
+                    Abbrechen
+                  </Button>
+                </Stack>
+              </Stack>
+            </form>
+          </Stack>
+        </Box>
       ) : (
         <>
-          <h1>{event.title}</h1>
+          <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
+            <Stack gap="4">
+              <Heading size="lg">{event.title}</Heading>
 
-          <p>{event.description}</p>
+              <Text color="gray.700">{event.description}</Text>
 
-          <p>
-            <strong>Erstellt von:</strong> {event.creator_username}
-          </p>
+              <Text>
+                <Text as="span" fontWeight="semibold">
+                  Erstellt von:
+                </Text>{" "}
+                {event.creator_username}
+              </Text>
 
-          <p>
-            <strong>Ort:</strong> {event.location}
-          </p>
+              <Text>
+                <Text as="span" fontWeight="semibold">
+                  Ort:
+                </Text>{" "}
+                {event.location}
+              </Text>
 
-          <p>
-            <strong>Genre:</strong> {event.genre ?? "—"}
-          </p>
+              <Text>
+                <Text as="span" fontWeight="semibold">
+                  Genre:
+                </Text>{" "}
+                {event.genre ?? "—"}
+              </Text>
 
-          <p>
-            <strong>Beginn:</strong>{" "}
-            {new Date(event.start_datetime).toLocaleString()}
-          </p>
+              <Text>
+                <Text as="span" fontWeight="semibold">
+                  Beginn:
+                </Text>{" "}
+                {new Date(event.start_datetime).toLocaleString()}
+              </Text>
 
-          <p>
-            <strong>Ende:</strong>{" "}
-            {event.end_datetime
-              ? new Date(event.end_datetime).toLocaleString()
-              : "Kein Endzeitpunkt angegeben"}
-          </p>
+              <Text>
+                <Text as="span" fontWeight="semibold">
+                  Ende:
+                </Text>{" "}
+                {event.end_datetime
+                  ? new Date(event.end_datetime).toLocaleString()
+                  : "Kein Endzeitpunkt angegeben"}
+              </Text>
+            </Stack>
+          </Box>
 
-          <div style={{ marginTop: "1.5rem" }}>
-            <h3>Teilnehmer ({event.participants_count})</h3>
+          <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
+            <Stack gap="4">
+              <Heading size="md">
+                Teilnehmer ({event.participants_count})
+              </Heading>
 
-            {event.participants.length === 0 ? (
-              <p>Noch keine Teilnehmer.</p>
-            ) : (
-              <>
-                <ul>
-                  {visibleParticipants.map((participant) => (
-                    <li key={participant}>{participant}</li>
-                  ))}
-                </ul>
+              {event.participants.length === 0 ? (
+                <Text>Noch keine Teilnehmer.</Text>
+              ) : (
+                <>
+                  <Stack gap="2">
+                    {visibleParticipants.map((participant) => (
+                      <Box
+                        key={participant}
+                        px="3"
+                        py="2"
+                        bg="gray.50"
+                        borderRadius="md"
+                        borderWidth="1px"
+                      >
+                        <Text>{participant}</Text>
+                      </Box>
+                    ))}
+                  </Stack>
 
-                {event.participants.length > 3 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllParticipants((prev) => !prev)}
-                  >
-                    {showAllParticipants ? "Weniger anzeigen" : "Mehr anzeigen"}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-
-          {currentUser ? (
-            <div
-              style={{
-                marginTop: "1.5rem",
-                display: "flex",
-                gap: "1rem",
-                flexWrap: "wrap",
-              }}
-            >
-              {!event.is_joined && (
-                <button onClick={handleJoin} disabled={actionLoading}>
-                  {actionLoading ? "Lädt..." : "Event beitreten"}
-                </button>
+                  {event.participants.length > 3 && (
+                    <Button
+                      variant="ghost"
+                      alignSelf="flex-start"
+                      onClick={() => setShowAllParticipants((prev) => !prev)}
+                    >
+                      {showAllParticipants
+                        ? "Weniger anzeigen"
+                        : "Mehr anzeigen"}
+                    </Button>
+                  )}
+                </>
               )}
+            </Stack>
+          </Box>
 
-              {event.is_joined && (
-                <button onClick={handleLeave} disabled={actionLoading}>
-                  {actionLoading ? "Lädt..." : "Event verlassen"}
-                </button>
+          <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
+            <Stack gap="4">
+              <Heading size="md">Aktionen</Heading>
+
+              {currentUser ? (
+                <Stack
+                  direction={{ base: "column", sm: "row" }}
+                  gap="3"
+                  flexWrap="wrap"
+                >
+                  {!event.is_joined && (
+                    <Button
+                      onClick={handleJoin}
+                      colorPalette="teal"
+                      loading={actionLoading}
+                    >
+                      Event beitreten
+                    </Button>
+                  )}
+
+                  {event.is_joined && (
+                    <Button
+                      onClick={handleLeave}
+                      variant="outline"
+                      loading={actionLoading}
+                    >
+                      Event verlassen
+                    </Button>
+                  )}
+
+                  {isCreator && (
+                    <>
+                      <Button
+                        onClick={() => setIsEditing(true)}
+                        variant="subtle"
+                        disabled={actionLoading}
+                      >
+                        Event bearbeiten
+                      </Button>
+
+                      <Button
+                        onClick={handleDelete}
+                        colorPalette="red"
+                        disabled={actionLoading}
+                      >
+                        Event löschen
+                      </Button>
+                    </>
+                  )}
+                </Stack>
+              ) : (
+                <Text>
+                  Du musst eingeloggt sein, um mit diesem Event zu interagieren.
+                </Text>
               )}
 
               {isCreator && (
-                <>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    disabled={actionLoading}
-                  >
-                    Event bearbeiten
-                  </button>
-
-                  <button onClick={handleDelete} disabled={actionLoading}>
-                    Event löschen
-                  </button>
-                </>
+                <Text color="gray.600">
+                  Du bist der Ersteller dieses Events.
+                </Text>
               )}
-            </div>
-          ) : (
-            <p style={{ marginTop: "1.5rem" }}>
-              Du musst eingeloggt sein, um mit diesem Event zu interagieren.
-            </p>
-          )}
-
-          {isCreator && (
-            <p style={{ marginTop: "1rem" }}>
-              Du bist der Ersteller dieses Events.
-            </p>
-          )}
+            </Stack>
+          </Box>
         </>
       )}
 
       {actionMessage && (
-        <p style={{ color: "green", marginTop: "1rem" }}>{actionMessage}</p>
+        <Alert.Root status="success">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Erfolgreich</Alert.Title>
+            <Alert.Description>{actionMessage}</Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
       )}
 
       {error && event && (
-        <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>
+        <Alert.Root status="error">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Fehler</Alert.Title>
+            <Alert.Description>{error}</Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
       )}
-    </div>
+    </Stack>
   );
 }
