@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { Box, Heading, Link, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 
 import { getCurrentUser } from "../api/auth";
 import { getMyCreatedEvents, getMyJoinedEvents } from "../api/users";
@@ -54,106 +55,143 @@ export default function ProfilePage() {
     return preview;
   }
 
+  function renderEventCard(event: Event) {
+    return (
+      <Box
+        key={event.id}
+        bg="white"
+        p="6"
+        borderRadius="lg"
+        boxShadow="sm"
+        borderWidth="1px"
+      >
+        <Stack gap="3">
+          <Heading size="md">{event.title}</Heading>
+
+          <Text color="gray.700">{event.description}</Text>
+
+          <Text>
+            <Text as="span" fontWeight="semibold">
+              Erstellt von:
+            </Text>{" "}
+            {event.creator_username}
+          </Text>
+
+          <Text>
+            <Text as="span" fontWeight="semibold">
+              Ort:
+            </Text>{" "}
+            {event.location}
+          </Text>
+
+          <Text>
+            <Text as="span" fontWeight="semibold">
+              Beginn:
+            </Text>{" "}
+            {new Date(event.start_datetime).toLocaleString()}
+          </Text>
+
+          <Text>
+            <Text as="span" fontWeight="semibold">
+              Ende:
+            </Text>{" "}
+            {event.end_datetime
+              ? new Date(event.end_datetime).toLocaleString()
+              : "Kein Endzeitpunkt angegeben"}
+          </Text>
+
+          <Text>
+            <Text as="span" fontWeight="semibold">
+              Teilnehmer:
+            </Text>{" "}
+            {formatParticipantsPreview(event)}
+          </Text>
+
+          <Link asChild color="teal.600" fontWeight="semibold">
+            <RouterLink to={`/events/${event.id}`}>Details ansehen</RouterLink>
+          </Link>
+        </Stack>
+      </Box>
+    );
+  }
+
   if (isLoading) {
-    return <p>Profil wird geladen...</p>;
+    return (
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <Text>Profil wird geladen...</Text>
+      </Box>
+    );
   }
 
   if (error) {
-    return <p style={{ color: "red" }}>{error}</p>;
+    return (
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <Text color="red.500">{error}</Text>
+      </Box>
+    );
   }
 
   if (!currentUser) {
-    return <p>Nicht eingeloggt.</p>;
+    return (
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <Text>Nicht eingeloggt.</Text>
+      </Box>
+    );
   }
 
   return (
-    <div>
-      <h1>Mein Profil</h1>
+    <Stack gap="8">
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <Heading size="lg">Mein Profil</Heading>
 
-      <section style={{ marginBottom: "2rem" }}>
-        <p>
-          <strong>Benutzername:</strong> {currentUser.username}
-        </p>
-        <p>
-          <strong>E-Mail:</strong> {currentUser.email}
-        </p>
-      </section>
+        <Stack gap="2" mt="4">
+          <Text>
+            <Text as="span" fontWeight="semibold">
+              Benutzername:
+            </Text>{" "}
+            {currentUser.username}
+          </Text>
 
-      <section style={{ marginBottom: "2rem" }}>
-        <h2>Meine erstellten Events</h2>
+          <Text>
+            <Text as="span" fontWeight="semibold">
+              E-Mail:
+            </Text>{" "}
+            {currentUser.email}
+          </Text>
+        </Stack>
+      </Box>
+
+      <Box>
+        <Heading size="md" mb="4">
+          Meine erstellten Events
+        </Heading>
 
         {createdEvents.length === 0 ? (
-          <p>Du hast noch keine Events erstellt.</p>
+          <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+            <Text>Du hast noch keine Events erstellt.</Text>
+          </Box>
         ) : (
-          <ul>
-            {createdEvents.map((event) => (
-              <li key={event.id} style={{ marginBottom: "1.5rem" }}>
-                <h3>{event.title}</h3>
-                <p>{event.description}</p>
-                <p>
-                  <strong>Erstellt von:</strong> {event.creator_username}
-                </p>
-                <p>
-                  <strong>Ort:</strong> {event.location}
-                </p>
-                <p>
-                  <strong>Beginn:</strong>{" "}
-                  {new Date(event.start_datetime).toLocaleString()}
-                </p>
-                <p>
-                  <strong>Ende:</strong>{" "}
-                  {event.end_datetime
-                    ? new Date(event.end_datetime).toLocaleString()
-                    : "Kein Endzeitpunkt angegeben"}
-                </p>
-                <p>
-                  <strong>Teilnehmer:</strong>{" "}
-                  {formatParticipantsPreview(event)}
-                </p>
-                <Link to={`/events/${event.id}`}>Details ansehen</Link>
-              </li>
-            ))}
-          </ul>
+          <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
+            {createdEvents.map(renderEventCard)}
+          </SimpleGrid>
         )}
-      </section>
+      </Box>
 
-      <section>
-        <h2>Meine beigetretenen Events</h2>
+      <Box>
+        <Heading size="md" mb="4">
+          Meine beigetretenen Events
+        </Heading>
 
         {joinedEvents.length === 0 ? (
-          <p>Du bist noch keinem Event beigetreten.</p>
+          <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+            <Text>Du bist noch keinem Event beigetreten.</Text>
+          </Box>
         ) : (
-          <ul>
-            {joinedEvents.map((event) => (
-              <li key={event.id} style={{ marginBottom: "1.5rem" }}>
-                <h3>{event.title}</h3>
-                <p>{event.description}</p>
-                <p>
-                  <strong>Erstellt von:</strong> {event.creator_username}
-                </p>
-                <p>
-                  <strong>Ort:</strong> {event.location}
-                </p>
-                <p>
-                  <strong>Beginn:</strong>{" "}
-                  {new Date(event.start_datetime).toLocaleString()}
-                </p>
-                <p>
-                  <strong>Ende:</strong>{" "}
-                  {event.end_datetime
-                    ? new Date(event.end_datetime).toLocaleString()
-                    : "Kein Endzeitpunkt angegeben"}
-                </p>
-                <p>
-                  <strong>Teilnehmer:</strong>{" "}
-                  {formatParticipantsPreview(event)}
-                </p>
-                <Link to={`/events/${event.id}`}>Details ansehen</Link>
-              </li>
-            ))}
-          </ul>
+          <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
+            {joinedEvents.map(renderEventCard)}
+          </SimpleGrid>
         )}
-      </section>
-    </div>
+      </Box>
+    </Stack>
   );
 }
