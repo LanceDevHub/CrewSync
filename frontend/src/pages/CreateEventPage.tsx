@@ -1,5 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Alert,
+  Box,
+  Button,
+  Field,
+  Heading,
+  Input,
+  Stack,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 
 import { createEvent } from "../api/events";
 
@@ -44,89 +55,91 @@ export default function CreateEventPage() {
   }
 
   return (
-    <div>
-      <h1>Event erstellen</h1>
+    <Box
+      maxW="xl"
+      mx="auto"
+      mt="10"
+      p="8"
+      bg="white"
+      borderRadius="lg"
+      boxShadow="md"
+    >
+      <Stack gap="6">
+        <Box>
+          <Heading size="lg">Event erstellen</Heading>
+          <Text color="gray.600" mt="2">
+            Lege ein neues Event an und gib Beginn sowie optional ein Ende an.
+          </Text>
+        </Box>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Titel</label>
-          <br />
-          <input
-            id="title"
-            type="text"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <Stack gap="4">
+            <Field.Root required>
+              <Field.Label>Titel</Field.Label>
+              <Input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+            </Field.Root>
 
-        <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="description">Beschreibung</label>
-          <br />
-          <textarea
-            id="description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            required
-          />
-        </div>
+            <Field.Root required>
+              <Field.Label>Beschreibung</Field.Label>
+              <Textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+              />
+            </Field.Root>
 
-        <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="location">Ort</label>
-          <br />
-          <input
-            id="location"
-            type="text"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            required
-          />
-        </div>
+            <Field.Root required>
+              <Field.Label>Ort</Field.Label>
+              <Input
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+              />
+            </Field.Root>
 
-        <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="genre">Genre</label>
-          <br />
-          <input
-            id="genre"
-            type="text"
-            value={genre}
-            onChange={(event) => setGenre(event.target.value)}
-          />
-        </div>
+            <Field.Root>
+              <Field.Label>Genre</Field.Label>
+              <Input
+                value={genre}
+                onChange={(event) => setGenre(event.target.value)}
+              />
+            </Field.Root>
 
-        <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="startDatetime">Beginn</label>
-          <br />
-          <input
-            id="startDatetime"
-            type="datetime-local"
-            value={startDatetime}
-            onChange={(event) => setStartDatetime(event.target.value)}
-            required
-          />
-        </div>
+            <Field.Root required>
+              <Field.Label>Beginn</Field.Label>
+              <Input
+                type="datetime-local"
+                value={startDatetime}
+                onChange={(event) => setStartDatetime(event.target.value)}
+              />
+            </Field.Root>
 
-        <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="endDatetime">Ende (optional)</label>
-          <br />
-          <input
-            id="endDatetime"
-            type="datetime-local"
-            value={endDatetime}
-            onChange={(event) => setEndDatetime(event.target.value)}
-          />
-        </div>
+            <Field.Root>
+              <Field.Label>Ende (optional)</Field.Label>
+              <Input
+                type="datetime-local"
+                value={endDatetime}
+                onChange={(event) => setEndDatetime(event.target.value)}
+              />
+            </Field.Root>
 
-        {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
+            {error && (
+              <Alert.Root status="error">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>Event konnte nicht erstellt werden</Alert.Title>
+                  <Alert.Description>{error}</Alert.Description>
+                </Alert.Content>
+              </Alert.Root>
+            )}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          style={{ marginTop: "1rem" }}
-        >
-          {isLoading ? "Wird erstellt..." : "Event erstellen"}
-        </button>
-      </form>
-    </div>
+            <Button type="submit" colorPalette="teal" loading={isLoading}>
+              Event erstellen
+            </Button>
+          </Stack>
+        </form>
+      </Stack>
+    </Box>
   );
 }
