@@ -32,6 +32,7 @@ def serialize_event(
         created_at=event.created_at,
         updated_at=event.updated_at,
         participants_count=len(participants),
+        participants_preview=participants[:3],
         participants=participants,
         is_joined=is_joined,
     )
@@ -50,7 +51,22 @@ def get_my_created_events(
 
     result = []
     for event in events:
-        result.append(serialize_event(event, current_user.username, [], False))
+        participants_users = db.scalars(
+            select(User)
+            .join(EventParticipant, EventParticipant.user_id == User.id)
+            .where(EventParticipant.event_id == event.id)
+        ).all()
+        participant_names = [user.username for user in participants_users]
+        is_joined = any(user.id == current_user.id for user in participants_users)
+
+        result.append(
+            serialize_event(
+                event,
+                current_user.username,
+                participant_names,
+                is_joined,
+            )
+        )
 
     return result
 
@@ -71,6 +87,22 @@ def get_my_joined_events(
     for event in events:
         creator = db.get(User, event.creator_id)
         creator_username = creator.username if creator else "Unknown"
-        result.append(serialize_event(event, creator_username, [], False))
+
+        participants_users = db.scalars(
+            select(User)
+            .join(EventParticipant, EventParticipant.user_id == User.id)
+            .where(EventParticipant.event_id == event.id)
+        ).all()
+        participant_names = [user.username for user in participants_users]
+        is_joined = any(user.id == current_user.id for user in participants_users)
+
+        result.append(
+            serialize_event(
+                event,
+                creator_username,
+                participant_names,
+                is_joined,
+            )
+        )
 
     return result

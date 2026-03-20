@@ -34,6 +34,7 @@ def serialize_event(
         created_at=event.created_at,
         updated_at=event.updated_at,
         participants_count=len(participants),
+        participants_preview=participants[:3],
         participants=participants,
         is_joined=is_joined,
     )
@@ -120,7 +121,19 @@ def list_events(
     for event in events:
         creator = db.get(User, event.creator_id)
         creator_username = creator.username if creator else "Unknown"
-        result.append(serialize_event(event, creator_username, [], False))
+
+        participants_users = get_event_participants(db, event.id)
+        participant_names = [user.username for user in participants_users]
+        is_joined = any(user.id == current_user.id for user in participants_users)
+
+        result.append(
+            serialize_event(
+                event,
+                creator_username,
+                participant_names,
+                is_joined,
+            )
+        )
 
     return result
 

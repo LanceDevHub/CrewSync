@@ -30,7 +30,9 @@ class EventRead(BaseModel):
     end_datetime: datetime | None
     created_at: datetime
     updated_at: datetime
+
     participants_count: int
+    participants_preview: list[str]
     participants: list[str]
     is_joined: bool
 
