@@ -11,6 +11,21 @@ from app.models.event_participant import EventParticipant
 from app.models.user import User
 from app.schemas.event import EventCreate, EventRead, EventUpdate
 
+def serialize_event(event: Event, creator_username: str) -> EventRead:
+    return EventRead(
+        id=event.id,
+        creator_id=event.creator_id,
+        creator_username=creator_username,
+        title=event.title,
+        description=event.description,
+        location=event.location,
+        genre=event.genre,
+        start_datetime=event.start_datetime,
+        end_datetime=event.end_datetime,
+        created_at=event.created_at,
+        updated_at=event.updated_at,
+    )
+
 router = APIRouter(prefix="/events", tags=["events"])
 
 @router.post("", response_model=EventRead, status_code=status.HTTP_201_CREATED)
@@ -33,7 +48,7 @@ def create_event(
     db.commit()
     db.refresh(new_event)
 
-    return new_event
+    return serialize_event(new_event, current_user.username)
 
 @router.get("", response_model=list[EventRead], status_code=status.HTTP_200_OK)
 def list_events(
@@ -84,7 +99,13 @@ def list_events(
     print(query)
     events = db.scalars(query).all()
 
-    return events
+    result = []
+    for event in events:
+        creator = db.get(User, event.creator_id)
+        creator_username = creator.username if creator else "Unknown"
+        result.append(serialize_event(event, creator_username))
+
+    return result
 
 @router.post("/{event_id}/join", status_code=status.HTTP_201_CREATED)
 def join_event(
@@ -170,7 +191,10 @@ def get_event_by_id(
             detail="Event not found.",
         )
 
-    return event
+    creator = db.get(User, event.creator_id)
+    creator_username = creator.username if creator else "Unknown"
+
+    return serialize_event(event, creator_username)
 
 @router.patch("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
 def update_event(
@@ -207,7 +231,10 @@ def update_event(
     db.commit()
     db.refresh(event)
 
-    return event
+    creator = db.get(User, event.creator_id)
+    creator_username = creator.username if creator else "Unknown"
+
+    return serialize_event(event, creator_username)
 
 
 ## spaeter maybe mit cascade loesen

@@ -21,6 +21,7 @@ class EventCreate(BaseModel):
 class EventRead(BaseModel):
     id: int
     creator_id: int
+    creator_username: str
     title: str
     description: str
     location: str
