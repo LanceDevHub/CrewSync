@@ -10,7 +10,7 @@ export type Event = {
   end_datetime: string | null;
   created_at: string;
   updated_at: string;
-
+  participants_preview: string[];
   participants_count: number;
   participants: string[];
   is_joined: boolean;

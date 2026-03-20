@@ -40,6 +40,20 @@ export default function ProfilePage() {
     loadProfileData();
   }, []);
 
+  function formatParticipantsPreview(event: Event) {
+    if (event.participants_preview.length === 0) {
+      return "Noch keine Teilnehmer";
+    }
+
+    const preview = event.participants_preview.join(", ");
+
+    if (event.participants_count > 3) {
+      return `${preview}, ...`;
+    }
+
+    return preview;
+  }
+
   if (isLoading) {
     return <p>Profil wird geladen...</p>;
   }
@@ -92,6 +106,10 @@ export default function ProfilePage() {
                     ? new Date(event.end_datetime).toLocaleString()
                     : "Kein Endzeitpunkt angegeben"}
                 </p>
+                <p>
+                  <strong>Teilnehmer:</strong>{" "}
+                  {formatParticipantsPreview(event)}
+                </p>
                 <Link to={`/events/${event.id}`}>Details ansehen</Link>
               </li>
             ))}
@@ -125,6 +143,10 @@ export default function ProfilePage() {
                   {event.end_datetime
                     ? new Date(event.end_datetime).toLocaleString()
                     : "Kein Endzeitpunkt angegeben"}
+                </p>
+                <p>
+                  <strong>Teilnehmer:</strong>{" "}
+                  {formatParticipantsPreview(event)}
                 </p>
                 <Link to={`/events/${event.id}`}>Details ansehen</Link>
               </li>

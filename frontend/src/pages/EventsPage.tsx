@@ -51,6 +51,20 @@ export default function EventsPage() {
     await loadEvents();
   }
 
+  function formatParticipantsPreview(event: Event) {
+    if (event.participants_preview.length === 0) {
+      return "Noch keine Teilnehmer";
+    }
+
+    const preview = event.participants_preview.join(", ");
+
+    if (event.participants_count > 3) {
+      return `${preview}, ...`;
+    }
+
+    return preview;
+  }
+
   return (
     <div>
       <h1>Events</h1>
@@ -179,6 +193,10 @@ export default function EventsPage() {
                 {event.end_datetime
                   ? new Date(event.end_datetime).toLocaleString()
                   : "Kein Endzeitpunkt angegeben"}
+              </p>
+
+              <p>
+                <strong>Teilnehmer:</strong> {formatParticipantsPreview(event)}
               </p>
 
               <Link to={`/events/${event.id}`}>Details ansehen</Link>
