@@ -10,8 +10,8 @@ export default function CreateEventPage() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [genre, setGenre] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [maxParticipants, setMaxParticipants] = useState("");
+  const [startDatetime, setStartDatetime] = useState("");
+  const [endDatetime, setEndDatetime] = useState("");
 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,8 +27,8 @@ export default function CreateEventPage() {
         description,
         location,
         genre: genre || null,
-        event_date: eventDate,
-        max_participants: maxParticipants ? Number(maxParticipants) : null,
+        start_datetime: startDatetime,
+        end_datetime: endDatetime || null,
       });
 
       navigate(`/events/${createdEvent.id}`);
@@ -95,26 +95,25 @@ export default function CreateEventPage() {
         </div>
 
         <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="eventDate">Datum und Uhrzeit</label>
+          <label htmlFor="startDatetime">Beginn</label>
           <br />
           <input
-            id="eventDate"
+            id="startDatetime"
             type="datetime-local"
-            value={eventDate}
-            onChange={(event) => setEventDate(event.target.value)}
+            value={startDatetime}
+            onChange={(event) => setStartDatetime(event.target.value)}
             required
           />
         </div>
 
         <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="maxParticipants">Max. Teilnehmer</label>
+          <label htmlFor="endDatetime">Ende (optional)</label>
           <br />
           <input
-            id="maxParticipants"
-            type="number"
-            min="1"
-            value={maxParticipants}
-            onChange={(event) => setMaxParticipants(event.target.value)}
+            id="endDatetime"
+            type="datetime-local"
+            value={endDatetime}
+            onChange={(event) => setEndDatetime(event.target.value)}
           />
         </div>
 

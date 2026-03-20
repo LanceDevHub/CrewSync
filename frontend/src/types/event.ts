@@ -1,14 +1,19 @@
 export type Event = {
   id: number;
   creator_id: number;
+  creator_username: string;
   title: string;
   description: string;
   location: string;
   genre: string | null;
-  event_date: string;
-  max_participants: number | null;
+  start_datetime: string;
+  end_datetime: string | null;
   created_at: string;
   updated_at: string;
+
+  participants_count: number;
+  participants: string[];
+  is_joined: boolean;
 };
 
 export type EventCreatePayload = {
@@ -16,8 +21,8 @@ export type EventCreatePayload = {
   description: string;
   location: string;
   genre?: string | null;
-  event_date: string;
-  max_participants?: number | null;
+  start_datetime: string;
+  end_datetime?: string | null;
 };
 
 export type EventUpdatePayload = {
@@ -25,6 +30,6 @@ export type EventUpdatePayload = {
   description?: string;
   location?: string;
   genre?: string | null;
-  event_date?: string;
-  max_participants?: number | null;
+  start_datetime?: string;
+  end_datetime?: string | null;
 };
