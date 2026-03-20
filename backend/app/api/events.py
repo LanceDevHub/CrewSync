@@ -25,8 +25,8 @@ def create_event(
         description=event_data.description,
         location=event_data.location,
         genre=event_data.genre,
-        event_date=event_data.event_date,
-        max_participants=event_data.max_participants,
+        start_datetime=event_data.start_datetime,
+        end_datetime=event_data.end_datetime,
     )
 
     db.add(new_event)
@@ -44,6 +44,7 @@ def list_events(
     date_to: datetime | None = Query(default=None),
     only_future: bool = Query(default=False),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     query = select(Event)
 
@@ -64,15 +65,15 @@ def list_events(
         query = query.where(Event.location.ilike(f"%{location}%"))
 
     if date_from:
-        query = query.where(Event.event_date >= date_from)
+        query = query.where(Event.start_datetime >= date_from)
 
     if date_to:
-        query = query.where(Event.event_date <= date_to)
+        query = query.where(Event.start_datetime <= date_to)
 
     if only_future:
-        query = query.where(Event.event_date >= datetime.utcnow())
+        query = query.where(Event.start_datetime >= datetime.utcnow())
 
-    query = query.order_by(Event.event_date.asc())
+    query = query.order_by(Event.start_datetime.asc())
 
     print("q:", q)
     print("genre:", genre)
@@ -159,6 +160,7 @@ def leave_event(
 def get_event_by_id(
     event_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     event = db.get(Event, event_id)
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class EventCreate(BaseModel):
@@ -10,6 +10,12 @@ class EventCreate(BaseModel):
     genre: str | None = Field(default=None, max_length=100)
     start_datetime: datetime
     end_datetime: datetime | None = None
+
+    @model_validator(mode="after")
+    def validate_datetimes(self):
+        if self.end_datetime is not None and self.end_datetime < self.start_datetime:
+            raise ValueError("end_datetime must be after or equal to start_datetime.")
+        return self
 
 
 class EventRead(BaseModel):
@@ -32,3 +38,13 @@ class EventUpdate(BaseModel):
     genre: str | None = Field(default=None, max_length=100)
     start_datetime: datetime | None = None
     end_datetime: datetime | None = None
+
+    @model_validator(mode="after")
+    def validate_datetimes(self):
+        if (
+            self.start_datetime is not None
+            and self.end_datetime is not None
+            and self.end_datetime < self.start_datetime
+        ):
+            raise ValueError("end_datetime must be after or equal to start_datetime.")
+        return self
