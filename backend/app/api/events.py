@@ -198,6 +198,12 @@ def update_event(
     for field, value in update_data.items():
         setattr(event, field, value)
 
+    if event.end_datetime is not None and event.end_datetime < event.start_datetime:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="end_datetime must be after or equal to start_datetime.",
+        )
+
     db.commit()
     db.refresh(event)
 
