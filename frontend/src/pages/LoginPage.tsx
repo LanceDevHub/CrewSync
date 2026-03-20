@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Alert,
+  Box,
+  Button,
+  Field,
+  Heading,
+  Input,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 
 import { loginUser } from "../api/auth";
 import type { User } from "../types/user";
@@ -42,44 +52,59 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   }
 
   return (
-    <div>
-      <h1>Login</h1>
+    <Box
+      maxW="md"
+      mx="auto"
+      mt="10"
+      p="8"
+      bg="white"
+      borderRadius="lg"
+      boxShadow="md"
+    >
+      <Stack gap="6">
+        <Box>
+          <Heading size="lg">Login</Heading>
+          <Text color="gray.600" mt="2">
+            Melde dich an, um Events zu sehen und daran teilzunehmen.
+          </Text>
+        </Box>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">E-Mail</label>
-          <br />
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <Stack gap="4">
+            <Field.Root required>
+              <Field.Label>E-Mail</Field.Label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </Field.Root>
 
-        <div style={{ marginTop: "1rem" }}>
-          <label htmlFor="password">Passwort</label>
-          <br />
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-        </div>
+            <Field.Root required>
+              <Field.Label>Passwort</Field.Label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </Field.Root>
 
-        {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
+            {error && (
+              <Alert.Root status="error">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>Login fehlgeschlagen</Alert.Title>
+                  <Alert.Description>{error}</Alert.Description>
+                </Alert.Content>
+              </Alert.Root>
+            )}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          style={{ marginTop: "1rem" }}
-        >
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
-      </form>
-    </div>
+            <Button type="submit" colorPalette="teal" loading={isLoading}>
+              Login
+            </Button>
+          </Stack>
+        </form>
+      </Stack>
+    </Box>
   );
 }
