@@ -22,6 +22,7 @@ export default function EventDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showAllParticipants, setShowAllParticipants] = useState(false);
 
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
@@ -30,8 +31,8 @@ export default function EventDetailPage() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [genre, setGenre] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [maxParticipants, setMaxParticipants] = useState("");
+  const [startDatetime, setStartDatetime] = useState("");
+  const [endDatetime, setEndDatetime] = useState("");
 
   useEffect(() => {
     async function loadEventData() {
@@ -54,15 +55,15 @@ export default function EventDetailPage() {
         setDescription(eventData.description);
         setLocation(eventData.location);
         setGenre(eventData.genre ?? "");
-        setEventDate(eventData.event_date.slice(0, 16));
-        setMaxParticipants(
-          eventData.max_participants ? String(eventData.max_participants) : "",
+        setStartDatetime(eventData.start_datetime.slice(0, 16));
+        setEndDatetime(
+          eventData.end_datetime ? eventData.end_datetime.slice(0, 16) : "",
         );
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError("Event could not be loaded.");
+          setError("Event konnte nicht geladen werden.");
         }
       } finally {
         setIsLoading(false);
@@ -71,6 +72,21 @@ export default function EventDetailPage() {
 
     loadEventData();
   }, [id]);
+
+  async function reloadEvent() {
+    if (!id) return;
+
+    const eventData = await getEventById(Number(id));
+    setEvent(eventData);
+    setTitle(eventData.title);
+    setDescription(eventData.description);
+    setLocation(eventData.location);
+    setGenre(eventData.genre ?? "");
+    setStartDatetime(eventData.start_datetime.slice(0, 16));
+    setEndDatetime(
+      eventData.end_datetime ? eventData.end_datetime.slice(0, 16) : "",
+    );
+  }
 
   async function handleJoin() {
     if (!id) return;
@@ -82,6 +98,7 @@ export default function EventDetailPage() {
     try {
       const result = await joinEvent(Number(id));
       setActionMessage(result.message);
+      await reloadEvent();
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -103,6 +120,7 @@ export default function EventDetailPage() {
     try {
       const result = await leaveEvent(Number(id));
       setActionMessage(result.message);
+      await reloadEvent();
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -128,8 +146,8 @@ export default function EventDetailPage() {
         description,
         location,
         genre: genre || null,
-        event_date: eventDate,
-        max_participants: maxParticipants ? Number(maxParticipants) : null,
+        start_datetime: startDatetime,
+        end_datetime: endDatetime || null,
       });
 
       setEvent(updated);
@@ -185,6 +203,9 @@ export default function EventDetailPage() {
   }
 
   const isCreator = currentUser?.id === event.creator_id;
+  const visibleParticipants = showAllParticipants
+    ? event.participants
+    : event.participants.slice(0, 3);
 
   return (
     <div>
@@ -239,26 +260,25 @@ export default function EventDetailPage() {
           </div>
 
           <div style={{ marginTop: "1rem" }}>
-            <label htmlFor="eventDate">Datum und Uhrzeit</label>
+            <label htmlFor="startDatetime">Beginn</label>
             <br />
             <input
-              id="eventDate"
+              id="startDatetime"
               type="datetime-local"
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
+              value={startDatetime}
+              onChange={(e) => setStartDatetime(e.target.value)}
               required
             />
           </div>
 
           <div style={{ marginTop: "1rem" }}>
-            <label htmlFor="maxParticipants">Max. Teilnehmer</label>
+            <label htmlFor="endDatetime">Ende (optional)</label>
             <br />
             <input
-              id="maxParticipants"
-              type="number"
-              min="1"
-              value={maxParticipants}
-              onChange={(e) => setMaxParticipants(e.target.value)}
+              id="endDatetime"
+              type="datetime-local"
+              value={endDatetime}
+              onChange={(e) => setEndDatetime(e.target.value)}
             />
           </div>
 
@@ -282,6 +302,10 @@ export default function EventDetailPage() {
           <p>{event.description}</p>
 
           <p>
+            <strong>Erstellt von:</strong> {event.creator_username}
+          </p>
+
+          <p>
             <strong>Ort:</strong> {event.location}
           </p>
 
@@ -290,18 +314,41 @@ export default function EventDetailPage() {
           </p>
 
           <p>
-            <strong>Datum:</strong>{" "}
-            {new Date(event.event_date).toLocaleString()}
+            <strong>Beginn:</strong>{" "}
+            {new Date(event.start_datetime).toLocaleString()}
           </p>
 
           <p>
-            <strong>Max. Teilnehmer:</strong>{" "}
-            {event.max_participants ?? "Keine Begrenzung"}
+            <strong>Ende:</strong>{" "}
+            {event.end_datetime
+              ? new Date(event.end_datetime).toLocaleString()
+              : "Kein Endzeitpunkt angegeben"}
           </p>
 
-          <p>
-            <strong>Ersteller-ID:</strong> {event.creator_id}
-          </p>
+          <div style={{ marginTop: "1.5rem" }}>
+            <h3>Teilnehmer ({event.participants_count})</h3>
+
+            {event.participants.length === 0 ? (
+              <p>Noch keine Teilnehmer.</p>
+            ) : (
+              <>
+                <ul>
+                  {visibleParticipants.map((participant) => (
+                    <li key={participant}>{participant}</li>
+                  ))}
+                </ul>
+
+                {event.participants.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllParticipants((prev) => !prev)}
+                  >
+                    {showAllParticipants ? "Weniger anzeigen" : "Mehr anzeigen"}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
 
           {currentUser ? (
             <div
@@ -312,13 +359,17 @@ export default function EventDetailPage() {
                 flexWrap: "wrap",
               }}
             >
-              <button onClick={handleJoin} disabled={actionLoading}>
-                {actionLoading ? "Lädt..." : "Event beitreten"}
-              </button>
+              {!event.is_joined && (
+                <button onClick={handleJoin} disabled={actionLoading}>
+                  {actionLoading ? "Lädt..." : "Event beitreten"}
+                </button>
+              )}
 
-              <button onClick={handleLeave} disabled={actionLoading}>
-                {actionLoading ? "Lädt..." : "Event verlassen"}
-              </button>
+              {event.is_joined && (
+                <button onClick={handleLeave} disabled={actionLoading}>
+                  {actionLoading ? "Lädt..." : "Event verlassen"}
+                </button>
+              )}
 
               {isCreator && (
                 <>

@@ -73,15 +73,24 @@ export default function ProfilePage() {
         ) : (
           <ul>
             {createdEvents.map((event) => (
-              <li key={event.id} style={{ marginBottom: "1rem" }}>
+              <li key={event.id} style={{ marginBottom: "1.5rem" }}>
                 <h3>{event.title}</h3>
                 <p>{event.description}</p>
+                <p>
+                  <strong>Erstellt von:</strong> {event.creator_username}
+                </p>
                 <p>
                   <strong>Ort:</strong> {event.location}
                 </p>
                 <p>
-                  <strong>Datum:</strong>{" "}
-                  {new Date(event.event_date).toLocaleString()}
+                  <strong>Beginn:</strong>{" "}
+                  {new Date(event.start_datetime).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Ende:</strong>{" "}
+                  {event.end_datetime
+                    ? new Date(event.end_datetime).toLocaleString()
+                    : "Kein Endzeitpunkt angegeben"}
                 </p>
                 <Link to={`/events/${event.id}`}>Details ansehen</Link>
               </li>
@@ -98,15 +107,24 @@ export default function ProfilePage() {
         ) : (
           <ul>
             {joinedEvents.map((event) => (
-              <li key={event.id} style={{ marginBottom: "1rem" }}>
+              <li key={event.id} style={{ marginBottom: "1.5rem" }}>
                 <h3>{event.title}</h3>
                 <p>{event.description}</p>
+                <p>
+                  <strong>Erstellt von:</strong> {event.creator_username}
+                </p>
                 <p>
                   <strong>Ort:</strong> {event.location}
                 </p>
                 <p>
-                  <strong>Datum:</strong>{" "}
-                  {new Date(event.event_date).toLocaleString()}
+                  <strong>Beginn:</strong>{" "}
+                  {new Date(event.start_datetime).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Ende:</strong>{" "}
+                  {event.end_datetime
+                    ? new Date(event.end_datetime).toLocaleString()
+                    : "Kein Endzeitpunkt angegeben"}
                 </p>
                 <Link to={`/events/${event.id}`}>Details ansehen</Link>
               </li>
