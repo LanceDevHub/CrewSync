@@ -27,6 +27,7 @@ Frontend:
 - React
 - TypeScript
 - Vite
+- Chakra
 
 Backend:
 
