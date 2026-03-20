@@ -1,477 +1,554 @@
-# Event-System – Implementierung
+# Frontend Event-Funktionalität & Interaktionen
 
-Dieses Dokument beschreibt die Implementierung der Event-Funktionalität der Anwendung.
+Dieses Dokument beschreibt die Erweiterung des Frontends um die zentrale Event-Funktionalität.
 
-Es baut direkt auf dem vorherigen Abschnitt auf, in dem die Authentifizierung (Register, Login, JWT, Cookies) umgesetzt wurde.
+Der vorherige Stand beinhaltete:
+
+- vollständige Authentifizierung (Login / Register / Logout)
+- JWT Cookie-basierte Authentifizierung
+- globalen Auth-State im Frontend
+- funktionierende API-Anbindung
+
+In diesem Abschnitt wurde die komplette **Event-Logik im Frontend** umgesetzt und später an die weiterentwickelte Backend-Struktur angepasst.
 
 ---
 
 # 1. Ziel dieses Abschnitts
 
-Ziel war es, die zentrale Funktion der Plattform umzusetzen:
+Ziel war es, die Kernfunktion der Plattform umzusetzen:
 
-**Erstellung und Verwaltung von Musik-Events sowie Teilnahme an Events**
-
-Dazu wurden folgende Funktionen implementiert:
-
+- Events anzeigen
+- Event-Details anzeigen
 - Events erstellen
-- Events anzeigen (Liste und Detail)
-- Suche und Filter
-- Events beitreten (Join)
-- Events verlassen (Leave)
-- persönliche Event-Übersichten
-- Events bearbeiten
-- Events löschen
+- Events bearbeiten & löschen (für Creator)
+- Events beitreten & verlassen
+- Events durchsuchen & filtern
 
-Zusätzlich wurden später erweitert:
+Später kamen zusätzlich hinzu:
 
-- Start- und Endzeit für Events
-- Teilnehmerinformationen im Event-Detail
-- Join-Status für aktuellen Nutzer
+- Anzeige des Erstellernamens statt nur der ID
+- neue Zeitstruktur mit Beginn und optionalem Ende
+- Teilnehmeranzeige auf der Detailseite
+- Join-Status für den aktuellen Nutzer
+- persönliche Event-Übersichten in der Profilseite
 
 ---
 
-# 2. Event-Schemas
+# 2. Event-Typen
 
 Datei:
 
-```
-backend/app/schemas/event.py
-```
-
-## Implementierte Schemas
-
-### EventCreate
-
-Wird verwendet zum Erstellen eines Events.
-
-### EventRead
-
-Wird für API-Responses verwendet.
-
-### EventUpdate
-
-Wird für das Bearbeiten von Events verwendet.
-
----
-
-## 2.1 Zeitstruktur (neu)
-
-Ein Event besitzt jetzt:
-
-- `start_datetime` (Pflichtfeld)
-- `end_datetime` (optional)
-
-Damit können Events mit Start- und Endzeit abgebildet werden.
-
----
-
-## 2.2 Validierung der Zeitlogik
-
-Es wurde eine fachliche Validierung ergänzt:
-
 ```text
-end_datetime >= start_datetime
+src/types/event.ts
 ```
 
-Diese wird über `model_validator` im Schema sichergestellt.
+## Definierte Typen
+
+```ts
+Event;
+EventCreatePayload;
+EventUpdatePayload;
+```
+
+## Zweck
+
+- klare Typisierung der Event-Daten
+- Trennung zwischen API-Input und API-Output
+- bessere Developer Experience durch TypeScript
 
 ---
 
-## 2.3 Erweiterung von EventRead (neu)
+## 2.1 Erweiterung des Event-Typs
 
-Das Response-Schema wurde erweitert um:
+Der Event-Typ wurde später an die neue Backend-Struktur angepasst.
+
+Neue bzw. geänderte Felder:
 
 - `creator_username`
+- `start_datetime`
+- `end_datetime`
 - `participants_count`
 - `participants`
 - `is_joined`
 
-Diese Felder werden hauptsächlich im Detail-Endpunkt genutzt.
+Entfernt:
+
+- `max_participants`
 
 ---
 
-# 3. Event-Endpunkte
-
-Alle Event-Endpunkte befinden sich in:
-
-```
-backend/app/api/events.py
-```
-
----
-
-## 3.1 Event erstellen
-
-```
-POST /events
-```
-
-- nur für eingeloggte Nutzer
-- `creator_id` wird automatisch gesetzt
-- Event wird in der Datenbank gespeichert
-
----
-
-## 3.2 Events abrufen
-
-```
-GET /events
-```
-
-Dieser Endpunkt wurde erweitert um:
-
-### Suche
-
-- Parameter: `q`
-- durchsucht:
-  - Titel
-  - Beschreibung
-  - Ort
-
-### Filter
-
-- `genre`
-- `location`
-
-### Datumsfilter
-
-- `date_from`
-- `date_to`
-
-### Zeitlogik
-
-- `only_future`
-
-Beispiel:
-
-```
-/events?q=techno&location=berlin&only_future=true
-```
-
----
-
-## 3.3 Event Details (erweitert)
-
-```
-GET /events/{event_id}
-```
-
-- liefert ein einzelnes Event
-- gibt `404` zurück, wenn Event nicht existiert
-
-### Erweiterungen:
-
-Dieser Endpoint liefert zusätzlich:
-
-- Teilnehmerliste (`participants`)
-- Teilnehmeranzahl (`participants_count`)
-- Join-Status (`is_joined`)
-- Username des Erstellers (`creator_username`)
-
----
-
-## 3.4 Event beitreten
-
-```
-POST /events/{event_id}/join
-```
-
-- nur für eingeloggte Nutzer
-
-- prüft:
-  - Event existiert
-  - Nutzer ist noch nicht beigetreten
-
-- erstellt Eintrag in `event_participants`
-
----
-
-## 3.5 Event verlassen
-
-```
-DELETE /events/{event_id}/leave
-```
-
-- löscht den Eintrag aus `event_participants`
-- nur möglich, wenn der Nutzer dem Event beigetreten ist
-
----
-
-## 3.6 Event bearbeiten
-
-```
-PATCH /events/{event_id}
-```
-
-- nur der Event-Ersteller darf bearbeiten
-- verwendet `EventUpdate`
-- nur gesendete Felder werden aktualisiert
-
-Zusätzliche Validierung:
-
-- `end_datetime >= start_datetime`
-
----
-
-## 3.7 Event löschen
-
-```
-DELETE /events/{event_id}
-```
-
-- nur der Event-Ersteller darf löschen
-
-Aktuelle Implementierung:
-
-1. alle Einträge in `event_participants` werden gelöscht
-2. danach wird das Event gelöscht
-
----
-
-# 4. Nutzerbezogene Event-Endpunkte
+# 3. Event API Layer
 
 Datei:
 
+```text
+src/api/events.ts
 ```
-backend/app/api/users.py
+
+## Implementierte Funktionen
+
+```ts
+getEvents();
+getEventById();
+createEvent();
+updateEvent();
+deleteEvent();
+joinEvent();
+leaveEvent();
 ```
+
+## Erweiterung: Filter
+
+```ts
+getEvents(filters);
+```
+
+→ nutzt Query-Parameter für Suche und Filter
 
 ---
 
-## 4.1 Eigene Events
+# 4. Event-Liste (EventsPage)
 
-```
-GET /users/me/events-created
-```
-
-- liefert alle Events, die der Nutzer erstellt hat
-
----
-
-## 4.2 Beigetretene Events
-
-```
-GET /users/me/events-joined
-```
-
-- liefert alle Events, denen der Nutzer beigetreten ist
-
----
-
-# 5. Teilnehmer-Logik (neu)
-
-Teilnehmer werden über die Tabelle `event_participants` verwaltet.
-
-Für Event-Details wird:
-
-1. alle Teilnehmer geladen
-2. deren Usernames extrahiert
-3. Join-Status berechnet
-
----
-
-## 5.1 Join-Status
+Datei:
 
 ```text
-is_joined = True / False
+src/pages/EventsPage.tsx
 ```
 
-Dieser Wert gibt an, ob der aktuelle Nutzer bereits Teilnehmer ist.
+## Funktionen
+
+- lädt alle Events
+- zeigt Eventliste an
+- Navigation zur Detailseite
 
 ---
 
-## 5.2 Teilnehmerliste
+## 4.1 Filter & Suche
+
+Folgende Filter wurden implementiert:
+
+- Textsuche (`q`)
+- Genre
+- Ort
+- Datum von / bis
+- nur zukünftige Events
+
+## Technische Umsetzung
+
+- lokale State-Variablen
+- Übergabe an API via Query-Params
+- dynamischer Request an Backend
+
+---
+
+## 4.2 Anpassung an neue Event-Felder
+
+Die Event-Liste wurde später auf das neue Backend-Datenmodell umgestellt.
+
+### Änderungen
+
+- Anzeige von `creator_username` statt `creator_id`
+- Anzeige von `start_datetime`
+- Anzeige von `end_datetime`
+- Entfernung von `max_participants`
+
+### Ergebnis
+
+Die Event-Liste zeigt nun fachlich sinnvollere Informationen und entspricht der aktuellen API-Struktur.
+
+---
+
+# 5. Event-Detailseite
+
+Datei:
 
 ```text
-participants = ["max", "anna", "john"]
+src/pages/EventDetailPage.tsx
 ```
+
+## Funktionen
+
+- zeigt vollständige Event-Daten
+- lädt aktuellen User parallel
+- zeigt Aktionen abhängig vom User
 
 ---
 
-## 5.3 Teilnehmeranzahl
+## 5.1 Join / Leave
+
+- Button zum Beitreten eines Events
+- Button zum Verlassen eines Events
+
+## Verhalten
+
+- Backend entscheidet über Validität
+- Frontend zeigt Erfolg oder Fehler
+- nach Join/Leave wird das Event neu geladen
+
+---
+
+## 5.2 Join-Status im Frontend
+
+Die Detailseite nutzt jetzt:
+
+```ts
+event.is_joined;
+```
+
+Dadurch kann das Frontend unterscheiden:
+
+- Nutzer ist noch nicht beigetreten
+- Nutzer ist bereits beigetreten
+
+---
+
+## 5.3 Teilnehmeranzeige
+
+Die Detailseite zeigt jetzt zusätzlich:
+
+- `participants_count`
+- `participants`
+
+### Darstellung
+
+- standardmäßig werden die ersten 3 Teilnehmer angezeigt
+- über „Mehr anzeigen“ kann die vollständige Liste eingeblendet werden
+- über „Weniger anzeigen“ kann wieder reduziert werden
+
+---
+
+## 5.4 Creator-Funktionalität
+
+Wenn:
+
+```ts
+currentUser.id === event.creator_id;
+```
+
+Dann:
+
+- Event bearbeiten möglich
+- Event löschen möglich
+
+---
+
+## 5.5 Wichtige Entscheidung: Creator darf weiterhin joinen
+
+Im Frontend wurde bewusst entschieden, dass der Event-Ersteller sein eigenes Event ebenfalls joinen und leaven kann.
+
+### Begründung
+
+Im Backend ist dies erlaubt und das Frontend wurde daran angepasst.
+
+Das bedeutet:
+
+- Creator kann Teilnehmer sein
+- Creator kann zusätzlich Bearbeiten/Löschen nutzen
+- Join/Leave und Creator-Funktionen schließen sich nicht gegenseitig aus
+
+---
+
+# 6. Event bearbeiten (PATCH)
+
+## Umsetzung
+
+- Inline-Edit-Modus auf Detailseite
+- Formular mit vorgefüllten Daten
+
+## Ablauf
+
+1. Nutzer klickt auf „Bearbeiten“
+2. Formular erscheint
+3. Änderungen werden gesendet
+4. UI aktualisiert sich
+
+---
+
+## 6.1 Anpassung an neue Zeitstruktur
+
+Der Edit-Modus wurde später angepasst auf:
+
+- `start_datetime`
+- `end_datetime`
+
+Entfernt:
+
+- `max_participants`
+
+---
+
+# 7. Event löschen (DELETE)
+
+## Ablauf
+
+1. Nutzer klickt auf „Löschen“
+2. Bestätigungsdialog (`confirm`)
+3. Backend-Request
+4. Redirect zur Eventliste
+
+---
+
+## Wichtige Anmerkung
+
+Aktuell erfolgt das Löschen korrekt im Backend.
+
+Später sinnvoll:
+
+- `cascade delete` für Teilnehmer
+- Soft Delete (optional)
+
+---
+
+# 8. Event erstellen
+
+Datei:
 
 ```text
-participants_count = len(participants)
+src/pages/CreateEventPage.tsx
 ```
+
+## Funktionen
+
+- Formular zur Erstellung
+- Validierung über Backend
+- Fehleranzeige
+- Redirect nach Erstellung
 
 ---
 
-# 6. Wichtige Architekturentscheidung (sehr wichtig)
+## 8.1 Anpassung an neue Event-Felder
 
-## Teilnehmer nur im Detail-Endpunkt
+Die Event-Erstellung wurde später überarbeitet.
 
-Teilnehmerdaten werden **nur in `GET /events/{id}` geladen**.
+### Neu
 
-Nicht in:
+- `start_datetime`
+- `end_datetime` (optional)
 
-```
-GET /events
-```
+### Entfernt
+
+- `max_participants`
+
+Dadurch entspricht das Formular nun der aktuellen fachlichen Struktur des Backends.
 
 ---
 
-## Grund
+# 9. Profilseite (ProfilePage)
 
-Vermeidung des **N+1 Query Problems**:
+Datei:
 
 ```text
-1 Query → Events
-+ N Queries → Teilnehmer pro Event
+src/pages/ProfilePage.tsx
 ```
 
-Das würde zu massiven Performance-Problemen führen.
+## Funktionen
+
+- zeigt den aktuell eingeloggten Nutzer
+- lädt:
+  - eigene erstellte Events
+  - beigetretene Events
+
+## Bereiche
+
+- „Meine erstellten Events“
+- „Meine beigetretenen Events“
 
 ---
 
-## Konsequenz
+## 9.1 Anpassung an neue Event-Struktur
 
-- Event-Liste bleibt schnell und leichtgewichtig
-- Detailseite enthält vollständige Informationen
+Auch die Profilseite wurde an die neue Event-Response angepasst.
 
----
+### Änderungen
 
-# 7. Datenbanklogik
-
-Verwendete Tabellen:
-
-- `events`
-- `event_participants`
-
-Beziehung:
-
-- ein Event hat viele Teilnehmer
-- ein Nutzer kann an vielen Events teilnehmen
+- `creator_username` statt `creator_id`
+- `start_datetime` statt altem Datumsfeld
+- `end_datetime` wird optional angezeigt
 
 ---
 
-# 8. Wichtige Implementierungsdetails
+# 10. Fehlerbehandlung
 
-## 8.1 Trennung von Verantwortlichkeiten
+## Problem
 
-- `events.py` → Event-Logik
-- `users.py` → nutzerspezifische Event-Daten
+FastAPI gibt bei Fehlern oft komplexe Objekte zurück:
 
----
+```json
+{
+  "detail": [...]
+}
+```
 
-## 8.2 Verwendung von Depends
+## Lösung im API-Client
 
-Dependencies:
+- Parsing von `detail`
+- lesbare Fehlermeldungen im Frontend
 
-- `get_db`
-- `get_current_user`
+## Ergebnis
 
----
+statt:
 
-## 8.3 Serialisierung
+```text
+[object Object]
+```
 
-Eine zentrale Helper-Funktion (`serialize_event`) wird verwendet, um:
+jetzt z. B.:
 
-- Datenbankmodelle in API-Responses zu transformieren
-- zusätzliche Felder zu ergänzen
+```text
+description: String should have at least 10 characters
+```
 
----
+oder
 
-## 8.4 Validierung über Pydantic
-
-- automatische Validierung
-- saubere Fehlerbehandlung
-- konsistente Datenstruktur
-
----
-
-# 9. Wichtige Hinweise & zukünftige Verbesserungen
-
-## 9.1 Cascade Delete
-
-Aktuell manuell umgesetzt → später:
-
-- SQLAlchemy cascade
-- ON DELETE CASCADE
+```text
+end_datetime must be after or equal to start_datetime.
+```
 
 ---
 
-## 9.2 SQLite vs PostgreSQL
+# 11. Wichtige Erkenntnisse
 
-- aktuell SQLite
-- Produktion → PostgreSQL
+## 11.1 Backend validiert die Fachlogik
 
----
+Frontend ist nur UI-Schicht.
 
-## 9.3 Filter & Pagination
+→ Validierung erfolgt im Backend
 
-Erweiterungen möglich:
+Dazu zählen jetzt auch:
 
-- Pagination (`limit`, `offset`)
-- Sortierung
-- komplexe Suche
-
----
-
-## 9.4 Teilnehmer im Event-Response
-
-Aktuell:
-
-- nur im Detail-Endpunkt
-
-Später möglich:
-
-- `participants_preview` (erste 3 Nutzer)
-- ohne Performanceverlust
+- Zeitvalidierung (`end_datetime >= start_datetime`)
+- Join-/Leave-Regeln
+- Zugriffsprüfung
 
 ---
 
-## 9.5 Zeitzonen
+## 11.2 Event-Liste vs Event-Detail
 
-- aktuell UTC (`datetime.utcnow`)
-- später: echte Zeitzonen
+Teilnehmerdaten werden aktuell **nur in der Detailansicht** genutzt.
 
----
+### Grund
 
-# 10. Ergebnis dieses Abschnitts
+Die Event-Liste soll leichtgewichtig bleiben.
 
-✔ vollständige Event-Verwaltung (CRUD)
-✔ Teilnahme-Logik (Join / Leave)
-✔ persönliche Event-Übersichten
-✔ Such- und Filterfunktion
-✔ Zeitstruktur (Start/Ende)
-✔ Teilnehmer-Logik
-✔ Join-Status
-✔ performante API-Struktur
+Würde man bei `GET /events` für jedes Event direkt Teilnehmer laden, könnte ein N+1-Problem entstehen.
+
+### Konsequenz
+
+- `EventsPage` → kompakte Daten
+- `EventDetailPage` → vollständige Daten inklusive Teilnehmer
 
 ---
 
-# 11. Nächste Schritte
+## 11.3 Datum Handling
 
-## Backend
+Verwendet wird:
 
-- Pagination
-- Teilnehmer-Preview in Liste
-- Optimierungen (Joins)
+```ts
+datetime - local;
+```
 
-## Frontend
+→ kompatibel mit Backend (ISO-Format)
 
-- EventDetailPage mit Teilnehmeranzeige
-- Join/Leave UI
-- Profilseite (eigene Events)
+---
 
-## Infrastruktur
+## 11.4 Query-Parameter-System
 
-- PostgreSQL
-- Deployment
+Filter funktionieren über:
+
+```text
+/events?q=...&genre=...&location=...
+```
+
+---
+
+## 11.5 Frontend wurde an API-Änderungen nachgezogen
+
+Nach Änderungen im Backend musste das Frontend angepasst werden für:
+
+- `creator_username`
+- `start_datetime`
+- `end_datetime`
+- Teilnehmerinformationen
+- Join-Status
+
+Diese Synchronisation zwischen Backend und Frontend ist ein wichtiger Teil der Weiterentwicklung.
+
+---
+
+# 12. Was jetzt funktioniert
+
+✔ Events anzeigen
+✔ Event-Details anzeigen
+✔ Event erstellen
+✔ Event bearbeiten
+✔ Event löschen
+✔ Event beitreten
+✔ Event verlassen
+✔ Event filtern
+✔ Event durchsuchen
+✔ Erstellername anzeigen
+✔ Beginn und Ende anzeigen
+✔ Teilnehmer anzeigen
+✔ Join-Status im UI nutzen
+✔ persönliche Event-Übersichten anzeigen
+
+---
+
+# 13. Offene Verbesserungen
+
+## UX
+
+- bessere UI (Cards, Layout)
+- Filter sofort anwenden ohne extra Button
+- Loading-Indikatoren verbessern
+- Navigation abhängig vom Login-Zustand
+
+## Logik
+
+- Teilnehmer-Vorschau eventuell auch in der Event-Liste
+- Teilnehmer-Count in weiteren Listen nutzen
+- bessere visuelle Trennung Creator / Teilnehmer
+
+## Architektur
+
+- AuthContext einführen
+- globales State Management verbessern
+
+---
+
+# 14. Wichtige technische TODOs (für später)
+
+- CSRF-Schutz bei Cookie Auth
+- secure Cookies in Produktion
+- Rate Limiting für API
+- Pagination für Events
+- Datenbankwechsel zu PostgreSQL
+
+---
+
+# 15. Nächster Schritt
+
+Empfohlene Reihenfolge:
+
+1. Navigation aufräumen
+2. UI/UX verbessern
+3. Event-Karten statt einfache Listen
+4. Pagination hinzufügen
+5. AuthContext einführen
 
 ---
 
 # Zusammenfassung
 
-In diesem Abschnitt wurde die zentrale Logik der Plattform implementiert.
+In diesem Abschnitt wurde:
 
-Die Anwendung ermöglicht nun:
+- vollständige Event-Funktionalität im Frontend umgesetzt
+- API-Integration erweitert
+- CRUD-Operationen implementiert
+- Benutzerinteraktionen ermöglicht
+- Such- und Filtersystem integriert
+- Frontend an die neue Event-Struktur angepasst
+- Teilnehmer- und Join-Logik sichtbar gemacht
+- persönliche Event-Ansichten ergänzt
 
-- Erstellung von Events
-- Teilnahme an Events
-- Verwaltung eigener Events
-- Suche und Filterung
-- Anzeige von Teilnehmern und Join-Status
-
-Damit ist ein funktionaler und technisch sauber strukturierter MVP erreicht.
+Damit ist die erste vollständige und bereits deutlich verfeinerte Frontend-Version der Anwendung erreicht.
