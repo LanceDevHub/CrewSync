@@ -1,5 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Field,
+  Heading,
+  Input,
+  Link,
+  SimpleGrid,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 
 import { getEvents } from "../api/events";
 import type { Event } from "../types/event";
@@ -65,145 +77,186 @@ export default function EventsPage() {
     return preview;
   }
 
+  function resetFilters() {
+    setQ("");
+    setGenre("");
+    setLocation("");
+    setDateFrom("");
+    setDateTo("");
+    setOnlyFuture(false);
+  }
+
   return (
-    <div>
-      <h1>Events</h1>
+    <Stack gap="8">
+      <Box>
+        <Heading size="lg">Events</Heading>
+        <Text color="gray.600" mt="2">
+          Entdecke Events, filtere nach Ort und Genre und sieh direkt, wer schon
+          dabei ist.
+        </Text>
+      </Box>
 
-      <form onSubmit={handleFilterSubmit} style={{ marginBottom: "2rem" }}>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="q">Suche</label>
-          <br />
-          <input
-            id="q"
-            type="text"
-            value={q}
-            onChange={(event) => setQ(event.target.value)}
-            placeholder="Titel, Beschreibung oder Ort"
-          />
-        </div>
+      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+        <form onSubmit={handleFilterSubmit}>
+          <Stack gap="4">
+            <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
+              <Field.Root>
+                <Field.Label>Suche</Field.Label>
+                <Input
+                  value={q}
+                  onChange={(event) => setQ(event.target.value)}
+                  placeholder="Titel, Beschreibung oder Ort"
+                />
+              </Field.Root>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="genre">Genre</label>
-          <br />
-          <input
-            id="genre"
-            type="text"
-            value={genre}
-            onChange={(event) => setGenre(event.target.value)}
-            placeholder="z. B. Techno"
-          />
-        </div>
+              <Field.Root>
+                <Field.Label>Genre</Field.Label>
+                <Input
+                  value={genre}
+                  onChange={(event) => setGenre(event.target.value)}
+                  placeholder="z. B. Techno"
+                />
+              </Field.Root>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="location">Ort</label>
-          <br />
-          <input
-            id="location"
-            type="text"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            placeholder="z. B. Berlin"
-          />
-        </div>
+              <Field.Root>
+                <Field.Label>Ort</Field.Label>
+                <Input
+                  value={location}
+                  onChange={(event) => setLocation(event.target.value)}
+                  placeholder="z. B. Berlin"
+                />
+              </Field.Root>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="dateFrom">Beginn ab</label>
-          <br />
-          <input
-            id="dateFrom"
-            type="datetime-local"
-            value={dateFrom}
-            onChange={(event) => setDateFrom(event.target.value)}
-          />
-        </div>
+              <Field.Root>
+                <Field.Label>Beginn ab</Field.Label>
+                <Input
+                  type="datetime-local"
+                  value={dateFrom}
+                  onChange={(event) => setDateFrom(event.target.value)}
+                />
+              </Field.Root>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="dateTo">Beginn bis</label>
-          <br />
-          <input
-            id="dateTo"
-            type="datetime-local"
-            value={dateTo}
-            onChange={(event) => setDateTo(event.target.value)}
-          />
-        </div>
+              <Field.Root>
+                <Field.Label>Beginn bis</Field.Label>
+                <Input
+                  type="datetime-local"
+                  value={dateTo}
+                  onChange={(event) => setDateTo(event.target.value)}
+                />
+              </Field.Root>
+            </SimpleGrid>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label>
-            <input
-              type="checkbox"
+            <Checkbox.Root
               checked={onlyFuture}
-              onChange={(event) => setOnlyFuture(event.target.checked)}
-            />{" "}
-            Nur zukünftige Events
-          </label>
-        </div>
+              onCheckedChange={(details) =>
+                setOnlyFuture(Boolean(details.checked))
+              }
+            >
+              <Checkbox.HiddenInput />
+              <Checkbox.Control />
+              <Checkbox.Label>Nur zukünftige Events</Checkbox.Label>
+            </Checkbox.Root>
 
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <button type="submit">Filter anwenden</button>
-          <button
-            type="button"
-            onClick={() => {
-              setQ("");
-              setGenre("");
-              setLocation("");
-              setDateFrom("");
-              setDateTo("");
-              setOnlyFuture(false);
-            }}
-          >
-            Filter zurücksetzen
-          </button>
-        </div>
-      </form>
+            <Stack direction={{ base: "column", sm: "row" }} gap="3">
+              <Button type="submit" colorPalette="teal" loading={isLoading}>
+                Filter anwenden
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={resetFilters}
+                disabled={isLoading}
+              >
+                Filter zurücksetzen
+              </Button>
+            </Stack>
+          </Stack>
+        </form>
+      </Box>
 
       {isLoading ? (
-        <p>Events werden geladen...</p>
+        <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+          <Text>Events werden geladen...</Text>
+        </Box>
       ) : error ? (
-        <p style={{ color: "red" }}>{error}</p>
+        <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+          <Text color="red.500">{error}</Text>
+        </Box>
       ) : events.length === 0 ? (
-        <p>Keine Events gefunden.</p>
+        <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+          <Text>Keine Events gefunden.</Text>
+        </Box>
       ) : (
-        <ul>
+        <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
           {events.map((event) => (
-            <li key={event.id} style={{ marginBottom: "1.5rem" }}>
-              <h3>{event.title}</h3>
+            <Box
+              key={event.id}
+              bg="white"
+              p="6"
+              borderRadius="lg"
+              boxShadow="sm"
+              borderWidth="1px"
+            >
+              <Stack gap="3">
+                <Heading size="md">{event.title}</Heading>
 
-              <p>{event.description}</p>
+                <Text color="gray.700">{event.description}</Text>
 
-              <p>
-                <strong>Erstellt von:</strong> {event.creator_username}
-              </p>
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Erstellt von:
+                  </Text>{" "}
+                  {event.creator_username}
+                </Text>
 
-              <p>
-                <strong>Ort:</strong> {event.location}
-              </p>
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Ort:
+                  </Text>{" "}
+                  {event.location}
+                </Text>
 
-              <p>
-                <strong>Genre:</strong> {event.genre ?? "—"}
-              </p>
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Genre:
+                  </Text>{" "}
+                  {event.genre ?? "—"}
+                </Text>
 
-              <p>
-                <strong>Beginn:</strong>{" "}
-                {new Date(event.start_datetime).toLocaleString()}
-              </p>
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Beginn:
+                  </Text>{" "}
+                  {new Date(event.start_datetime).toLocaleString()}
+                </Text>
 
-              <p>
-                <strong>Ende:</strong>{" "}
-                {event.end_datetime
-                  ? new Date(event.end_datetime).toLocaleString()
-                  : "Kein Endzeitpunkt angegeben"}
-              </p>
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Ende:
+                  </Text>{" "}
+                  {event.end_datetime
+                    ? new Date(event.end_datetime).toLocaleString()
+                    : "Kein Endzeitpunkt angegeben"}
+                </Text>
 
-              <p>
-                <strong>Teilnehmer:</strong> {formatParticipantsPreview(event)}
-              </p>
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Teilnehmer:
+                  </Text>{" "}
+                  {formatParticipantsPreview(event)}
+                </Text>
 
-              <Link to={`/events/${event.id}`}>Details ansehen</Link>
-            </li>
+                <Link asChild color="teal.600" fontWeight="semibold">
+                  <RouterLink to={`/events/${event.id}`}>
+                    Details ansehen
+                  </RouterLink>
+                </Link>
+              </Stack>
+            </Box>
           ))}
-        </ul>
+        </SimpleGrid>
       )}
-    </div>
+    </Stack>
   );
 }
