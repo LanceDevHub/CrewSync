@@ -7,6 +7,8 @@ import { getMyCreatedEvents, getMyJoinedEvents } from "../api/users";
 import type { Event } from "../types/event";
 import type { User } from "../types/user";
 
+import EventCard from "../components/events/EventCard";
+
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
@@ -40,80 +42,6 @@ export default function ProfilePage() {
 
     loadProfileData();
   }, []);
-
-  function formatParticipantsPreview(event: Event) {
-    if (event.participants_preview.length === 0) {
-      return "Noch keine Teilnehmer";
-    }
-
-    const preview = event.participants_preview.join(", ");
-
-    if (event.participants_count > 3) {
-      return `${preview}, ...`;
-    }
-
-    return preview;
-  }
-
-  function renderEventCard(event: Event) {
-    return (
-      <Box
-        key={event.id}
-        bg="white"
-        p="6"
-        borderRadius="lg"
-        boxShadow="sm"
-        borderWidth="1px"
-      >
-        <Stack gap="3">
-          <Heading size="md">{event.title}</Heading>
-
-          <Text color="gray.700">{event.description}</Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Erstellt von:
-            </Text>{" "}
-            {event.creator_username}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Ort:
-            </Text>{" "}
-            {event.location}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Beginn:
-            </Text>{" "}
-            {new Date(event.start_datetime).toLocaleString()}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Ende:
-            </Text>{" "}
-            {event.end_datetime
-              ? new Date(event.end_datetime).toLocaleString()
-              : "Kein Endzeitpunkt angegeben"}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Teilnehmer:
-            </Text>{" "}
-            {formatParticipantsPreview(event)}
-          </Text>
-
-          <Link asChild color="teal.600" fontWeight="semibold">
-            <RouterLink to={`/events/${event.id}`}>Details ansehen</RouterLink>
-          </Link>
-        </Stack>
-      </Box>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -172,7 +100,9 @@ export default function ProfilePage() {
           </Box>
         ) : (
           <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
-            {createdEvents.map(renderEventCard)}
+            {createdEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
           </SimpleGrid>
         )}
       </Box>
@@ -188,7 +118,9 @@ export default function ProfilePage() {
           </Box>
         ) : (
           <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
-            {joinedEvents.map(renderEventCard)}
+            {joinedEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
           </SimpleGrid>
         )}
       </Box>

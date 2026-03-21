@@ -13,6 +13,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 
+import EventCard from "../components/events/EventCard";
+
 import { getEvents } from "../api/events";
 import type { Event } from "../types/event";
 
@@ -61,20 +63,6 @@ export default function EventsPage() {
   async function handleFilterSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await loadEvents();
-  }
-
-  function formatParticipantsPreview(event: Event) {
-    if (event.participants_preview.length === 0) {
-      return "Noch keine Teilnehmer";
-    }
-
-    const preview = event.participants_preview.join(", ");
-
-    if (event.participants_count > 3) {
-      return `${preview}, ...`;
-    }
-
-    return preview;
   }
 
   function resetFilters() {
@@ -190,70 +178,7 @@ export default function EventsPage() {
       ) : (
         <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
           {events.map((event) => (
-            <Box
-              key={event.id}
-              bg="white"
-              p="6"
-              borderRadius="lg"
-              boxShadow="sm"
-              borderWidth="1px"
-            >
-              <Stack gap="3">
-                <Heading size="md">{event.title}</Heading>
-
-                <Text color="gray.700">{event.description}</Text>
-
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Erstellt von:
-                  </Text>{" "}
-                  {event.creator_username}
-                </Text>
-
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Ort:
-                  </Text>{" "}
-                  {event.location}
-                </Text>
-
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Genre:
-                  </Text>{" "}
-                  {event.genre ?? "—"}
-                </Text>
-
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Beginn:
-                  </Text>{" "}
-                  {new Date(event.start_datetime).toLocaleString()}
-                </Text>
-
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Ende:
-                  </Text>{" "}
-                  {event.end_datetime
-                    ? new Date(event.end_datetime).toLocaleString()
-                    : "Kein Endzeitpunkt angegeben"}
-                </Text>
-
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Teilnehmer:
-                  </Text>{" "}
-                  {formatParticipantsPreview(event)}
-                </Text>
-
-                <Link asChild color="teal.600" fontWeight="semibold">
-                  <RouterLink to={`/events/${event.id}`}>
-                    Details ansehen
-                  </RouterLink>
-                </Link>
-              </Stack>
-            </Box>
+            <EventCard key={event.id} event={event} />
           ))}
         </SimpleGrid>
       )}
