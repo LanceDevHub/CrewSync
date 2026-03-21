@@ -26,6 +26,7 @@ export default function EventCard({ event }: EventCardProps) {
         <EventMeta
           creatorUsername={event.creator_username}
           location={event.location}
+          genre={event.genre}
           startDatetime={event.start_datetime}
           endDatetime={event.end_datetime}
         />

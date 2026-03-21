@@ -324,16 +324,10 @@ export default function EventDetailPage() {
               <EventMeta
                 creatorUsername={event.creator_username}
                 location={event.location}
+                genre={event.genre}
                 startDatetime={event.start_datetime}
                 endDatetime={event.end_datetime}
               />
-
-              <Text>
-                <Text as="span" fontWeight="semibold">
-                  Genre:
-                </Text>{" "}
-                {event.genre ?? "—"}
-              </Text>
             </Stack>
           </Box>
 
