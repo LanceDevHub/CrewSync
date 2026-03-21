@@ -10,6 +10,7 @@ import type { User } from "../types/user";
 import EventCard from "../components/events/EventCard";
 import EmptyState from "../components/common/EmptyState";
 import LoadingState from "../components/common/LoadingState";
+import PageContainer from "../components/common/PageContainer";
 
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -58,11 +59,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <Stack gap="8">
+    <PageContainer
+      title="Mein Profil"
+      description="Hier findest du deine Profildaten sowie deine erstellten und beigetretenen Events."
+    >
       <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Heading size="lg">Mein Profil</Heading>
-
-        <Stack gap="2" mt="4">
+        <Stack gap="2">
           <Text>
             <Text as="span" fontWeight="semibold">
               Benutzername:
@@ -110,6 +112,6 @@ export default function ProfilePage() {
           </SimpleGrid>
         )}
       </Box>
-    </Stack>
+    </PageContainer>
   );
 }

@@ -16,6 +16,7 @@ import {
 import EventCard from "../components/events/EventCard";
 import EmptyState from "../components/common/EmptyState";
 import LoadingState from "../components/common/LoadingState";
+import PageContainer from "../components/common/PageContainer";
 
 import { getEvents } from "../api/events";
 import type { Event } from "../types/event";
@@ -77,15 +78,10 @@ export default function EventsPage() {
   }
 
   return (
-    <Stack gap="8">
-      <Box>
-        <Heading size="lg">Events</Heading>
-        <Text color="gray.600" mt="2">
-          Entdecke Events, filtere nach Ort und Genre und sieh direkt, wer schon
-          dabei ist.
-        </Text>
-      </Box>
-
+    <PageContainer
+      title="Events"
+      description="Entdecke Events, filtere nach Ort und Genre und sieh direkt, wer schon dabei ist."
+    >
       <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
         <form onSubmit={handleFilterSubmit}>
           <Stack gap="4">
@@ -178,6 +174,6 @@ export default function EventsPage() {
           ))}
         </SimpleGrid>
       )}
-    </Stack>
+    </PageContainer>
   );
 }
