@@ -49,6 +49,8 @@ export default function EventDetailPage() {
   const [startDatetime, setStartDatetime] = useState("");
   const [endDatetime, setEndDatetime] = useState("");
 
+  const [shareMessage, setShareMessage] = useState("");
+
   useEffect(() => {
     async function loadEventData() {
       if (!id) {
@@ -202,6 +204,19 @@ export default function EventDetailPage() {
       }
     } finally {
       setActionLoading(false);
+    }
+  }
+
+  async function handleShare() {
+    setError("");
+    setActionMessage("");
+    setShareMessage("");
+
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareMessage("Event-Link in die Zwischenablage kopiert.");
+    } catch {
+      setShareMessage("Link konnte nicht kopiert werden.");
     }
   }
 
@@ -409,6 +424,10 @@ export default function EventDetailPage() {
                       >
                         Event löschen
                       </Button>
+
+                      <Button variant="outline" onClick={handleShare}>
+                        Event teilen
+                      </Button>
                     </>
                   )}
                 </Stack>
@@ -444,6 +463,16 @@ export default function EventDetailPage() {
           <Alert.Content>
             <Alert.Title>Fehler</Alert.Title>
             <Alert.Description>{error}</Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
+      )}
+
+      {shareMessage && (
+        <Alert.Root status="success">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Link kopiert</Alert.Title>
+            <Alert.Description>{shareMessage}</Alert.Description>
           </Alert.Content>
         </Alert.Root>
       )}
