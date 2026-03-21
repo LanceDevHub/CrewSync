@@ -8,6 +8,8 @@ import type { Event } from "../types/event";
 import type { User } from "../types/user";
 
 import EventCard from "../components/events/EventCard";
+import EmptyState from "../components/common/EmptyState";
+import LoadingState from "../components/common/LoadingState";
 
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -44,27 +46,15 @@ export default function ProfilePage() {
   }, []);
 
   if (isLoading) {
-    return (
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Text>Profil wird geladen...</Text>
-      </Box>
-    );
+    return <LoadingState message="Profil wird geladen..." />;
   }
 
   if (error) {
-    return (
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Text color="red.500">{error}</Text>
-      </Box>
-    );
+    return <EmptyState message={error} />;
   }
 
   if (!currentUser) {
-    return (
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Text>Nicht eingeloggt.</Text>
-      </Box>
-    );
+    return <EmptyState message="Nicht eingeloggt." />;
   }
 
   return (
@@ -95,9 +85,7 @@ export default function ProfilePage() {
         </Heading>
 
         {createdEvents.length === 0 ? (
-          <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-            <Text>Du hast noch keine Events erstellt.</Text>
-          </Box>
+          <EmptyState message="Du hast noch keine Events erstellt." />
         ) : (
           <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
             {createdEvents.map((event) => (
@@ -113,9 +101,7 @@ export default function ProfilePage() {
         </Heading>
 
         {joinedEvents.length === 0 ? (
-          <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-            <Text>Du bist noch keinem Event beigetreten.</Text>
-          </Box>
+          <EmptyState message="Du bist noch keinem Event beigetreten." />
         ) : (
           <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
             {joinedEvents.map((event) => (

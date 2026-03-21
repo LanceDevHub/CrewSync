@@ -24,6 +24,8 @@ import {
 import type { Event } from "../types/event";
 import type { User } from "../types/user";
 import EventMeta from "../components/events/EventMeta";
+import EmptyState from "../components/common/EmptyState";
+import LoadingState from "../components/common/LoadingState";
 
 export default function EventDetailPage() {
   const { id } = useParams();
@@ -204,27 +206,15 @@ export default function EventDetailPage() {
   }
 
   if (isLoading) {
-    return (
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Text>Event wird geladen...</Text>
-      </Box>
-    );
+    return <LoadingState message="Event wird geladen..." />;
   }
 
   if (error && !event) {
-    return (
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Text color="red.500">{error}</Text>
-      </Box>
-    );
+    return <EmptyState message={error} />;
   }
 
   if (!event) {
-    return (
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Text>Event nicht gefunden.</Text>
-      </Box>
-    );
+    return <EmptyState message="Event nicht gefunden." />;
   }
 
   const isCreator = currentUser?.id === event.creator_id;

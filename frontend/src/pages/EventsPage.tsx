@@ -14,6 +14,8 @@ import {
 } from "@chakra-ui/react";
 
 import EventCard from "../components/events/EventCard";
+import EmptyState from "../components/common/EmptyState";
+import LoadingState from "../components/common/LoadingState";
 
 import { getEvents } from "../api/events";
 import type { Event } from "../types/event";
@@ -164,17 +166,11 @@ export default function EventsPage() {
       </Box>
 
       {isLoading ? (
-        <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-          <Text>Events werden geladen...</Text>
-        </Box>
+        <LoadingState message="Events werden geladen..." />
       ) : error ? (
-        <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-          <Text color="red.500">{error}</Text>
-        </Box>
+        <EmptyState message={error} />
       ) : events.length === 0 ? (
-        <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-          <Text>Keine Events gefunden.</Text>
-        </Box>
+        <EmptyState message="Keine Events gefunden." />
       ) : (
         <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
           {events.map((event) => (
