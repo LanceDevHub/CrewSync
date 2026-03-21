@@ -3,6 +3,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import type { Event } from "../../types/event";
 import ParticipantsPreview from "./ParticipantsPreview";
+import EventMeta from "./EventMeta";
 
 type EventCardProps = {
   event: Event;
@@ -22,37 +23,12 @@ export default function EventCard({ event }: EventCardProps) {
 
         <Text lineClamp="2">{event.description}</Text>
 
-        <Stack fontSize="sm" color="gray.600" gap="2">
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Erstellt von:
-            </Text>{" "}
-            {event.creator_username}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Ort:
-            </Text>{" "}
-            {event.location}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Beginn:
-            </Text>{" "}
-            {new Date(event.start_datetime).toLocaleString()}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Ende:
-            </Text>{" "}
-            {event.end_datetime
-              ? new Date(event.end_datetime).toLocaleString()
-              : "—"}
-          </Text>
-        </Stack>
+        <EventMeta
+          creatorUsername={event.creator_username}
+          location={event.location}
+          startDatetime={event.start_datetime}
+          endDatetime={event.end_datetime}
+        />
 
         <ParticipantsPreview
           participantsPreview={event.participants_preview}

@@ -20,8 +20,10 @@ import {
   leaveEvent,
   updateEvent,
 } from "../api/events";
+
 import type { Event } from "../types/event";
 import type { User } from "../types/user";
+import EventMeta from "../components/events/EventMeta";
 
 export default function EventDetailPage() {
   const { id } = useParams();
@@ -319,41 +321,18 @@ export default function EventDetailPage() {
 
               <Text color="gray.700">{event.description}</Text>
 
-              <Text>
-                <Text as="span" fontWeight="semibold">
-                  Erstellt von:
-                </Text>{" "}
-                {event.creator_username}
-              </Text>
-
-              <Text>
-                <Text as="span" fontWeight="semibold">
-                  Ort:
-                </Text>{" "}
-                {event.location}
-              </Text>
+              <EventMeta
+                creatorUsername={event.creator_username}
+                location={event.location}
+                startDatetime={event.start_datetime}
+                endDatetime={event.end_datetime}
+              />
 
               <Text>
                 <Text as="span" fontWeight="semibold">
                   Genre:
                 </Text>{" "}
                 {event.genre ?? "—"}
-              </Text>
-
-              <Text>
-                <Text as="span" fontWeight="semibold">
-                  Beginn:
-                </Text>{" "}
-                {new Date(event.start_datetime).toLocaleString()}
-              </Text>
-
-              <Text>
-                <Text as="span" fontWeight="semibold">
-                  Ende:
-                </Text>{" "}
-                {event.end_datetime
-                  ? new Date(event.end_datetime).toLocaleString()
-                  : "Kein Endzeitpunkt angegeben"}
               </Text>
             </Stack>
           </Box>
