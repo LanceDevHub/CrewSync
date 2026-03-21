@@ -10,17 +10,13 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 
 import type { Event } from "../../types/event";
+import ParticipantsPreview from "./ParticipantsPreview";
 
 type EventCardProps = {
   event: Event;
 };
 
 export default function EventCard({ event }: EventCardProps) {
-  const participantPreview =
-    event.participants_preview.length > 3
-      ? [...event.participants_preview.slice(0, 3), "..."]
-      : event.participants_preview;
-
   return (
     <Box bg="white" p="6" borderRadius="lg" boxShadow="sm" borderWidth="1px">
       <Stack gap="3">
@@ -66,19 +62,10 @@ export default function EventCard({ event }: EventCardProps) {
           </Text>
         </Stack>
 
-        <HStack gap="2" flexWrap="wrap">
-          {participantPreview.length > 0 ? (
-            participantPreview.map((name, index) => (
-              <Badge key={`${name}-${index}`} colorPalette="teal">
-                {name}
-              </Badge>
-            ))
-          ) : (
-            <Text fontSize="sm" color="gray.500">
-              Keine Teilnehmer
-            </Text>
-          )}
-        </HStack>
+        <ParticipantsPreview
+          participantsPreview={event.participants_preview}
+          participantsCount={event.participants_count}
+        />
 
         <Text fontSize="xs" color="gray.500">
           {event.participants_count} Teilnehmer
