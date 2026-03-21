@@ -1,12 +1,4 @@
-import {
-  Badge,
-  Box,
-  Heading,
-  HStack,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Heading, Link, Stack, Text } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 
 import type { Event } from "../../types/event";
@@ -70,6 +62,10 @@ export default function EventCard({ event }: EventCardProps) {
         <Text fontSize="xs" color="gray.500">
           {event.participants_count} Teilnehmer
         </Text>
+
+        <Link asChild color="teal.600" fontWeight="semibold">
+          <RouterLink to={`/events/${event.id}`}>Details ansehen</RouterLink>
+        </Link>
       </Stack>
     </Box>
   );
