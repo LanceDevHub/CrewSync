@@ -1,5 +1,6 @@
-import { Flex, Button, Spacer, Text } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Box, Button, Flex, Spacer, Stack, Text } from "@chakra-ui/react";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
+
 import type { User } from "../../types/user";
 
 type NavbarProps = {
@@ -7,44 +8,109 @@ type NavbarProps = {
   onLogout: () => void;
 };
 
-export default function Navbar({ currentUser, onLogout }: NavbarProps) {
+type NavLinkButtonProps = {
+  to: string;
+  label: string;
+  isActive: boolean;
+};
+
+function NavLinkButton({ to, label, isActive }: NavLinkButtonProps) {
   return (
-    <Flex as="nav" bg="gray.800" color="white" padding="1rem" align="center">
-      <Text fontWeight="bold">Music Events</Text>
+    <Button
+      asChild
+      variant={isActive ? "solid" : "ghost"}
+      colorPalette="teal"
+      size="sm"
+    >
+      <RouterLink to={to}>{label}</RouterLink>
+    </Button>
+  );
+}
+
+export default function Navbar({ currentUser, onLogout }: NavbarProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const showBackButton =
+    location.pathname !== "/events" && location.pathname !== "/login";
+
+  return (
+    <Flex
+      as="nav"
+      bg="white"
+      borderBottomWidth="1px"
+      borderColor="gray.200"
+      px="6"
+      py="4"
+      align="center"
+      gap="4"
+      wrap="wrap"
+      boxShadow="sm"
+    >
+      {showBackButton && (
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+          ← Zurück
+        </Button>
+      )}
+
+      <Box>
+        <Text asChild fontWeight="bold" fontSize="lg" color="teal.600">
+          <RouterLink to={currentUser ? "/events" : "/login"}>
+            Music Events
+          </RouterLink>
+        </Text>
+      </Box>
 
       <Spacer />
 
-      <Flex gap="1rem" align="center">
+      <Stack direction="row" gap="3" align="center" flexWrap="wrap">
         {currentUser ? (
           <>
-            <Button asChild colorPalette="teal" variant="ghost">
-              <Link to="/events">Events</Link>
-            </Button>
+            <NavLinkButton
+              to="/events"
+              label="Events"
+              isActive={location.pathname === "/events"}
+            />
 
-            <Button asChild colorPalette="teal" variant="ghost">
-              <Link to="/events/new">Create Event</Link>
-            </Button>
+            <NavLinkButton
+              to="/events/new"
+              label="Create Event"
+              isActive={location.pathname === "/events/new"}
+            />
 
-            <Button asChild colorPalette="teal" variant="ghost">
-              <Link to="/me">Profile</Link>
-            </Button>
+            <NavLinkButton
+              to="/me"
+              label="Profile"
+              isActive={location.pathname === "/me"}
+            />
 
-            <Button onClick={onLogout} colorPalette="red">
+            <Text fontSize="sm" color="gray.600">
+              Eingeloggt als: <strong>{currentUser.username}</strong>
+            </Text>
+
+            <Button onClick={onLogout} colorPalette="red" size="sm">
               Logout
             </Button>
           </>
         ) : (
           <>
-            <Button asChild colorPalette="teal">
-              <Link to="/login">Login</Link>
-            </Button>
+            <NavLinkButton
+              to="/login"
+              label="Login"
+              isActive={location.pathname === "/login"}
+            />
 
-            <Button asChild variant="outline" colorPalette="teal">
-              <Link to="/register">Register</Link>
+            <Button
+              asChild
+              variant={location.pathname === "/register" ? "solid" : "outline"}
+              colorPalette="teal"
+              size="sm"
+            >
+              <RouterLink to="/register">Register</RouterLink>
             </Button>
           </>
         )}
-      </Flex>
+      </Stack>
     </Flex>
   );
 }
