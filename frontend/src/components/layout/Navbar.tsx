@@ -68,19 +68,19 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
           <>
             <NavLinkButton
               to="/events"
-              label="Events"
+              label="Event Suche"
               isActive={location.pathname === "/events"}
             />
 
             <NavLinkButton
               to="/events/new"
-              label="Create Event"
+              label="Event erstellen"
               isActive={location.pathname === "/events/new"}
             />
 
             <NavLinkButton
               to="/me"
-              label="Profile"
+              label="Mein Bereich"
               isActive={location.pathname === "/me"}
             />
 
