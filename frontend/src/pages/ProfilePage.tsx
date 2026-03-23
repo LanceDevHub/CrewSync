@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Avatar,
   Badge,
   Box,
   Button,
+  Collapsible,
   Field,
   Heading,
   Input,
@@ -31,8 +33,27 @@ function isPastEvent(event: Event) {
   return new Date(event.start_datetime).getTime() < Date.now();
 }
 
+function filterEvents(events: Event[], search: string, includeCreator = false) {
+  if (!search.trim()) {
+    return events;
+  }
+
+  const normalizedSearch = search.toLowerCase();
+
+  return events.filter((event) => {
+    return (
+      event.title.toLowerCase().includes(normalizedSearch) ||
+      event.lineup.toLowerCase().includes(normalizedSearch) ||
+      event.location.toLowerCase().includes(normalizedSearch) ||
+      (includeCreator &&
+        event.creator_username.toLowerCase().includes(normalizedSearch))
+    );
+  });
+}
+
+type EventSectionView = "upcoming" | "past";
+
 export default function ProfilePage() {
-  const [createdSearch, setCreatedSearch] = useState("");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [joinedEvents, setJoinedEvents] = useState<Event[]>([]);
@@ -40,9 +61,12 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [showPastCreated, setShowPastCreated] = useState(false);
-  const [showPastJoined, setShowPastJoined] = useState(false);
+  const [createdSearch, setCreatedSearch] = useState("");
   const [joinedSearch, setJoinedSearch] = useState("");
+
+  const [showCreatedSection, setShowCreatedSection] = useState(false);
+  const [joinedView, setJoinedView] = useState<EventSectionView>("upcoming");
+  const [createdView, setCreatedView] = useState<EventSectionView>("upcoming");
 
   useEffect(() => {
     async function loadProfileData() {
@@ -70,58 +94,25 @@ export default function ProfilePage() {
     loadProfileData();
   }, []);
 
-  const upcomingCreatedEvents = useMemo(() => {
-    const filtered = createdEvents.filter((event) => !isPastEvent(event));
-
-    if (!createdSearch.trim()) {
-      return sortByStartAscending(filtered);
-    }
-
-    const search = createdSearch.toLowerCase();
-
-    return sortByStartAscending(
-      filtered.filter((event) => {
-        return (
-          event.title.toLowerCase().includes(search) ||
-          event.lineup.toLowerCase().includes(search) ||
-          event.location.toLowerCase().includes(search)
-        );
-      }),
-    );
-  }, [createdEvents, createdSearch]);
-
-  const pastCreatedEvents = useMemo(() => {
-    return sortByStartAscending(
-      createdEvents.filter((event) => isPastEvent(event)),
-    );
-  }, [createdEvents]);
-
   const upcomingJoinedEvents = useMemo(() => {
     const filtered = joinedEvents.filter((event) => !isPastEvent(event));
-
-    if (!joinedSearch.trim()) {
-      return sortByStartAscending(filtered);
-    }
-
-    const search = joinedSearch.toLowerCase();
-
-    return sortByStartAscending(
-      filtered.filter((event) => {
-        return (
-          event.title.toLowerCase().includes(search) ||
-          event.lineup.toLowerCase().includes(search) ||
-          event.location.toLowerCase().includes(search) ||
-          event.creator_username.toLowerCase().includes(search)
-        );
-      }),
-    );
+    return sortByStartAscending(filterEvents(filtered, joinedSearch, true));
   }, [joinedEvents, joinedSearch]);
 
   const pastJoinedEvents = useMemo(() => {
-    return sortByStartAscending(
-      joinedEvents.filter((event) => isPastEvent(event)),
-    );
-  }, [joinedEvents]);
+    const filtered = joinedEvents.filter((event) => isPastEvent(event));
+    return sortByStartAscending(filterEvents(filtered, joinedSearch, true));
+  }, [joinedEvents, joinedSearch]);
+
+  const upcomingCreatedEvents = useMemo(() => {
+    const filtered = createdEvents.filter((event) => !isPastEvent(event));
+    return sortByStartAscending(filterEvents(filtered, createdSearch));
+  }, [createdEvents, createdSearch]);
+
+  const pastCreatedEvents = useMemo(() => {
+    const filtered = createdEvents.filter((event) => isPastEvent(event));
+    return sortByStartAscending(filterEvents(filtered, createdSearch));
+  }, [createdEvents, createdSearch]);
 
   if (isLoading) {
     return <LoadingState message="Profil wird geladen..." />;
@@ -135,165 +126,196 @@ export default function ProfilePage() {
     return <EmptyState message="Nicht eingeloggt." />;
   }
 
+  const visibleJoinedEvents =
+    joinedView === "upcoming" ? upcomingJoinedEvents : pastJoinedEvents;
+
+  const visibleCreatedEvents =
+    createdView === "upcoming" ? upcomingCreatedEvents : pastCreatedEvents;
+
   return (
     <PageContainer
       title="Mein Profil"
-      description="Hier findest du deine Profildaten sowie deine erstellten und beigetretenen Events."
+      description="Hier findest du deine Profildaten sowie deine beigetretenen und erstellten Events."
     >
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Stack gap="3">
-          <Stack direction="row" align="center" gap="2" flexWrap="wrap">
-            <Text>
-              <Text as="span" fontWeight="semibold">
-                Benutzername:
-              </Text>{" "}
-              {currentUser.username}
+      <Box bg="white" p="6" borderRadius="xl" boxShadow="sm" borderWidth="1px">
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          gap="5"
+          align={{ base: "start", md: "center" }}
+        >
+          <Avatar.Root size="2xl">
+            <Avatar.Fallback
+              name={`${currentUser.first_name} ${currentUser.last_name}`}
+            />
+          </Avatar.Root>
+
+          <Stack gap="2">
+            <Stack
+              direction={{ base: "column", sm: "row" }}
+              align={{ base: "start", sm: "center" }}
+              gap="2"
+            >
+              <Heading size="lg">
+                {currentUser.first_name} {currentUser.last_name}
+              </Heading>
+
+              {currentUser.is_admin && (
+                <Badge colorPalette="purple" variant="subtle">
+                  Admin
+                </Badge>
+              )}
+            </Stack>
+
+            <Text color="gray.600" fontSize="md">
+              @{currentUser.username}
             </Text>
 
-            {currentUser.is_admin && (
-              <Badge colorPalette="purple" variant="subtle">
-                Admin
-              </Badge>
-            )}
+            <Text color="gray.600">{currentUser.email}</Text>
           </Stack>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Name:
-            </Text>{" "}
-            {currentUser.first_name} {currentUser.last_name}
-          </Text>
-
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              E-Mail:
-            </Text>{" "}
-            {currentUser.email}
-          </Text>
         </Stack>
       </Box>
 
-      <Box>
-        <Stack gap="4" mb="4">
-          <Stack
-            direction={{ base: "column", md: "row" }}
-            justify="space-between"
-            align={{ base: "start", md: "center" }}
-            gap="3"
-          >
-            <Heading size="md">Erstellte Events</Heading>
-
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setShowPastCreated((prev) => !prev)}
-            >
-              {showPastCreated
-                ? "Vergangene erstellte Events ausblenden"
-                : "Vergangene erstellte Events anzeigen"}
-            </Button>
-          </Stack>
+      <Box bg="white" p="6" borderRadius="xl" boxShadow="sm" borderWidth="1px">
+        <Stack gap="5">
+          <Heading size="md">
+            Beigetretene Events ({joinedEvents.length})
+          </Heading>
 
           <Box maxW="md">
             <Field.Root>
-              <Field.Label>Suche in erstellten Events</Field.Label>
+              <Field.Label>Suche in beigetretenen Events</Field.Label>
               <Input
-                placeholder="Titel, Line-up, Ort, ..."
-                value={createdSearch}
-                onChange={(event) => setCreatedSearch(event.target.value)}
+                placeholder="Titel, Line-up, Ort oder Creator"
+                value={joinedSearch}
+                onChange={(event) => setJoinedSearch(event.target.value)}
               />
             </Field.Root>
           </Box>
-        </Stack>
 
-        {upcomingCreatedEvents.length === 0 ? (
-          <EmptyState message="Du hast keine bevorstehenden erstellten Events." />
-        ) : (
-          <Stack gap="6">
-            {upcomingCreatedEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+          <Stack direction="row" gap="2" flexWrap="wrap">
+            <Button
+              size="sm"
+              colorPalette="teal"
+              variant={joinedView === "upcoming" ? "solid" : "outline"}
+              onClick={() => setJoinedView("upcoming")}
+            >
+              Aktuell ({upcomingJoinedEvents.length})
+            </Button>
+
+            <Button
+              size="sm"
+              colorPalette="teal"
+              variant={joinedView === "past" ? "solid" : "outline"}
+              onClick={() => setJoinedView("past")}
+            >
+              Vergangen ({pastJoinedEvents.length})
+            </Button>
           </Stack>
-        )}
 
-        {showPastCreated && (
-          <Box mt="6">
+          <Box>
             <Heading size="sm" mb="4">
-              Vergangene erstellte Events
+              {joinedView === "upcoming"
+                ? `Aktuelle beigetretene Events (${upcomingJoinedEvents.length})`
+                : `Vergangene beigetretene Events (${pastJoinedEvents.length})`}
             </Heading>
 
-            {pastCreatedEvents.length === 0 ? (
-              <EmptyState message="Du hast keine vergangenen erstellten Events." />
+            {visibleJoinedEvents.length === 0 ? (
+              <EmptyState
+                message={
+                  joinedView === "upcoming"
+                    ? "Du hast keine aktuellen beigetretenen Events."
+                    : "Du hast keine vergangenen beigetretenen Events."
+                }
+              />
             ) : (
               <Stack gap="6">
-                {pastCreatedEvents.map((event) => (
+                {visibleJoinedEvents.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}
               </Stack>
             )}
           </Box>
-        )}
+        </Stack>
       </Box>
 
-      <Box>
-        <Stack
-          direction={{ base: "column", md: "row" }}
-          justify="space-between"
-          align={{ base: "start", md: "center" }}
-          mb="4"
-          gap="3"
-        >
-          <Heading size="md">Beigetretene Events</Heading>
-
+      <Box bg="white" p="6" borderRadius="xl" boxShadow="sm" borderWidth="1px">
+        <Stack gap="5">
           <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowPastJoined((prev) => !prev)}
+            variant="ghost"
+            justifyContent="space-between"
+            width="full"
+            px="0"
+            onClick={() => setShowCreatedSection((prev) => !prev)}
           >
-            {showPastJoined
-              ? "Vergangene beigetretene Events ausblenden"
-              : "Vergangene beigetretene Events anzeigen"}
-          </Button>
-        </Stack>
-
-        <Box maxW="md" mb="4">
-          <Field.Root>
-            <Field.Label>Suche in beigetretenen Events</Field.Label>
-            <Input
-              placeholder="Titel, Ort, Lineup ..."
-              value={joinedSearch}
-              onChange={(event) => setJoinedSearch(event.target.value)}
-            />
-          </Field.Root>
-        </Box>
-
-        {upcomingJoinedEvents.length === 0 ? (
-          <EmptyState message="Keine bevorstehenden beigetretenen Events gefunden." />
-        ) : (
-          <Stack gap="6">
-            {upcomingJoinedEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </Stack>
-        )}
-
-        {showPastJoined && (
-          <Box mt="6">
-            <Heading size="sm" mb="4">
-              Vergangene beigetretene Events
+            <Heading size="md">
+              Erstellte Events ({createdEvents.length})
             </Heading>
+            <Text fontSize="xl" lineHeight="1">
+              {showCreatedSection ? "−" : "+"}
+            </Text>
+          </Button>
 
-            {pastJoinedEvents.length === 0 ? (
-              <EmptyState message="Du hast keine vergangenen beigetretenen Events." />
-            ) : (
-              <Stack gap="6">
-                {pastJoinedEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
+          <Collapsible.Root open={showCreatedSection}>
+            <Collapsible.Content>
+              <Stack gap="5" pt="2">
+                <Box maxW="md">
+                  <Field.Root>
+                    <Field.Label>Suche in erstellten Events</Field.Label>
+                    <Input
+                      placeholder="Titel, Line-up oder Ort"
+                      value={createdSearch}
+                      onChange={(event) => setCreatedSearch(event.target.value)}
+                    />
+                  </Field.Root>
+                </Box>
+
+                <Stack direction="row" gap="2" flexWrap="wrap">
+                  <Button
+                    size="sm"
+                    colorPalette="teal"
+                    variant={createdView === "upcoming" ? "solid" : "outline"}
+                    onClick={() => setCreatedView("upcoming")}
+                  >
+                    Aktuell ({upcomingCreatedEvents.length})
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    colorPalette="teal"
+                    variant={createdView === "past" ? "solid" : "outline"}
+                    onClick={() => setCreatedView("past")}
+                  >
+                    Vergangen ({pastCreatedEvents.length})
+                  </Button>
+                </Stack>
+
+                <Box>
+                  <Heading size="sm" mb="4">
+                    {createdView === "upcoming"
+                      ? `Aktuelle erstellte Events (${upcomingCreatedEvents.length})`
+                      : `Vergangene erstellte Events (${pastCreatedEvents.length})`}
+                  </Heading>
+
+                  {visibleCreatedEvents.length === 0 ? (
+                    <EmptyState
+                      message={
+                        createdView === "upcoming"
+                          ? "Du hast keine aktuellen erstellten Events."
+                          : "Du hast keine vergangenen erstellten Events."
+                      }
+                    />
+                  ) : (
+                    <Stack gap="6">
+                      {visibleCreatedEvents.map((event) => (
+                        <EventCard key={event.id} event={event} />
+                      ))}
+                    </Stack>
+                  )}
+                </Box>
               </Stack>
-            )}
-          </Box>
-        )}
+            </Collapsible.Content>
+          </Collapsible.Root>
+        </Stack>
       </Box>
     </PageContainer>
   );
