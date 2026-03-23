@@ -327,61 +327,103 @@ export default function EventDetailPage() {
         </Box>
       ) : (
         <>
-          <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
-            <Stack gap="4">
-              <Heading size="lg">{event.title}</Heading>
+          <Box
+            bg="white"
+            p="8"
+            borderRadius="2xl"
+            boxShadow="sm"
+            borderWidth="1px"
+          >
+            <Stack gap="6">
+              <Stack gap="3">
+                <Heading size="lg">{event.title}</Heading>
+
+                {event.official_link && (
+                  <Box>
+                    <Link
+                      href={event.official_link}
+                      color="teal.600"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      fontWeight="medium"
+                    >
+                      Offizielle Eventseite
+                    </Link>
+                  </Box>
+                )}
+              </Stack>
+
+              <Box
+                bg="gray.50"
+                p="4"
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor="gray.100"
+              >
+                <EventMeta
+                  creatorUsername={event.creator_username}
+                  location={event.location}
+                  startDatetime={event.start_datetime}
+                  endDatetime={event.end_datetime}
+                />
+              </Box>
 
               <Box>
-                <Heading size="sm">Line-up</Heading>
+                <Heading size="sm" mb="3">
+                  Line-up
+                </Heading>
 
-                <Stack mt="2">
+                <Stack direction="row" gap="2" flexWrap="wrap">
                   {event.lineup
                     .split("\n")
-                    .filter((artist) => artist.trim() !== "")
+                    .map((artist) => artist.trim())
+                    .filter(Boolean)
                     .map((artist, index) => (
-                      <Text key={index}>• {artist}</Text>
+                      <Box
+                        px="3"
+                        py="1.5"
+                        bg="gray.50"
+                        borderRadius="full"
+                        borderWidth="1px"
+                        borderColor="gray.200"
+                        _hover={{ bg: "gray.100" }}
+                      >
+                        <Text fontSize="sm" fontWeight="medium">
+                          {artist}
+                        </Text>
+                      </Box>
                     ))}
                 </Stack>
               </Box>
-
-              {event.official_link && (
-                <Link
-                  href={event.official_link}
-                  color="teal.500"
-                  target="_blank"
-                >
-                  Offizielle Eventseite
-                </Link>
-              )}
-
-              <EventMeta
-                creatorUsername={event.creator_username}
-                location={event.location}
-                startDatetime={event.start_datetime}
-                endDatetime={event.end_datetime}
-              />
             </Stack>
           </Box>
 
-          <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
+          <Box
+            bg="white"
+            p="8"
+            borderRadius="2xl"
+            boxShadow="sm"
+            borderWidth="1px"
+          >
             <Stack gap="4">
               <Heading size="md">
                 Teilnehmer ({event.participants_count})
               </Heading>
 
               {event.participants.length === 0 ? (
-                <Text>Noch keine Teilnehmer.</Text>
+                <Text color="gray.600">Noch keine Teilnehmer.</Text>
               ) : (
                 <>
-                  <Stack gap="2">
+                  <Stack gap="3">
                     {visibleParticipants.map((participant) => (
                       <Box
                         key={participant.username}
-                        px="3"
+                        px="4"
                         py="3"
                         bg="gray.50"
-                        borderRadius="md"
+                        borderRadius="xl"
                         borderWidth="1px"
+                        borderColor="gray.100"
                       >
                         <Stack direction="row" gap="3" align="center">
                           <Avatar.Root size="sm">
@@ -419,7 +461,13 @@ export default function EventDetailPage() {
             </Stack>
           </Box>
 
-          <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
+          <Box
+            bg="white"
+            p="8"
+            borderRadius="2xl"
+            boxShadow="sm"
+            borderWidth="1px"
+          >
             <Stack gap="4">
               <Heading size="md">Aktionen</Heading>
 
@@ -449,10 +497,6 @@ export default function EventDetailPage() {
                     </Button>
                   )}
 
-                  <Button variant="outline" onClick={handleShare}>
-                    Event teilen
-                  </Button>
-
                   {canManageEvent && (
                     <>
                       <Button
@@ -472,9 +516,13 @@ export default function EventDetailPage() {
                       </Button>
                     </>
                   )}
+
+                  <Button variant="outline" onClick={handleShare}>
+                    Event teilen
+                  </Button>
                 </Stack>
               ) : (
-                <Text>
+                <Text color="gray.600">
                   Du musst eingeloggt sein, um mit diesem Event zu interagieren.
                 </Text>
               )}
@@ -487,7 +535,7 @@ export default function EventDetailPage() {
 
               {isAdmin && !isCreator && (
                 <Text color="gray.600">
-                  Du bearbeitest dieses Event als Admin.
+                  Du bearbeitest dieses Event mit Admin-Rechten.
                 </Text>
               )}
             </Stack>

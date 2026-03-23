@@ -7,6 +7,13 @@ type EventMetaProps = {
   endDatetime: string | null;
 };
 
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("de-DE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
 export default function EventMeta({
   creatorUsername,
   location,
@@ -33,15 +40,17 @@ export default function EventMeta({
         <Text as="span" fontWeight="semibold">
           Beginn:
         </Text>{" "}
-        {new Date(startDatetime).toLocaleString()}
+        {formatDateTime(startDatetime)}
       </Text>
 
-      <Text>
-        <Text as="span" fontWeight="semibold">
-          Ende:
-        </Text>{" "}
-        {endDatetime ? new Date(endDatetime).toLocaleString() : "—"}
-      </Text>
+      {endDatetime && (
+        <Text>
+          <Text as="span" fontWeight="semibold">
+            Ende:
+          </Text>{" "}
+          {formatDateTime(endDatetime)}
+        </Text>
+      )}
     </Stack>
   );
 }
