@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, HTTPException, Response, status
 
 from app.core.config import settings
 from app.schemas.site_access import SiteAccessRequest, SiteAccessResponse
@@ -20,6 +20,7 @@ def unlock_site_access(payload: SiteAccessRequest, response: Response):
         httponly=True,
         samesite="lax",
         secure=False,
+        max_age=60 * 60 * 24 * 7,
     )
 
     return {"message": "Site access granted."}
@@ -28,5 +29,9 @@ def unlock_site_access(payload: SiteAccessRequest, response: Response):
 @router.post("/lock", response_model=SiteAccessResponse, status_code=status.HTTP_200_OK)
 def lock_site_access(response: Response):
     response.delete_cookie(key="site_access")
-
     return {"message": "Site access removed."}
+
+
+@router.get("/status", status_code=status.HTTP_200_OK)
+def get_site_access_status(site_access: str | None = Cookie(default=None)):
+    return {"has_access": site_access == "granted"}

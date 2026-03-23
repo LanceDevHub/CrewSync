@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import { getCurrentUser, logoutUser } from "./api/auth";
+import { getSiteAccessStatus } from "./api/siteAccess";
 import type { User } from "./types/user";
 
+import AccessGatePage from "./pages/AccessGatePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import EventsPage from "./pages/EventsPage";
@@ -14,11 +16,35 @@ import ProfilePage from "./pages/ProfilePage";
 import AppLayout from "./components/layout/AppLayout";
 
 export default function App() {
+  const [hasSiteAccess, setHasSiteAccess] = useState(false);
+  const [siteAccessChecked, setSiteAccessChecked] = useState(false);
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState("");
 
   useEffect(() => {
+    async function checkSiteAccess() {
+      try {
+        const result = await getSiteAccessStatus();
+        setHasSiteAccess(result.has_access);
+      } catch {
+        setHasSiteAccess(false);
+      } finally {
+        setSiteAccessChecked(true);
+      }
+    }
+
+    checkSiteAccess();
+  }, []);
+
+  useEffect(() => {
+    if (!hasSiteAccess) {
+      setAuthChecked(false);
+      setCurrentUser(null);
+      return;
+    }
+
     async function loadCurrentUser() {
       try {
         const user = await getCurrentUser();
@@ -31,7 +57,7 @@ export default function App() {
     }
 
     loadCurrentUser();
-  }, []);
+  }, [hasSiteAccess]);
 
   async function handleLogout() {
     try {
@@ -45,6 +71,14 @@ export default function App() {
         setAuthError("Logout failed.");
       }
     }
+  }
+
+  if (!siteAccessChecked) {
+    return <p>Loading...</p>;
+  }
+
+  if (!hasSiteAccess) {
+    return <AccessGatePage onAccessGranted={() => setHasSiteAccess(true)} />;
   }
 
   if (!authChecked) {
