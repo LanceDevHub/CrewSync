@@ -47,7 +47,7 @@ export default function EventDetailPage() {
   const [lineup, setLineup] = useState("");
   const [officialLink, setOfficialLink] = useState("");
   const [location, setLocation] = useState("");
-  const [genre, setGenre] = useState("");
+
   const [startDatetime, setStartDatetime] = useState("");
   const [endDatetime, setEndDatetime] = useState("");
 
@@ -74,7 +74,6 @@ export default function EventDetailPage() {
         setLineup(eventData.lineup);
         setOfficialLink(eventData.official_link ?? "");
         setLocation(eventData.location);
-        setGenre(eventData.genre ?? "");
         setStartDatetime(eventData.start_datetime.slice(0, 16));
         setEndDatetime(
           eventData.end_datetime ? eventData.end_datetime.slice(0, 16) : "",
@@ -102,7 +101,6 @@ export default function EventDetailPage() {
     setLineup(eventData.lineup);
     setOfficialLink(eventData.official_link ?? "");
     setLocation(eventData.location);
-    setGenre(eventData.genre ?? "");
     setStartDatetime(eventData.start_datetime.slice(0, 16));
     setEndDatetime(
       eventData.end_datetime ? eventData.end_datetime.slice(0, 16) : "",
@@ -167,7 +165,6 @@ export default function EventDetailPage() {
         lineup,
         official_link: officialLink || null,
         location,
-        genre: genre || null,
         start_datetime: startDatetime,
         end_datetime: endDatetime || null,
       });
@@ -277,14 +274,6 @@ export default function EventDetailPage() {
                 </Field.Root>
 
                 <Field.Root>
-                  <Field.Label>Genre</Field.Label>
-                  <Input
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
-                  />
-                </Field.Root>
-
-                <Field.Root>
                   <Field.Label>Offizielle Eventseite (optional)</Field.Label>
                   <Input
                     type="url"
@@ -365,7 +354,6 @@ export default function EventDetailPage() {
               <EventMeta
                 creatorUsername={event.creator_username}
                 location={event.location}
-                genre={event.genre}
                 startDatetime={event.start_datetime}
                 endDatetime={event.end_datetime}
               />

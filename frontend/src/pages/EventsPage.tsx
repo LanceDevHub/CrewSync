@@ -27,7 +27,6 @@ export default function EventsPage() {
   const [error, setError] = useState("");
 
   const [q, setQ] = useState("");
-  const [genre, setGenre] = useState("");
   const [location, setLocation] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -40,7 +39,6 @@ export default function EventsPage() {
     try {
       const data = await getEvents({
         q: q || undefined,
-        genre: genre || undefined,
         location: location || undefined,
         date_from: dateFrom || undefined,
         date_to: dateTo || undefined,
@@ -70,7 +68,6 @@ export default function EventsPage() {
 
   function resetFilters() {
     setQ("");
-    setGenre("");
     setLocation("");
     setDateFrom("");
     setDateTo("");
@@ -80,7 +77,7 @@ export default function EventsPage() {
   return (
     <PageContainer
       title="Events"
-      description="Entdecke Events, filtere nach Ort und Genre und sieh direkt, wer schon dabei ist."
+      description="Entdecke Events, filtere nach Ort und Lineup und sieh direkt, wer schon dabei ist."
     >
       <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
         <form onSubmit={handleFilterSubmit}>
@@ -92,15 +89,6 @@ export default function EventsPage() {
                   value={q}
                   onChange={(event) => setQ(event.target.value)}
                   placeholder="Titel, Line-up oder Ort"
-                />
-              </Field.Root>
-
-              <Field.Root>
-                <Field.Label>Genre</Field.Label>
-                <Input
-                  value={genre}
-                  onChange={(event) => setGenre(event.target.value)}
-                  placeholder="z. B. Techno"
                 />
               </Field.Root>
 

@@ -20,7 +20,6 @@ class Event(Base):
     title: Mapped[str] = mapped_column(String(150), nullable=False)
     lineup: Mapped[str] = mapped_column(Text, nullable=False)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
-    genre: Mapped[str | None] = mapped_column(String(100), nullable=True)
     official_link: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     start_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)

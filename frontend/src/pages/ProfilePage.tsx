@@ -83,8 +83,7 @@ export default function ProfilePage() {
         return (
           event.title.toLowerCase().includes(search) ||
           event.lineup.toLowerCase().includes(search) ||
-          event.location.toLowerCase().includes(search) ||
-          (event.genre ?? "").toLowerCase().includes(search)
+          event.location.toLowerCase().includes(search)
         );
       }),
     );
@@ -111,7 +110,6 @@ export default function ProfilePage() {
           event.title.toLowerCase().includes(search) ||
           event.lineup.toLowerCase().includes(search) ||
           event.location.toLowerCase().includes(search) ||
-          (event.genre ?? "").toLowerCase().includes(search) ||
           event.creator_username.toLowerCase().includes(search)
         );
       }),
@@ -191,7 +189,7 @@ export default function ProfilePage() {
             <Field.Root>
               <Field.Label>Suche in erstellten Events</Field.Label>
               <Input
-                placeholder="Titel, Line-up, Ort, Genre ..."
+                placeholder="Titel, Line-up, Ort, ..."
                 value={createdSearch}
                 onChange={(event) => setCreatedSearch(event.target.value)}
               />
@@ -253,7 +251,7 @@ export default function ProfilePage() {
           <Field.Root>
             <Field.Label>Suche in beigetretenen Events</Field.Label>
             <Input
-              placeholder="Titel, Ort, Genre, Creator ..."
+              placeholder="Titel, Ort, Lineup ..."
               value={joinedSearch}
               onChange={(event) => setJoinedSearch(event.target.value)}
             />

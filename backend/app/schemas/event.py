@@ -7,7 +7,6 @@ class EventCreate(BaseModel):
     title: str = Field(min_length=3, max_length=150)
     lineup: str = Field(min_length=3, max_length=5000)
     location: str = Field(min_length=2, max_length=255)
-    genre: str | None = Field(default=None, max_length=100)
     official_link: HttpUrl | None = None
     start_datetime: datetime
     end_datetime: datetime | None = None
@@ -26,7 +25,6 @@ class EventRead(BaseModel):
     title: str
     lineup: str
     location: str
-    genre: str | None
     official_link: str | None
     start_datetime: datetime
     end_datetime: datetime | None
@@ -43,7 +41,6 @@ class EventUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=3, max_length=150)
     lineup: str | None = Field(default=None, min_length=3, max_length=5000)
     location: str | None = Field(default=None, min_length=2, max_length=255)
-    genre: str | None = Field(default=None, max_length=100)
     official_link: HttpUrl | None = None
     start_datetime: datetime | None = None
     end_datetime: datetime | None = None

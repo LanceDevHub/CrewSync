@@ -26,7 +26,6 @@ def serialize_event(
         title=event.title,
         lineup=event.lineup,
         location=event.location,
-        genre=event.genre,
         official_link=event.official_link,
         start_datetime=event.start_datetime,
         end_datetime=event.end_datetime,

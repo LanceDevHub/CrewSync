@@ -6,7 +6,6 @@ export type Event = {
   lineup: string;
   official_link?: string | null;
   location: string;
-  genre: string | null;
   start_datetime: string;
   end_datetime: string | null;
   created_at: string;
@@ -22,7 +21,6 @@ export type EventCreatePayload = {
   lineup: string;
   official_link?: string | null;
   location: string;
-  genre?: string | null;
   start_datetime: string;
   end_datetime?: string | null;
 };
@@ -32,7 +30,6 @@ export type EventUpdatePayload = {
   lineup?: string;
   official_link?: string | null;
   location?: string;
-  genre?: string | null;
   start_datetime?: string;
   end_datetime?: string | null;
 };

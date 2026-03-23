@@ -3,7 +3,6 @@ import { Stack, Text } from "@chakra-ui/react";
 type EventMetaProps = {
   creatorUsername: string;
   location: string;
-  genre: string | null;
   startDatetime: string;
   endDatetime: string | null;
 };
@@ -11,7 +10,6 @@ type EventMetaProps = {
 export default function EventMeta({
   creatorUsername,
   location,
-  genre,
   startDatetime,
   endDatetime,
 }: EventMetaProps) {
@@ -29,13 +27,6 @@ export default function EventMeta({
           Ort:
         </Text>{" "}
         {location}
-      </Text>
-
-      <Text>
-        <Text as="span" fontWeight="semibold">
-          Genre:
-        </Text>{" "}
-        {genre ?? "—"}
       </Text>
 
       <Text>

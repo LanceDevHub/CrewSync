@@ -28,7 +28,6 @@ def serialize_event(
         title=event.title,
         lineup=event.lineup,
         location=event.location,
-        genre=event.genre,
         official_link=event.official_link,
         start_datetime=event.start_datetime,
         end_datetime=event.end_datetime,
@@ -58,7 +57,6 @@ def create_event(
         title=event_data.title,
         lineup=event_data.lineup,
         location=event_data.location,
-        genre=event_data.genre,
         official_link=str(event_data.official_link) if event_data.official_link else None,
         start_datetime=event_data.start_datetime,
         end_datetime=event_data.end_datetime,
@@ -73,7 +71,6 @@ def create_event(
 @router.get("", response_model=list[EventRead], status_code=status.HTTP_200_OK)
 def list_events(
     q: str | None = Query(default=None),
-    genre: str | None = Query(default=None),
     location: str | None = Query(default=None),
     date_from: datetime | None = Query(default=None),
     date_to: datetime | None = Query(default=None),
@@ -90,13 +87,9 @@ def list_events(
                 Event.title.ilike(search_term),
                 Event.lineup.ilike(search_term),
                 Event.location.ilike(search_term),
-                Event.genre.ilike(search_term),
-                Event.official_link.ilike(search_term),
-            )
+            )       
         )
 
-    if genre:
-        query = query.where(Event.genre.ilike(f"%{genre}%"))
 
     if location:
         query = query.where(Event.location.ilike(f"%{location}%"))
@@ -112,13 +105,6 @@ def list_events(
 
     query = query.order_by(Event.start_datetime.asc())
 
-    print("q:", q)
-    print("genre:", genre)
-    print("location:", location)
-    print("date_from:", date_from)
-    print("date_to:", date_to)
-    print("only_future:", only_future)
-    print(query)
     events = db.scalars(query).all()
 
     result = []

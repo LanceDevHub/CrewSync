@@ -21,7 +21,6 @@ export default function CreateEventPage() {
   const [lineup, setLineup] = useState("");
   const [officialLink, setOfficialLink] = useState("");
   const [location, setLocation] = useState("");
-  const [genre, setGenre] = useState("");
   const [startDatetime, setStartDatetime] = useState("");
   const [endDatetime, setEndDatetime] = useState("");
 
@@ -39,7 +38,6 @@ export default function CreateEventPage() {
         lineup,
         official_link: officialLink || null,
         location,
-        genre: genre || null,
         start_datetime: startDatetime,
         end_datetime: endDatetime || null,
       });
@@ -108,14 +106,6 @@ export default function CreateEventPage() {
               <Input
                 value={location}
                 onChange={(event) => setLocation(event.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root>
-              <Field.Label>Genre</Field.Label>
-              <Input
-                value={genre}
-                onChange={(event) => setGenre(event.target.value)}
               />
             </Field.Root>
 
