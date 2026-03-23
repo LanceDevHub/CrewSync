@@ -7,6 +7,7 @@ import {
   Field,
   Heading,
   Input,
+  Link,
   Stack,
   Text,
   Textarea,
@@ -43,7 +44,8 @@ export default function EventDetailPage() {
   const [actionMessage, setActionMessage] = useState("");
 
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [lineup, setLineup] = useState("");
+  const [officialLink, setOfficialLink] = useState("");
   const [location, setLocation] = useState("");
   const [genre, setGenre] = useState("");
   const [startDatetime, setStartDatetime] = useState("");
@@ -69,7 +71,8 @@ export default function EventDetailPage() {
         setCurrentUser(userData);
 
         setTitle(eventData.title);
-        setDescription(eventData.description);
+        setLineup(eventData.lineup);
+        setOfficialLink(eventData.official_link ?? "");
         setLocation(eventData.location);
         setGenre(eventData.genre ?? "");
         setStartDatetime(eventData.start_datetime.slice(0, 16));
@@ -96,7 +99,8 @@ export default function EventDetailPage() {
     const eventData = await getEventById(Number(id));
     setEvent(eventData);
     setTitle(eventData.title);
-    setDescription(eventData.description);
+    setLineup(eventData.lineup);
+    setOfficialLink(eventData.official_link ?? "");
     setLocation(eventData.location);
     setGenre(eventData.genre ?? "");
     setStartDatetime(eventData.start_datetime.slice(0, 16));
@@ -160,7 +164,8 @@ export default function EventDetailPage() {
     try {
       const updated = await updateEvent(Number(id), {
         title,
-        description,
+        lineup,
+        official_link: officialLink || null,
         location,
         genre: genre || null,
         start_datetime: startDatetime,
@@ -255,10 +260,11 @@ export default function EventDetailPage() {
                 </Field.Root>
 
                 <Field.Root required>
-                  <Field.Label>Beschreibung</Field.Label>
+                  <Field.Label>Line-up</Field.Label>
                   <Textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Ein Interpret pro Zeile"
+                    value={lineup}
+                    onChange={(e) => setLineup(e.target.value)}
                   />
                 </Field.Root>
 
@@ -275,6 +281,15 @@ export default function EventDetailPage() {
                   <Input
                     value={genre}
                     onChange={(e) => setGenre(e.target.value)}
+                  />
+                </Field.Root>
+
+                <Field.Root>
+                  <Field.Label>Offizielle Eventseite (optional)</Field.Label>
+                  <Input
+                    type="url"
+                    value={officialLink}
+                    onChange={(e) => setOfficialLink(e.target.value)}
                   />
                 </Field.Root>
 
@@ -324,7 +339,28 @@ export default function EventDetailPage() {
             <Stack gap="4">
               <Heading size="lg">{event.title}</Heading>
 
-              <Text color="gray.700">{event.description}</Text>
+              <Box>
+                <Heading size="sm">Line-up</Heading>
+
+                <Stack mt="2">
+                  {event.lineup
+                    .split("\n")
+                    .filter((artist) => artist.trim() !== "")
+                    .map((artist, index) => (
+                      <Text key={index}>• {artist}</Text>
+                    ))}
+                </Stack>
+              </Box>
+
+              {event.official_link && (
+                <Link
+                  href={event.official_link}
+                  color="teal.500"
+                  target="_blank"
+                >
+                  Offizielle Eventseite
+                </Link>
+              )}
 
               <EventMeta
                 creatorUsername={event.creator_username}
@@ -407,6 +443,10 @@ export default function EventDetailPage() {
                     </Button>
                   )}
 
+                  <Button variant="outline" onClick={handleShare}>
+                    Event teilen
+                  </Button>
+
                   {isCreator && (
                     <>
                       <Button
@@ -423,10 +463,6 @@ export default function EventDetailPage() {
                         disabled={actionLoading}
                       >
                         Event löschen
-                      </Button>
-
-                      <Button variant="outline" onClick={handleShare}>
-                        Event teilen
                       </Button>
                     </>
                   )}

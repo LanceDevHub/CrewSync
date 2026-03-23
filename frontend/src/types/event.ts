@@ -3,7 +3,8 @@ export type Event = {
   creator_id: number;
   creator_username: string;
   title: string;
-  description: string;
+  lineup: string;
+  official_link?: string | null;
   location: string;
   genre: string | null;
   start_datetime: string;
@@ -18,7 +19,8 @@ export type Event = {
 
 export type EventCreatePayload = {
   title: string;
-  description: string;
+  lineup: string;
+  official_link?: string | null;
   location: string;
   genre?: string | null;
   start_datetime: string;
@@ -27,7 +29,8 @@ export type EventCreatePayload = {
 
 export type EventUpdatePayload = {
   title?: string;
-  description?: string;
+  lineup?: string;
+  official_link?: string | null;
   location?: string;
   genre?: string | null;
   start_datetime?: string;

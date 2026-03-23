@@ -91,7 +91,7 @@ export default function EventsPage() {
                 <Input
                   value={q}
                   onChange={(event) => setQ(event.target.value)}
-                  placeholder="Titel, Beschreibung oder Ort"
+                  placeholder="Titel, Line-up oder Ort"
                 />
               </Field.Root>
 

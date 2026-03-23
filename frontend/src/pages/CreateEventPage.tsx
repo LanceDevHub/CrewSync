@@ -18,7 +18,8 @@ export default function CreateEventPage() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [lineup, setLineup] = useState("");
+  const [officialLink, setOfficialLink] = useState("");
   const [location, setLocation] = useState("");
   const [genre, setGenre] = useState("");
   const [startDatetime, setStartDatetime] = useState("");
@@ -35,7 +36,8 @@ export default function CreateEventPage() {
     try {
       const createdEvent = await createEvent({
         title,
-        description,
+        lineup,
+        official_link: officialLink || null,
         location,
         genre: genre || null,
         start_datetime: startDatetime,
@@ -83,10 +85,21 @@ export default function CreateEventPage() {
             </Field.Root>
 
             <Field.Root required>
-              <Field.Label>Beschreibung</Field.Label>
+              <Field.Label>Interpreten / Line-up</Field.Label>
               <Textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Ein Name pro Zeile"
+                value={lineup}
+                onChange={(event) => setLineup(event.target.value)}
+              />
+            </Field.Root>
+
+            <Field.Root>
+              <Field.Label>Offizielle Eventseite (optional)</Field.Label>
+              <Input
+                type="url"
+                placeholder="https://..."
+                value={officialLink}
+                onChange={(event) => setOfficialLink(event.target.value)}
               />
             </Field.Root>
 
