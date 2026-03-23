@@ -11,7 +11,7 @@ import {
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import type { User } from "../../types/user";
-import logo from "../../assets/logo/default_border.svg";
+import logo from "../../assets/logo/default.svg";
 
 type NavbarProps = {
   currentUser: User | null;
