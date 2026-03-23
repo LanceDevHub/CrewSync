@@ -2,14 +2,20 @@ import { Box, Heading, Link, Stack, Text } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 
 import type { Event } from "../../types/event";
-import ParticipantsPreview from "./ParticipantsPreview";
 import EventMeta from "./EventMeta";
+import ParticipantsPreview from "./ParticipantsPreview";
 
 type EventCardProps = {
   event: Event;
 };
 
 export default function EventCard({ event }: EventCardProps) {
+  const lineupPreview = event.lineup
+    .split("\n")
+    .map((artist) => artist.trim())
+    .filter((artist) => artist !== "")
+    .join(", ");
+
   return (
     <Box bg="white" p="6" borderRadius="lg" boxShadow="sm" borderWidth="1px">
       <Stack gap="3">
@@ -21,7 +27,15 @@ export default function EventCard({ event }: EventCardProps) {
           </RouterLink>
         </Link>
 
-        <Text lineClamp="2">{event.description}</Text>
+        <Text lineClamp="2" color="gray.700">
+          {lineupPreview || "Kein Line-up angegeben"}
+        </Text>
+
+        {event.official_link && (
+          <Text fontSize="xs" color="teal.600">
+            Externer Event-Link verfügbar
+          </Text>
+        )}
 
         <EventMeta
           creatorUsername={event.creator_username}
