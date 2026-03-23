@@ -1,8 +1,8 @@
-"""create initial tables
+"""initial schema
 
-Revision ID: 538e29b9c784
+Revision ID: 47590e4ecd49
 Revises: 
-Create Date: 2026-03-17 20:47:40.757227
+Create Date: 2026-03-23 15:31:02.299821
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '538e29b9c784'
+revision: str = '47590e4ecd49'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,23 +26,26 @@ def upgrade() -> None:
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('password_hash', sa.String(length=255), nullable=False),
+    sa.Column('first_name', sa.String(length=100), nullable=False),
+    sa.Column('last_name', sa.String(length=100), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
-    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('events',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('creator_id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=150), nullable=False),
-    sa.Column('description', sa.Text(), nullable=False),
+    sa.Column('lineup', sa.Text(), nullable=False),
     sa.Column('location', sa.String(length=255), nullable=False),
     sa.Column('genre', sa.String(length=100), nullable=True),
-    sa.Column('event_date', sa.DateTime(), nullable=False),
-    sa.Column('max_participants', sa.Integer(), nullable=True),
+    sa.Column('official_link', sa.String(length=500), nullable=True),
+    sa.Column('start_datetime', sa.DateTime(), nullable=False),
+    sa.Column('end_datetime', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['creator_id'], ['users.id'], ),
@@ -77,6 +80,5 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_events_creator_id'), table_name='events')
     op.drop_table('events')
     op.drop_index(op.f('ix_users_id'), table_name='users')
-    op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
     # ### end Alembic commands ###

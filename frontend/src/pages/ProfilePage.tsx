@@ -82,7 +82,7 @@ export default function ProfilePage() {
       filtered.filter((event) => {
         return (
           event.title.toLowerCase().includes(search) ||
-          event.description.toLowerCase().includes(search) ||
+          event.lineup.toLowerCase().includes(search) ||
           event.location.toLowerCase().includes(search) ||
           (event.genre ?? "").toLowerCase().includes(search)
         );
@@ -109,7 +109,7 @@ export default function ProfilePage() {
       filtered.filter((event) => {
         return (
           event.title.toLowerCase().includes(search) ||
-          event.description.toLowerCase().includes(search) ||
+          event.lineup.toLowerCase().includes(search) ||
           event.location.toLowerCase().includes(search) ||
           (event.genre ?? "").toLowerCase().includes(search) ||
           event.creator_username.toLowerCase().includes(search)
@@ -152,6 +152,13 @@ export default function ProfilePage() {
 
           <Text>
             <Text as="span" fontWeight="semibold">
+              Name:
+            </Text>{" "}
+            {currentUser.first_name} {currentUser.last_name}
+          </Text>
+
+          <Text>
+            <Text as="span" fontWeight="semibold">
               E-Mail:
             </Text>{" "}
             {currentUser.email}
@@ -184,7 +191,7 @@ export default function ProfilePage() {
             <Field.Root>
               <Field.Label>Suche in erstellten Events</Field.Label>
               <Input
-                placeholder="Titel, Beschreibung, Ort, Genre ..."
+                placeholder="Titel, Line-up, Ort, Genre ..."
                 value={createdSearch}
                 onChange={(event) => setCreatedSearch(event.target.value)}
               />

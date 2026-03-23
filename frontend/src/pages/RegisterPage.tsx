@@ -19,6 +19,8 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -35,6 +37,8 @@ export default function RegisterPage() {
         username,
         email,
         password,
+        first_name: firstName,
+        last_name: lastName,
       });
 
       setSuccessMessage(
@@ -82,6 +86,22 @@ export default function RegisterPage() {
                 type="text"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
+              />
+            </Field.Root>
+
+            <Field.Root required>
+              <Field.Label>Vorname</Field.Label>
+              <Input
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
+              />
+            </Field.Root>
+
+            <Field.Root required>
+              <Field.Label>Nachname</Field.Label>
+              <Input
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
               />
             </Field.Root>
 
