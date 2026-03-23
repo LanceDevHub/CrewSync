@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Field,
@@ -375,17 +376,27 @@ export default function EventDetailPage() {
                       <Box
                         key={participant.username}
                         px="3"
-                        py="2"
+                        py="3"
                         bg="gray.50"
                         borderRadius="md"
                         borderWidth="1px"
                       >
-                        <Text fontWeight="medium">
-                          {participant.first_name} {participant.last_name}
-                        </Text>
-                        <Text fontSize="sm" color="gray.600">
-                          @{participant.username}
-                        </Text>
+                        <Stack direction="row" gap="3" align="center">
+                          <Avatar.Root size="sm">
+                            <Avatar.Fallback
+                              name={`${participant.first_name} ${participant.last_name}`}
+                            />
+                          </Avatar.Root>
+
+                          <Box>
+                            <Text fontWeight="medium">
+                              {participant.first_name} {participant.last_name}
+                            </Text>
+                            <Text fontSize="sm" color="gray.600">
+                              @{participant.username}
+                            </Text>
+                          </Box>
+                        </Stack>
                       </Box>
                     ))}
                   </Stack>

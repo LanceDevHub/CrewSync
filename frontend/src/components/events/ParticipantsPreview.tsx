@@ -1,4 +1,4 @@
-import { Badge, HStack, Popover, Portal, Text } from "@chakra-ui/react";
+import { Avatar, Badge, HStack, Popover, Portal, Text } from "@chakra-ui/react";
 import type { EventParticipantPreview } from "../../types/event";
 
 type ParticipantsPreviewProps = {
@@ -12,6 +12,10 @@ function getDisplayName(participant: EventParticipantPreview) {
     : "";
 
   return `${participant.first_name} ${lastInitial}`.trim();
+}
+
+function getFullName(participant: EventParticipantPreview) {
+  return `${participant.first_name} ${participant.last_name}`.trim();
 }
 
 export default function ParticipantsPreview({
@@ -33,9 +37,21 @@ export default function ParticipantsPreview({
               positioning={{ placement: "top" }}
             >
               <Popover.Trigger asChild>
-                <Badge colorPalette="teal" cursor="pointer">
-                  {getDisplayName(participant)}
-                </Badge>
+                <HStack
+                  gap="2"
+                  px="2"
+                  py="1"
+                  borderWidth="1px"
+                  borderRadius="full"
+                  bg="gray.50"
+                  cursor="pointer"
+                >
+                  <Avatar.Root size="2xs">
+                    <Avatar.Fallback name={getFullName(participant)} />
+                  </Avatar.Root>
+
+                  <Text fontSize="sm">{getDisplayName(participant)}</Text>
+                </HStack>
               </Popover.Trigger>
 
               <Portal>
@@ -43,12 +59,20 @@ export default function ParticipantsPreview({
                   <Popover.Content>
                     <Popover.Arrow />
                     <Popover.Body>
-                      <Text fontWeight="semibold">
-                        {participant.first_name} {participant.last_name}
-                      </Text>
-                      <Text fontSize="sm" color="gray.600">
-                        @{participant.username}
-                      </Text>
+                      <HStack gap="3">
+                        <Avatar.Root size="sm">
+                          <Avatar.Fallback name={getFullName(participant)} />
+                        </Avatar.Root>
+
+                        <div>
+                          <Text fontWeight="semibold">
+                            {participant.first_name} {participant.last_name}
+                          </Text>
+                          <Text fontSize="sm" color="gray.600">
+                            @{participant.username}
+                          </Text>
+                        </div>
+                      </HStack>
                     </Popover.Body>
                   </Popover.Content>
                 </Popover.Positioner>
