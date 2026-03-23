@@ -6,8 +6,9 @@ class Settings(BaseSettings):
     debug: bool = True
     database_url: str
     secret_key: str
+    master_password: str
     frontend_url: str = "http://localhost:5173"
-    
+
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 

@@ -3,14 +3,18 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps.auth import get_current_user
+from app.api.deps.site_access import require_site_access
 from app.core.database import get_db
 from app.models.event import Event
 from app.models.event_participant import EventParticipant
 from app.models.user import User
 from app.schemas.event import EventParticipantPreview, EventRead
 
-
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(
+    prefix="/users",
+    tags=["users"],
+    dependencies=[Depends(require_site_access)],
+)
 
 
 def serialize_participants(users: list[User]) -> list[EventParticipantPreview]:

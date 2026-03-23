@@ -2,15 +2,21 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.api.deps.auth import get_current_user
+from app.api.deps.site_access import require_site_access
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.user import User
 from app.schemas.auth import LoginRequest
 from app.schemas.user import UserCreate, UserRead
-from app.api.deps.auth import get_current_user
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(
+    prefix="/auth",
+    tags=["auth"],
+    dependencies=[Depends(require_site_access)],
+)
+
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
@@ -48,6 +54,7 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
     return new_user
 
+
 @router.post("/login", response_model=UserRead, status_code=status.HTTP_200_OK)
 def login_user(
     login_data: LoginRequest,
@@ -83,9 +90,11 @@ def login_user(
 
     return user
 
+
 @router.get("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
+
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 def logout_user(response: Response):
