@@ -580,3 +580,212 @@ POST /events/{id}/join
 ```
 
 Diese Endpunkte können nun den aktuell eingeloggten Benutzer über `get_current_user()` bestimmen.
+
+---
+
+# 22. Einführung eines globalen Masterpassworts (Site Access Gate)
+
+Zusätzlich zur Benutzer-Authentifizierung wurde ein **vorgelagertes Zugriffssystem** implementiert.
+
+Dieses System stellt sicher, dass die Anwendung nur nach Eingabe eines **globalen Masterpassworts** verwendet werden kann.
+
+---
+
+## Ziel dieses Features
+
+- Schutz der Anwendung in frühen Entwicklungsphasen
+- Einschränkung des Zugriffs auf ausgewählte Nutzer
+- einfache Zugangskontrolle ohne Benutzerverwaltung
+
+---
+
+## Funktionsweise
+
+Bevor ein Nutzer:
+
+- `/auth/login`
+- `/auth/register`
+- `/events`
+
+aufrufen kann, muss ein gültiger **Site-Access-Cookie** vorhanden sein.
+
+---
+
+## Ablauf
+
+```
+User öffnet App
+↓
+Kein Site-Access-Cookie vorhanden
+↓
+Weiterleitung zur AccessGatePage (Frontend)
+↓
+User gibt Masterpasswort ein
+↓
+Backend prüft Passwort
+↓
+Cookie wird gesetzt
+↓
+User erhält Zugriff auf gesamte App
+```
+
+---
+
+## Neue Endpunkte
+
+### POST `/site-access/unlock`
+
+Überprüft das Masterpasswort.
+
+**Request:**
+
+```json
+{
+  "password": "masterpassword"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Access granted"
+}
+```
+
+**Effekt:**
+
+Setzt Cookie:
+
+```
+site_access=true
+```
+
+---
+
+### POST `/site-access/lock`
+
+Löscht den Zugriff.
+
+**Effekt:**
+
+- entfernt `site_access` Cookie
+- Nutzer verliert Zugriff auf geschützte Bereiche
+
+---
+
+### GET `/site-access/status`
+
+Prüft, ob Zugriff vorhanden ist.
+
+**Response:**
+
+```json
+{
+  "has_access": true
+}
+```
+
+---
+
+## Cookie-Konfiguration
+
+Der Site-Access wird ebenfalls über ein Cookie gesteuert:
+
+- `httponly=True`
+- `samesite="lax"`
+- `secure=False` (Development)
+
+---
+
+## Backend-Dependency
+
+Neue Dependency:
+
+```
+require_site_access
+```
+
+Diese wird auf geschützte Routen angewendet.
+
+Beispiel:
+
+```
+Depends(require_site_access)
+```
+
+---
+
+## Zusammenspiel mit JWT-Auth
+
+Das System besteht jetzt aus zwei Ebenen:
+
+### 1. Site Access (global)
+
+- steuert Zugang zur Anwendung
+
+### 2. User Auth (JWT)
+
+- steuert eingeloggte Benutzer
+
+---
+
+## Gesamt-Flow
+
+```
+[1] Masterpasswort korrekt
+↓
+[2] Site Access Cookie gesetzt
+↓
+[3] Login möglich
+↓
+[4] JWT Cookie gesetzt
+↓
+[5] Zugriff auf geschützte Endpunkte
+```
+
+---
+
+## Ablaufzeit (Wichtig)
+
+Der Site-Access bleibt aktiv, solange das Cookie gültig ist.
+
+Die JWT-Session wird gesteuert über:
+
+```
+ACCESS_TOKEN_EXPIRE_MINUTES
+```
+
+Standard aktuell:
+
+```
+30 Minuten
+```
+
+---
+
+## Vorteile dieses Ansatzes
+
+✔ sehr einfache Zugangskontrolle
+✔ kein zusätzlicher Admin-User nötig
+✔ schnell deaktivierbar
+✔ ideal für MVP / Beta-Phase
+
+---
+
+## Einschränkungen
+
+- kein Ersatz für echtes Rollen-/Rechtesystem
+- Passwort ist global (kein User-spezifischer Schutz)
+- kein CSRF-Schutz implementiert
+
+---
+
+## Nächste mögliche Erweiterungen
+
+- Rollen (Admin/User)
+- Einladungssystem statt Masterpasswort
+- temporäre Zugangstokens
+- Rate Limiting für Unlock-Endpunkt
+
+---

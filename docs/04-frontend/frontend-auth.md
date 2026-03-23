@@ -2,306 +2,220 @@
 
 Dieses Dokument beschreibt die Umsetzung der Frontend-Authentifizierung sowie die Anbindung an das Backend.
 
-Der vorherige Stand beinhaltete:
-
-- funktionierendes FastAPI Backend
-- Benutzerregistrierung im Backend
-- Login mit JWT (HttpOnly Cookie)
-- `/auth/me` zur Benutzeridentifikation
-
-In diesem Abschnitt wurde die vollständige **Frontend-Integration der Authentifizierung** umgesetzt.
-
 ---
 
-# 1. Ziel dieses Abschnitts
+# 1. Ziel
 
 Ziel war es, das Frontend mit dem Backend zu verbinden und folgende Funktionen zu ermöglichen:
 
-- Benutzerregistrierung im Frontend
-- Login über API
-- automatische Erkennung eingeloggter Nutzer
+- Registrierung
+- Login
+- automatische Session-Erkennung
 - Logout
-- Zustandssynchronisation zwischen Backend und Frontend
+- Zugriffsschutz über Master-Passwort
 
 ---
 
 # 2. API-Client
 
-Datei:
-
-```
-src/lib/api-client.ts
-```
+Datei: src/lib/api-client.ts
 
 ## Zweck
 
-Zentrale Abstraktion für alle HTTP-Requests.
+Zentrale Stelle für alle HTTP-Requests.
 
 ## Wichtige Features
 
-- automatische JSON-Konvertierung (`JSON.stringify`)
-- einheitliche Fehlerbehandlung
+- automatische JSON-Konvertierung
+- zentrale Fehlerbehandlung
 - Nutzung von:
 
-```
 credentials: "include"
-```
 
 → notwendig für Cookie-basierte Authentifizierung
-
-## Wichtige Erkenntnis
-
-TypeScript erwartet `BodyInit`, aber wir senden Objekte.
-
-Lösung:
-
-- eigenes `RequestOptions`-Type
-- JSON-Konvertierung im Client
 
 ---
 
 # 3. Typdefinitionen
 
-Datei:
+Datei: src/types/user.ts
 
-```
-src/types/user.ts
-```
+## Typen
 
-## Definierte Typen
+- User
+- RegisterPayload
+- LoginPayload
 
-```ts
-User;
-RegisterPayload;
-LoginPayload;
-```
+## User enthält jetzt:
 
-## Zweck
-
-- klare Trennung zwischen Backend-Daten und Frontend-Typen
-- bessere TypeScript-Unterstützung
-- Vermeidung von Fehlern bei API-Calls
+- id
+- username
+- email
+- first_name
+- last_name
+- is_active
 
 ---
 
 # 4. Auth API Layer
 
-Datei:
-
-```
-src/api/auth.ts
-```
+Datei: src/api/auth.ts
 
 ## Funktionen
 
-```ts
-registerUser();
-loginUser();
-getCurrentUser();
-logoutUser();
-```
-
-## Zweck
-
-- kapselt alle Auth-Endpunkte
-- trennt API-Logik von UI-Komponenten
-- sorgt für Wiederverwendbarkeit
+- registerUser
+- loginUser
+- getCurrentUser
+- logoutUser
 
 ---
 
 # 5. LoginPage
 
-Datei:
-
-```
-src/pages/LoginPage.tsx
-```
+Datei: src/pages/LoginPage.tsx
 
 ## Funktionen
 
-- Formular für Login
+- Login-Formular
 - Fehleranzeige
 - Loading-State
-- Weiterleitung nach erfolgreichem Login
 
-## Wichtige Besonderheit
+Nach Login:
 
-Nach erfolgreichem Login:
+onLoginSuccess(user)
 
-```ts
-onLoginSuccess(user);
-```
-
-→ sorgt für sofortige Aktualisierung des App-Zustands
+→ sofortige Aktualisierung des globalen States
 
 ---
 
 # 6. RegisterPage
 
-Datei:
+Datei: src/pages/RegisterPage.tsx
 
-```
-src/pages/RegisterPage.tsx
-```
+## Erweiterung
 
-## Funktionen
+Neue Felder:
 
-- Formular für Registrierung
-- Validierung über Backend
-- Fehleranzeige
-- Erfolgsmeldung
-- Weiterleitung zu `/login`
+- first_name
+- last_name
 
----
+## Ergebnis
 
-# 7. Globaler Auth-State in App.tsx
-
-Datei:
-
-```
-src/App.tsx
-```
-
-## Implementierung
-
-```ts
-const [currentUser, setCurrentUser] = useState<User | null>(null);
-```
-
-## Beim Laden der App
-
-```ts
-getCurrentUser();
-```
-
-→ prüft, ob ein Nutzer eingeloggt ist
-
-## Problem & Lösung
-
-### Problem
-
-Nach Login war der User erst nach Refresh sichtbar.
-
-### Ursache
-
-`getCurrentUser()` wird nur beim initialen Laden ausgeführt.
-
-### Lösung
-
-Callback-Mechanismus:
-
-```tsx
-<LoginPage onLoginSuccess={setCurrentUser} />
-```
-
-→ sofortige Aktualisierung des States nach Login
+User wird vollständig angelegt und kann später korrekt angezeigt werden.
 
 ---
 
-# 8. Logout
+# 7. Globaler Auth-State
 
-- ruft `POST /auth/logout` auf
-- löscht Cookie im Backend
-- setzt `currentUser` im Frontend auf `null`
+Datei: src/App.tsx
 
----
+State:
 
-# 9. Cookie-basierte Authentifizierung
+currentUser
 
-## Funktionsweise
+Beim Start:
 
-- Backend setzt JWT in HttpOnly Cookie
-- Frontend kann Cookie nicht direkt lesen
-- Browser sendet Cookie automatisch mit
-
-## Wichtig
-
-```ts
-credentials: "include";
-```
-
-muss gesetzt sein
+getCurrentUser()
 
 ---
 
-# 10. CORS-Konfiguration
+# 8. Problem: State nach Reload verloren
 
-Im Backend erforderlich:
+## Ursache
 
-```python
-allow_origins=["http://localhost:5173"]
-allow_credentials=True
-```
+React State geht bei Reload verloren
 
-## Wichtig
+## Lösung
 
-- `allow_credentials=True` ist Pflicht für Cookies
-- `allow_origins` darf nicht `"*"` sein
+Session bleibt über Cookie erhalten  
+→ getCurrentUser wird beim Start erneut aufgerufen
 
 ---
 
-# 11. Wichtige Erkenntnis: localhost vs 127.0.0.1
+# 9. Logout
 
-Cookies sind hostgebunden:
-
-- `localhost` ≠ `127.0.0.1`
-
-## Empfehlung
-
-Projekt konsistent auf:
-
-```
-http://localhost
-```
-
-halten
+- ruft /auth/logout auf
+- löscht Cookie
+- setzt currentUser auf null
 
 ---
 
-# 12. Was jetzt funktioniert
+# 10. Cookie-basierte Auth
 
-✔ Registrierung im Frontend
-✔ Login im Frontend
-✔ JWT Cookie wird gesetzt
-✔ `/auth/me` funktioniert
-✔ eingeloggter Zustand wird erkannt
-✔ Logout funktioniert
-✔ Zustand aktualisiert sich ohne Refresh
+- JWT wird im HttpOnly Cookie gespeichert
+- Frontend kann Cookie nicht lesen
+- Browser sendet Cookie automatisch
 
----
+Wichtig:
 
-# 13. Offene Verbesserungen (später)
-
-- AuthContext einführen (statt State in App.tsx)
-- bessere Fehlerdarstellung
-- Form-Validierung im Frontend
-- UI/UX verbessern
+credentials: "include"
 
 ---
 
-# 14. Nächster Schritt
+# 11. CORS
 
-Der nächste logische Schritt ist:
+Backend muss erlauben:
 
-## Event-Funktionalität im Frontend
+- allow_credentials=True
+- allow_origins korrekt setzen
 
-- Event-Liste anzeigen (`GET /events`)
-- Event-Detailseite
-- Event erstellen
-- Event beitreten
+---
 
-Damit wird die erste echte Kernfunktion der Anwendung sichtbar.
+# 12. Master-Passwort (NEU)
+
+## Zweck
+
+Die gesamte Seite ist zusätzlich geschützt durch ein Master-Passwort.
+
+## Ablauf
+
+1. Nutzer öffnet Seite
+2. AccessGate erscheint
+3. Eingabe des Master-Passworts
+4. Backend validiert Zugriff
+5. Cookie wird gesetzt
+6. Zugriff auf App erlaubt
+
+## Vorteil
+
+- zusätzlicher Schutz
+- App nicht öffentlich zugänglich
+
+---
+
+# 13. Typische Fehlerquellen
+
+- credentials vergessen → Cookie wird nicht gesendet
+- localhost vs 127.0.0.1 → unterschiedliche Cookies
+- falsche CORS-Konfiguration
+
+---
+
+# 14. Was jetzt funktioniert
+
+- Registrierung
+- Login
+- Logout
+- Session bleibt erhalten
+- Auth-State wird korrekt geladen
+- Master-Passwort schützt Anwendung
+
+---
+
+# 15. Nächste Schritte
+
+- AuthContext einführen
+- bessere Fehleranzeige
+- UX verbessern
 
 ---
 
 # Zusammenfassung
 
-In diesem Abschnitt wurde:
+Das Frontend ist vollständig mit dem Backend verbunden und nutzt:
 
-- ein API-Client implementiert
-- Auth-API integriert
-- Login & Registrierung im Frontend umgesetzt
-- globaler Auth-State eingeführt
-- Cookie-basierte Authentifizierung korrekt angebunden
+- Cookie-basierte Authentifizierung
+- globalen Auth-State
+- Master-Passwort-Schutz
 
 Damit ist die Grundlage für alle weiteren Features gelegt.

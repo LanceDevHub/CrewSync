@@ -1,422 +1,293 @@
-# Datenbankmodelle und Migrationen (User, Event, EventParticipant)
+# Datenbankmodelle und Migrationen
 
-Dieses Dokument beschreibt die Schritte, die im Projekt durchgeführt wurden, um:
+Dieses Dokument beschreibt die Entwicklung der Datenbankstruktur der Anwendung.
 
-- Datenbankmodelle mit **SQLAlchemy** zu erstellen
-- Tabellen für **users**, **events** und **event_participants** zu definieren
-- **Alembic** für versionierte Datenbankmigrationen einzurichten
-- das Datenbankschema sauber und reproduzierbar zu verwalten
+Es umfasst:
 
-Der Abschnitt beginnt bei der Erstellung der ersten Modelle (`user.py`) und endet bei dem Punkt, an dem die Tabellen erfolgreich über **Alembic-Migrationen** erzeugt wurden.
+- die SQLAlchemy-Datenbankmodelle
+- die Tabellen users, events und event_participants
+- die Einführung und Nutzung von Alembic
+- die Weiterentwicklung des Schemas im Verlauf des Projekts
+- den späteren Reset auf ein neues konsolidiertes Initialschema
 
 ---
 
-# 1. Ausgangssituation
+# 1. Ziel dieses Abschnitts
+
+Ziel war es, eine saubere, versionierbare und reproduzierbare Datenbankstruktur aufzubauen, die die zentralen Funktionen der Anwendung abbildet:
+
+- Benutzerkonten
+- Musik-Events
+- Event-Teilnahmen
+
+---
+
+# 2. Ausgangssituation
 
 Zu Beginn lief das Backend bereits mit:
 
-- **FastAPI**
-- **SQLAlchemy**
-- einer funktionierenden **Datenbankverbindung**
-- einer `.env`-Konfiguration
-- einer zentralen DB-Basis (`Base`)
-
-Vorhandene Infrastruktur:
-
-```
-backend/
-├─ app/
-│  ├─ core/
-│  │  ├─ config.py
-│  │  └─ database.py
-│  └─ main.py
-```
-
-Diese Dateien stellten bereits bereit:
-
-- Konfigurationsmanagement (`config.py`)
-- Datenbankengine und Session (`database.py`)
+- FastAPI
+- SQLAlchemy
+- einer funktionierenden Datenbankverbindung
+- .env-Konfiguration
+- einer zentralen Base
 
 ---
 
-# 2. Erstellung der Datenbankmodelle
+# 3. SQLAlchemy-Modelle
 
-Im nächsten Schritt wurden die **Domain-Modelle** erstellt.
+Die Modelle befinden sich in:
 
-Diese Modelle definieren die Struktur der Datenbanktabellen über SQLAlchemy.
-
-Ordnerstruktur:
-
-```
 backend/app/models/
-├─ __init__.py
-├─ user.py
-├─ event.py
-└─ event_participant.py
-```
+
+- user.py
+- event.py
+- event_participant.py
 
 ---
 
-# 3. Modell: User (`user.py`)
+# 4. Modell: User
 
-Dieses Modell beschreibt registrierte Benutzer.
-
-Beispielstruktur:
-
-```python
-class User(Base):
-    __tablename__ = "users"
-
-    id = mapped_column(primary_key=True)
-    username = mapped_column(String(50), unique=True, nullable=False)
-    email = mapped_column(String(255), unique=True, nullable=False)
-    password_hash = mapped_column(String(255), nullable=False)
-
-    is_active = mapped_column(Boolean, default=True)
-
-    created_at = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at = mapped_column(DateTime, default=datetime.utcnow)
-```
-
-Zweck der Tabelle:
-
-- Speicherung von Benutzerkonten
-- Grundlage für Authentifizierung
-- Grundlage für Event-Erstellung
-
----
-
-# 4. Modell: Event (`event.py`)
-
-Dieses Modell beschreibt Musik-Events.
+Datei: backend/app/models/user.py
 
 Wichtige Felder:
 
-- Titel
-- Beschreibung
-- Ort
-- Datum
-- optionales Genre
-- optional maximale Teilnehmerzahl
-- Referenz zum Ersteller
+- id
+- username
+- email
+- password_hash
+- first_name
+- last_name
+- is_active
+- created_at
+- updated_at
 
-Beispielstruktur:
+Zweck:
 
-```python
-class Event(Base):
-    __tablename__ = "events"
+- Benutzerkonten
+- Authentifizierung
+- Grundlage für Events
 
-    id = mapped_column(primary_key=True)
+Wichtige Änderung:
 
-    creator_id = mapped_column(
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
-    title = mapped_column(String(150), nullable=False)
-    description = mapped_column(Text, nullable=False)
-    location = mapped_column(String(255), nullable=False)
-
-    genre = mapped_column(String(100), nullable=True)
-
-    event_date = mapped_column(DateTime, nullable=False)
-
-    max_participants = mapped_column(Integer, nullable=True)
-
-    created_at = mapped_column(DateTime)
-    updated_at = mapped_column(DateTime)
-```
-
-Zweck der Tabelle:
-
-- Speicherung von Musik-Events
-- Verbindung zu einem Ersteller (`creator_id`)
+- first_name und last_name wurden später ergänzt
 
 ---
 
-# 5. Modell: EventParticipant (`event_participant.py`)
+# 5. Modell: Event
 
-Diese Tabelle bildet eine **Many-to-Many-Beziehung** zwischen Nutzern und Events.
+Datei: backend/app/models/event.py
 
-Ein Nutzer kann mehreren Events beitreten.
-Ein Event kann mehrere Teilnehmer haben.
+Aktuelle Felder:
 
-Beispielstruktur:
-
-```python
-class EventParticipant(Base):
-    __tablename__ = "event_participants"
-
-    __table_args__ = (
-        UniqueConstraint("event_id", "user_id"),
-    )
-
-    id = mapped_column(primary_key=True)
-
-    event_id = mapped_column(
-        ForeignKey("events.id"),
-        nullable=False
-    )
-
-    user_id = mapped_column(
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
-    joined_at = mapped_column(DateTime)
-```
-
-Besonders wichtig:
-
-```
-UniqueConstraint("event_id", "user_id")
-```
-
-Dies verhindert, dass ein Nutzer **mehrfach dem gleichen Event beitritt**.
+- id
+- creator_id
+- title
+- lineup
+- location
+- official_link
+- start_datetime
+- end_datetime
+- created_at
+- updated_at
 
 ---
 
-# 6. Warum Migrationen notwendig sind
+## Frühere Struktur
 
-Anfangs können Tabellen über SQLAlchemy mit
+Früher vorhanden:
 
-```
-Base.metadata.create_all()
-```
-
-erstellt werden.
-
-Dieses Vorgehen hat jedoch Nachteile:
-
-- Änderungen an Tabellen sind schwer nachvollziehbar
-- Datenbankschema ist nicht versioniert
-- Zusammenarbeit im Team wird schwierig
-- Produktionsdatenbanken können nicht sauber aktualisiert werden
-
-Deshalb wird ein Migrationstool verwendet.
+- description
+- genre
+- event_date
+- max_participants
 
 ---
 
-# 7. Einführung von Alembic
+## Änderungen
 
-**Alembic** ist das offizielle Migrationstool für SQLAlchemy.
-
-Es ermöglicht:
-
-- versionierte Änderungen am Datenbankschema
-- automatisches Generieren von Migrationen
-- kontrolliertes Upgraden und Downgraden der Datenbank
-- reproduzierbare Datenbankstruktur in jeder Umgebung
-
-Mit Alembic wird jede Schemaänderung als **Migration** gespeichert.
-
-Beispiel:
-
-```
-create users table
-add column genre to events
-add constraint to participants
-```
-
-Diese Änderungen können später jederzeit reproduziert werden.
+- description → lineup
+- event_date → start_datetime
+- end_datetime hinzugefügt
+- official_link hinzugefügt
+- genre entfernt
+- max_participants entfernt
 
 ---
 
-# 8. Installation von Alembic
+# 6. Modell: EventParticipant
 
-Im Backend-Verzeichnis:
+Datei: backend/app/models/event_participant.py
 
-```bash
-pip install alembic
-```
+Felder:
 
----
+- id
+- event_id
+- user_id
+- joined_at
 
-# 9. Initialisierung von Alembic
+Constraint:
 
-Im `backend`-Ordner:
+- (event_id, user_id) ist einzigartig
 
-```bash
-alembic init alembic
-```
+Zweck:
 
-Dadurch entstehen:
-
-```
-backend/
-├─ alembic/
-│  ├─ versions/
-│  └─ env.py
-├─ alembic.ini
-```
-
-Diese Struktur verwaltet alle zukünftigen Migrationen.
+- Teilnahme an Events
+- Join / Leave Logik
 
 ---
 
-# 10. Verbindung mit dem Projekt
+# 7. Warum Migrationen
 
-In `alembic/env.py` wurde Alembic mit dem Projekt verbunden.
+Direktes create_all ist ungeeignet, weil:
 
-Wichtige Imports:
-
-```python
-from app.core.config import settings
-from app.core.database import Base
-from app.models import User, Event, EventParticipant
-```
-
-Außerdem:
-
-```python
-target_metadata = Base.metadata
-```
-
-Dies erlaubt Alembic, die SQLAlchemy-Modelle mit der Datenbank zu vergleichen.
+- keine Versionierung
+- schwer wartbar
+- problematisch im Team
 
 ---
 
-# 11. Erste Migration erzeugen
+# 8. Alembic
 
-Migration erstellen:
+Alembic wurde eingeführt für:
 
-```bash
-alembic revision --autogenerate -m "create initial tables"
-```
-
-Alembic vergleicht:
-
-- aktuelle Datenbank
-- SQLAlchemy-Modelle
-
-und erzeugt daraus ein Migrationsskript.
-
-Dieses Skript enthält z. B.:
-
-```
-op.create_table("users")
-op.create_table("events")
-op.create_table("event_participants")
-```
+- versionierte Schemaänderungen
+- Upgrades / Downgrades
+- automatische Migrationen
 
 ---
 
-# 12. Migration ausführen
+# 9. Struktur
 
-Migration anwenden:
+backend/alembic/
 
-```bash
-alembic upgrade head
-```
-
-Dadurch wird das Schema tatsächlich in der Datenbank erstellt.
+- env.py
+- versions/
 
 ---
 
-# 13. Ergebnis in der Datenbank
+# 10. Migrationen im Verlauf
 
-Die Datenbank enthält nun folgende Tabellen:
+Beispiele:
 
-```
-[
- ('alembic_version',),
- ('users',),
- ('events',),
- ('event_participants',)
-]
-```
-
-### Erklärung
-
-| Tabelle            | Zweck                        |
-| ------------------ | ---------------------------- |
-| users              | Benutzerkonten               |
-| events             | Musik-Events                 |
-| event_participants | Event-Teilnahmen             |
-| alembic_version    | verwaltet aktuelle Migration |
-
-Die Tabelle `alembic_version` speichert, welche Migration zuletzt angewendet wurde.
+- initiale Tabellen
+- neue Zeitstruktur
+- lineup statt description
+- official_link hinzugefügt
+- first_name / last_name hinzugefügt
 
 ---
 
-# 14. Vorteile des aktuellen Setups
+# 11. Probleme
 
-Die Datenbank ist nun:
+- SQLite Einschränkungen
+- NOT NULL Probleme
+- fehlerhafte Revisionen
 
-- reproduzierbar
+---
+
+# 12. Reset
+
+Da keine Daten vorhanden waren:
+
+- Migrationen gelöscht
+- DB gelöscht
+- neue Initialmigration erstellt
+
+---
+
+# 13. Aktuelles Schema
+
+Tabellen:
+
+- users
+- events
+- event_participants
+- alembic_version
+
+---
+
+## users
+
+- username
+- email
+- password_hash
+- first_name
+- last_name
+
+---
+
+## events
+
+- creator_id
+- title
+- lineup
+- location
+- official_link
+- start_datetime
+- end_datetime
+
+---
+
+## event_participants
+
+- event_id
+- user_id
+
+---
+
+# 14. Zustand
+
+Die DB unterstützt jetzt:
+
+- Auth
+- Events
+- Teilnehmer
+- Profile
+
+---
+
+# 15. Vorteile
+
+- sauber
 - versioniert
-- migrationsfähig
-- sauber strukturiert
-- mit SQLAlchemy-Modellen verbunden
-
-Neue Änderungen am Schema können später einfach erstellt werden mit:
-
-```
-alembic revision --autogenerate
-```
-
-und angewendet werden mit:
-
-```
-alembic upgrade head
-```
+- reproduzierbar
+- konsistent
 
 ---
 
-# 15. Aktueller Stand des Projekts
+# 16. Erkenntnisse
 
-Backend-Infrastruktur:
-
-✔ FastAPI Server läuft
-✔ Konfigurationssystem mit `.env`
-✔ SQLAlchemy Datenbankbasis
-✔ drei Domain-Modelle
-✔ Alembic Migrationen
-✔ versioniertes Datenbankschema
+- Schema entwickelt sich iterativ
+- SQLite ist limitiert
+- Reset kann sinnvoll sein
 
 ---
 
-# 16. Nächste Entwicklungsschritte
+# 17. Projektstand
 
-Die nächsten sinnvollen Schritte im Projekt sind:
+- User mit Namen
+- Events mit Lineup
+- Zeitstruktur
+- Teilnehmer-System
 
-1. **Pydantic Schemas erstellen**
+---
 
-```
-backend/app/schemas/
-├─ user.py
-├─ event.py
-└─ auth.py
-```
+# 18. Nächste Schritte
 
-2. **Passwort-Hashing implementieren**
-
-3. **Registrierungs-Endpunkt**
-
-```
-POST /auth/register
-```
-
-4. **Login-Endpunkt**
-
-5. **Event-API**
-
-```
-POST /events
-GET /events
-POST /events/{id}/join
-```
+- PostgreSQL
+- Rollen
+- Soft Delete
+- Cascade Delete
 
 ---
 
 # Zusammenfassung
 
-In diesem Abschnitt wurde:
+Die Datenbank wurde aufgebaut, mehrfach angepasst und schließlich in einer neuen Initialmigration konsolidiert.
 
-1. das **Datenbankmodell implementiert**
-2. **SQLAlchemy-Modelle erstellt**
-3. **Alembic eingeführt**
-4. die **erste Migration erzeugt**
-5. das **initiale Datenbankschema erstellt**
+Sie bildet die Grundlage für:
 
-Die Datenbankstruktur bildet nun den fachlichen Kern der Anwendung und dient als Grundlage für die weitere Backend-Entwicklung.
+- Authentifizierung
+- Events
+- Teilnehmer

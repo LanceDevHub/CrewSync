@@ -10,277 +10,281 @@ Für das MVP werden drei Kernbereiche abgebildet:
 - Musik-Events
 - Teilnahme von Nutzern an Events
 
-Das Datenmodell ist bewusst schlank gehalten, damit die Grundfunktionalität der Plattform klar und nachvollziehbar umgesetzt werden kann.
+Das Datenmodell ist bewusst schlank gehalten, bildet aber bereits die aktuelle fachliche Struktur der Anwendung ab.
 
 ---
 
 # 2. Verwendete Datenbank
 
-Für das Projekt wird **PostgreSQL** verwendet.
+Für die Entwicklung wird aktuell **SQLite** verwendet.
 
-PostgreSQL eignet sich für dieses Projekt, weil:
+Warum SQLite:
 
-- relationale Daten sauber abgebildet werden können
-- Beziehungen zwischen Nutzern und Events einfach modellierbar sind
-- Filter-, Such- und Datumsabfragen gut unterstützt werden
-- das System später problemlos erweitert werden kann
+- sehr schnell für lokale Entwicklung
+- keine zusätzliche Installation nötig
+- ideal für MVP-Phase
 
-Die Datenbankstruktur wird im Backend mit SQLAlchemy-Modellen beschrieben und über Migrationen verwaltet.
+Hinweis:
+
+In späteren Phasen ist ein Wechsel zu **PostgreSQL** geplant.
 
 ---
 
 # 3. Tabellenübersicht
 
-Im MVP werden folgende Tabellen verwendet:
+Im aktuellen Stand werden folgende Tabellen verwendet:
 
-1. `users`
-2. `events`
-3. `event_participants`
-
----
-
-# 4. Tabelle `users`
-
-Die Tabelle `users` speichert alle registrierten Benutzerkonten.
-
-## Zweck
-
-Sie enthält die grundlegenden Informationen eines Nutzers und dient als Basis für Authentifizierung und Benutzerverwaltung.
-
-## Felder
-
-| Feld          | Beschreibung                        |
-| ------------- | ----------------------------------- |
-| id            | Eindeutige ID des Nutzers           |
-| username      | Eindeutiger Benutzername            |
-| email         | Eindeutige E-Mail-Adresse           |
-| password_hash | Sicher gehashter Passwortwert       |
-| is_active     | Gibt an, ob der Nutzer aktiv ist    |
-| created_at    | Zeitpunkt der Erstellung des Kontos |
-| updated_at    | Zeitpunkt der letzten Änderung      |
-
-## Regeln und Constraints
-
-- `id` ist Primärschlüssel
-- `username` ist eindeutig
-- `email` ist eindeutig
-- `password_hash` darf nie leer sein
-- Passwörter werden niemals im Klartext gespeichert
-- `is_active` ist standardmäßig `true`
+- users
+- events
+- event_participants
 
 ---
 
-# 5. Tabelle `events`
+# 4. Tabelle users
 
-Die Tabelle `events` speichert alle Musik-Events, die von Nutzern erstellt wurden.
+Die Tabelle users speichert alle registrierten Benutzerkonten.
 
 ## Zweck
 
-Sie bildet die zentrale fachliche Einheit der Plattform ab.
+- Authentifizierung
+- Darstellung von Teilnehmern
+- Zuordnung von Events zu Erstellern
 
 ## Felder
 
-| Feld             | Beschreibung                                       |
-| ---------------- | -------------------------------------------------- |
-| id               | Eindeutige ID des Events                           |
-| creator_id       | Verweis auf den Nutzer, der das Event erstellt hat |
-| title            | Titel des Events                                   |
-| description      | Beschreibung des Events                            |
-| location         | Veranstaltungsort oder Treffpunkt                  |
-| genre            | Musikrichtung des Events (optional)                |
-| event_date       | Datum und Uhrzeit des Events                       |
-| max_participants | Maximale Teilnehmerzahl (optional)                 |
-| created_at       | Zeitpunkt der Erstellung                           |
-| updated_at       | Zeitpunkt der letzten Änderung                     |
+- id → eindeutige ID
+- username → eindeutiger Benutzername
+- email → eindeutige E-Mail-Adresse
+- password_hash → gehashter Passwortwert
+- first_name → Vorname
+- last_name → Nachname
+- is_active → ob Nutzer aktiv ist
+- created_at → Erstellung
+- updated_at → letzte Änderung
 
-## Regeln und Constraints
+## Regeln
 
-- `id` ist Primärschlüssel
-- `creator_id` ist Fremdschlüssel auf `users.id`
-- `title` ist Pflichtfeld
-- `description` ist Pflichtfeld
-- `location` ist Pflichtfeld
-- `event_date` ist Pflichtfeld
-- `max_participants` ist optional
+- username ist eindeutig
+- email ist eindeutig
+- password wird niemals im Klartext gespeichert
+- first_name und last_name sind Pflichtfelder
+
+---
+
+# 5. Tabelle events
+
+Die Tabelle events speichert alle Musik-Events.
+
+## Zweck
+
+- zentrale fachliche Einheit der Plattform
+- Grundlage für Event-Listen und Detailseiten
+
+## Aktuelle Felder
+
+- id → eindeutige Event-ID
+- creator_id → Verweis auf users.id
+- title → Titel des Events
+- lineup → Beschreibung der Acts / Künstler
+- location → Veranstaltungsort
+- official_link → optionaler externer Link
+- start_datetime → Startzeit
+- end_datetime → optionales Enddatum
+- created_at → Erstellung
+- updated_at → letzte Änderung
+
+---
+
+## Wichtige Änderungen zur alten Struktur
+
+Folgende Felder wurden entfernt:
+
+- description → ersetzt durch lineup
+- genre → vollständig entfernt
+- event_date → ersetzt durch start_datetime
+- max_participants → entfernt
+
+---
+
+## Regeln
+
+- creator_id ist Fremdschlüssel auf users.id
+- title ist Pflichtfeld
+- lineup ist Pflichtfeld
+- location ist Pflichtfeld
+- start_datetime ist Pflichtfeld
+- end_datetime ist optional
 - ein Event gehört genau einem Ersteller
 
 ---
 
-# 6. Tabelle `event_participants`
+# 6. Tabelle event_participants
 
-Die Tabelle `event_participants` speichert, welche Nutzer welchen Events beigetreten sind.
+Diese Tabelle speichert die Teilnahme von Nutzern an Events.
 
 ## Zweck
 
-Sie bildet die **Many-to-Many-Beziehung** zwischen Nutzern und Events ab.
+Many-to-Many Beziehung zwischen users und events
 
-Ein Nutzer kann mehreren Events beitreten.
-Ein Event kann mehrere Teilnehmer haben.
+Ein Nutzer kann mehreren Events beitreten  
+Ein Event kann mehrere Teilnehmer haben
 
 ## Felder
 
-| Feld      | Beschreibung                         |
-| --------- | ------------------------------------ |
-| id        | Eindeutige ID des Teilnahme-Eintrags |
-| event_id  | Verweis auf das Event                |
-| user_id   | Verweis auf den teilnehmenden Nutzer |
-| joined_at | Zeitpunkt des Beitritts              |
+- id → eindeutige ID
+- event_id → Referenz auf events.id
+- user_id → Referenz auf users.id
+- joined_at → Zeitpunkt des Beitritts
 
-## Regeln und Constraints
+## Regeln
 
-- `id` ist Primärschlüssel
-- `event_id` ist Fremdschlüssel auf `events.id`
-- `user_id` ist Fremdschlüssel auf `users.id`
-- Kombination aus `event_id` und `user_id` ist eindeutig
+- Kombination (event_id, user_id) ist eindeutig
 - ein Nutzer kann einem Event nur einmal beitreten
 
 ---
 
-# 7. Beziehungen zwischen den Tabellen
+# 7. Beziehungen
 
 ## Nutzer erstellt Events
 
-Ein Nutzer kann mehrere Events erstellen.
-
-Beziehung:
-
-```
 users (1) → (n) events
-```
 
-Verknüpfung:
-
-```
 events.creator_id → users.id
-```
 
 ---
 
 ## Nutzer tritt Events bei
 
-Ein Nutzer kann mehreren Events beitreten.
-Ein Event kann mehrere Teilnehmer haben.
-
-Beziehung:
-
-```
 users (n) ↔ (m) events
-```
 
-Diese Beziehung wird über die Tabelle `event_participants` umgesetzt.
+über event_participants
 
-Verknüpfungen:
-
-```
-event_participants.user_id → users.id
+event_participants.user_id → users.id  
 event_participants.event_id → events.id
-```
 
 ---
 
 # 8. Modellierungsentscheidungen
 
-## Event-Ersteller und Teilnehmer sind getrennt
+## Ersteller ≠ Teilnehmer
 
-Der Ersteller eines Events wird über `creator_id` gespeichert.
+Der Event-Ersteller ist nicht automatisch Teilnehmer.
 
-Teilnehmer werden über die Tabelle `event_participants` verwaltet.
+Das bedeutet:
 
-Damit bleibt klar unterscheidbar:
-
-- wer das Event erstellt hat
-- wer dem Event beigetreten ist
-
-Der Ersteller ist im MVP **nicht automatisch Teilnehmer** kann aber teilnehmen.
+- creator kann joinen oder nicht
+- klare Trennung von Rollen
 
 ---
 
 ## Keine Rollen im MVP
 
-Alle Nutzer sind zunächst normale Nutzer.
+Alle Nutzer sind gleichberechtigt.
 
-Ein Rollenmodell (Admin / Moderator etc.) kann später ergänzt werden.
+Später möglich:
+
+- Admin
+- Moderator
 
 ---
 
 ## Keine Soft Deletes
 
-Im MVP werden Einträge normal gelöscht.
-
-Soft-Delete-Mechanismen können später ergänzt werden.
+Einträge werden aktuell hart gelöscht.
 
 ---
 
-## Kein Event-Status
+## Zeitmodell
 
-Events besitzen im MVP keinen Status wie:
+Events haben:
 
-- draft
-- published
-- cancelled
+- start_datetime
+- optional end_datetime
 
-Die zeitliche Einordnung erfolgt ausschließlich über `event_date`.
+Das erlaubt:
+
+- flexible Zeitdarstellung
+- zukünftige Erweiterungen
 
 ---
 
-# 9. Empfohlene Indizes
+## Strukturierte Teilnehmerdaten
 
-## Tabelle `users`
+Teilnehmer werden nicht nur als Username gespeichert, sondern enthalten:
 
-- Unique Index auf `username`
-- Unique Index auf `email`
+- username
+- first_name
+- last_name
 
-## Tabelle `events`
+Dadurch kann das Frontend:
 
-- Index auf `creator_id`
-- Index auf `event_date`
+- Initialen anzeigen
+- Namen darstellen
+- Detailansichten bauen
 
-## Tabelle `event_participants`
+---
 
-- Index auf `event_id`
-- Index auf `user_id`
-- Unique Constraint auf `(event_id, user_id)`
+# 9. Indizes
 
-Diese Indizes verbessern insbesondere:
+users:
 
-- Login-Abfragen
-- Event-Suchen
-- Filter nach Datum
+- unique(username)
+- unique(email)
+
+events:
+
+- index(creator_id)
+- index(start_datetime)
+
+event_participants:
+
+- index(event_id)
+- index(user_id)
+- unique(event_id, user_id)
+
+---
+
+# 10. Aktueller Stand
+
+Die Datenbank unterstützt jetzt vollständig:
+
+- Registrierung & Login
+- Event-Erstellung
+- Event-Bearbeitung
+- Event-Teilnahme
 - Teilnehmerlisten
-- persönliche Eventübersichten
+- Profilseiten
 
 ---
 
-# 10. Mögliche zukünftige Erweiterungen
+# 11. Zukünftige Erweiterungen
 
-Das Datenmodell kann später erweitert werden, z. B. um:
+Mögliche Erweiterungen:
 
-- Benutzerprofile
-- Eventbilder
-- Event-Tags oder Kategorien
-- Kommentare zu Events
-- Event-Status
-- Benachrichtigungen
-- Favoriten
-- Rollenverwaltung
-
-Das aktuelle Modell konzentriert sich bewusst auf die Kernfunktionalität des MVP.
+- PostgreSQL Migration
+- Rollen & Rechte
+- Soft Delete
+- Event-Bilder
+- Kommentare
+- Notifications
+- Pagination
+- Performance-Optimierungen
 
 ---
 
-# 11. Zusammenfassung
+# 12. Zusammenfassung
 
-Das Datenbankmodell des MVP besteht aus drei Tabellen:
+Das Datenbankmodell besteht aus:
 
-- `users`
-- `events`
-- `event_participants`
+- users
+- events
+- event_participants
 
-Diese Struktur ermöglicht:
+Es ermöglicht:
 
 - Benutzerverwaltung
-- Erstellung von Musik-Events
-- Teilnahme an Events
-- persönliche Eventübersichten
+- Musik-Events mit Lineup
+- strukturierte Teilnehmerdarstellung
+- Join / Leave Logik
 
-Das Modell ist einfach, klar strukturiert und gut erweiterbar.
+Das Modell ist aktuell konsistent, schlank und bereit für Erweiterungen.

@@ -1,6 +1,6 @@
 # Frontend Event-Funktionalität & Interaktionen
 
-Dieses Dokument beschreibt die Erweiterung des Frontends um die zentrale Event-Funktionalität.
+Dieses Dokument beschreibt die Event-Funktionalität im Frontend.
 
 ---
 
@@ -10,179 +10,185 @@ Dieses Dokument beschreibt die Erweiterung des Frontends um die zentrale Event-F
 - Details anzeigen
 - erstellen / bearbeiten / löschen
 - join / leave
-- Filter & Suche
-
-Zusätzlich:
-
-- Teilnehmeranzeige
-- Join-Status
-- Teilnehmer-Vorschau in Listen (neu)
+- Teilnehmer sichtbar machen
 
 ---
 
 # 2. Event-Typen
 
-Neue Felder:
+Neue Felder aus dem Backend:
 
-- `participants_count`
-- `participants`
-- `participants_preview`
-- `is_joined`
+- participants_count
+- participants
+- participants_preview
+- is_joined
+
+## Teilnehmerstruktur (NEU)
+
+Teilnehmer bestehen jetzt aus:
+
+- username
+- first_name
+- last_name
 
 ---
 
 # 3. Event-Liste (EventsPage)
 
-## NEU: Teilnehmer-Vorschau
+## Teilnehmer-Vorschau
 
-In der Liste wird jetzt angezeigt:
+Anzeige:
 
-```text
-anna, leo, mila
-```
+anna s., leo m., mila k.
 
 Wenn mehr Teilnehmer:
 
-```text
-anna, leo, mila, ...
-```
+anna s., leo m., mila k., ...
 
 ---
 
-## Umsetzung
+## Darstellung
 
-```ts
-event.participants_preview.join(", ");
-```
+Format:
 
-- Bedingung:
-
-```ts
-if (participants_count > 3) → ", ..."
-```
+first_name + erster Buchstabe von last_name
 
 ---
 
 ## Vorteil
 
-- Nutzer sehen sofort Aktivität
-- keine Detailseite nötig
-- bessere UX
+- kompakt
+- gut lesbar
+- mobile friendly
 
 ---
 
 # 4. Event-Detailseite
 
-## Teilnehmeranzeige
+## Teilnehmerliste
 
 - vollständige Liste
 - expand / collapse
 
 ---
 
+## Anzeige
+
+Jeder Teilnehmer:
+
+- Vorname + Nachname
+- Username zusätzlich sichtbar
+
+---
+
 ## Join-Status
 
-```ts
-event.is_joined;
-```
+event.is_joined
+
+→ steuert Join / Leave Button
 
 ---
 
-## Buttons
+# 5. Teilnehmer UX (NEU)
 
-- Join
-- Leave
-- Edit / Delete (Creator)
+## Problem vorher
+
+- nur Username sichtbar
+- Hover notwendig → schlecht für Mobile
+
+## Lösung
+
+- Anzeige: "Max M."
+- Details direkt sichtbar oder über Klick
+- kein Hover nötig
 
 ---
 
-# 5. Profilseite
+# 6. Profilseite
 
-## Erweiterung (neu)
-
-Auch hier:
+## Erweiterung
 
 - Teilnehmer-Vorschau integriert
-- gleiche Darstellung wie Event-Liste
+- gleiche Darstellung wie Events
 
 ---
 
-## Vorteil
+# 7. Architekturentscheidung
 
-- konsistente UI
-- gleiche Informationsdichte überall
+Liste vs Detail:
 
----
-
-# 6. Architekturentscheidung
-
-## Liste vs Detail
-
-| View        | Daten            |
-| ----------- | ---------------- |
-| Event-Liste | Preview (leicht) |
-| Detailseite | Vollständig      |
+Event-Liste → leichte Daten (Preview)  
+Detailseite → vollständige Daten
 
 ---
 
-# 7. Wichtige Erkenntnisse
+# 8. URL-Feld Fix (NEU)
 
-## Backend bestimmt Logik
+## Problem
 
-Frontend zeigt nur:
+Frontend verlangte zwingend https://
 
-- Join-Status
-- Teilnehmer
+## Lösung
+
+Input akzeptiert jetzt auch:
+
+www.example.com
+
+Backend ergänzt automatisch:
+
+https://
 
 ---
 
-## Konsistenz ist entscheidend
+# 9. Backend-Abhängigkeit
 
-Teilnehmer werden jetzt angezeigt in:
+Frontend nutzt:
+
+- participants_preview
+- participants
+- is_joined
+
+Backend liefert strukturierte Daten.
+
+---
+
+# 10. UX-Verbesserungen
+
+- Teilnehmer sichtbar ohne Klick
+- kompakte Darstellung
+- konsistente Anzeige in allen Views
+
+---
+
+# 11. Was jetzt funktioniert
 
 - Event-Liste
-- Detailseite
-- Profilseite
+- Event-Details
+- Join / Leave
+- Teilnehmeranzeige
+- Teilnehmer-Vorschau
+- Profilseite mit Events
+- URL-Fix
+- mobile-friendly Darstellung
 
 ---
 
-# 8. UX-Verbesserung
+# 12. Nächste Schritte
 
-Die Teilnehmer-Vorschau sorgt dafür:
-
-- Events wirken "lebendig"
-- Nutzer sehen Aktivität sofort
-- weniger Klicks notwendig
-
----
-
-# 9. Was jetzt funktioniert
-
-✔ Events anzeigen
-✔ Details anzeigen
-✔ Join / Leave
-✔ Teilnehmer anzeigen
-✔ Teilnehmer-Vorschau in Listen
-✔ Profilseite erweitert
-✔ Filter & Suche
-
----
-
-# 10. Offene Verbesserungen
-
-- bessere UI (Cards)
-- Navigation verbessern
-- AuthContext
+- Avatar-Komponenten
+- bessere Event-Cards
 - Pagination
+- globale State-Lösung
 
 ---
 
-# 11. Zusammenfassung
+# Zusammenfassung
 
 Das Frontend bietet jetzt:
 
 - vollständige Event-Interaktion
-- sichtbare Teilnehmerstruktur
-- konsistente Darstellung über alle Seiten
+- strukturierte Teilnehmerdaten
+- konsistente Darstellung
+- deutlich bessere UX
 
-Die Anwendung wirkt damit deutlich "echter" und näher an einem produktiven System.
+Die Anwendung wirkt dadurch deutlich näher an einem echten Produkt.
