@@ -7,16 +7,27 @@ from app.core.database import get_db
 from app.models.event import Event
 from app.models.event_participant import EventParticipant
 from app.models.user import User
-from app.schemas.event import EventRead
+from app.schemas.event import EventParticipantPreview, EventRead
 
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-## helper functions
+
+def serialize_participants(users: list[User]) -> list[EventParticipantPreview]:
+    return [
+        EventParticipantPreview(
+            username=user.username,
+            first_name=user.first_name,
+            last_name=user.last_name,
+        )
+        for user in users
+    ]
+
+
 def serialize_event(
     event: Event,
     creator_username: str,
-    participants: list[str],
+    participants: list[EventParticipantPreview],
     is_joined: bool,
 ) -> EventRead:
     return EventRead(
@@ -56,14 +67,15 @@ def get_my_created_events(
             .join(EventParticipant, EventParticipant.user_id == User.id)
             .where(EventParticipant.event_id == event.id)
         ).all()
-        participant_names = [user.username for user in participants_users]
+
+        participants_data = serialize_participants(participants_users)
         is_joined = any(user.id == current_user.id for user in participants_users)
 
         result.append(
             serialize_event(
                 event,
                 current_user.username,
-                participant_names,
+                participants_data,
                 is_joined,
             )
         )
@@ -93,14 +105,15 @@ def get_my_joined_events(
             .join(EventParticipant, EventParticipant.user_id == User.id)
             .where(EventParticipant.event_id == event.id)
         ).all()
-        participant_names = [user.username for user in participants_users]
+
+        participants_data = serialize_participants(participants_users)
         is_joined = any(user.id == current_user.id for user in participants_users)
 
         result.append(
             serialize_event(
                 event,
                 creator_username,
-                participant_names,
+                participants_data,
                 is_joined,
             )
         )

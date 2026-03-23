@@ -1,3 +1,9 @@
+export type EventParticipantPreview = {
+  username: string;
+  first_name: string;
+  last_name: string;
+};
+
 export type Event = {
   id: number;
   creator_id: number;
@@ -10,9 +16,9 @@ export type Event = {
   end_datetime: string | null;
   created_at: string;
   updated_at: string;
-  participants_preview: string[];
+  participants_preview: EventParticipantPreview[];
   participants_count: number;
-  participants: string[];
+  participants: EventParticipantPreview[];
   is_joined: boolean;
 };
 

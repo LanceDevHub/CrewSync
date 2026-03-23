@@ -373,14 +373,19 @@ export default function EventDetailPage() {
                   <Stack gap="2">
                     {visibleParticipants.map((participant) => (
                       <Box
-                        key={participant}
+                        key={participant.username}
                         px="3"
                         py="2"
                         bg="gray.50"
                         borderRadius="md"
                         borderWidth="1px"
                       >
-                        <Text>{participant}</Text>
+                        <Text fontWeight="medium">
+                          {participant.first_name} {participant.last_name}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          @{participant.username}
+                        </Text>
                       </Box>
                     ))}
                   </Stack>

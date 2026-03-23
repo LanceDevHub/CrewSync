@@ -94,8 +94,8 @@ export default function CreateEventPage() {
             <Field.Root>
               <Field.Label>Offizielle Eventseite (optional)</Field.Label>
               <Input
-                type="url"
-                placeholder="https://..."
+                type="text"
+                placeholder="z. B. www.eventseite.de"
                 value={officialLink}
                 onChange={(event) => setOfficialLink(event.target.value)}
               />

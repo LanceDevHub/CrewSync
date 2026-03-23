@@ -9,16 +9,31 @@ from app.core.database import get_db
 from app.models.event import Event
 from app.models.event_participant import EventParticipant
 from app.models.user import User
-from app.schemas.event import EventCreate, EventRead, EventUpdate
+from app.schemas.event import (
+    EventCreate,
+    EventParticipantPreview,
+    EventRead,
+    EventUpdate,
+)
 
 router = APIRouter(prefix="/events", tags=["events"])
 
-## helper funcs
+
+def serialize_participants(users: list[User]) -> list[EventParticipantPreview]:
+    return [
+        EventParticipantPreview(
+            username=user.username,
+            first_name=user.first_name,
+            last_name=user.last_name,
+        )
+        for user in users
+    ]
+
 
 def serialize_event(
     event: Event,
     creator_username: str,
-    participants: list[str],
+    participants: list[EventParticipantPreview],
     is_joined: bool,
 ) -> EventRead:
     return EventRead(
@@ -39,12 +54,14 @@ def serialize_event(
         is_joined=is_joined,
     )
 
+
 def get_event_participants(db: Session, event_id: int) -> list[User]:
     return db.scalars(
         select(User)
         .join(EventParticipant, EventParticipant.user_id == User.id)
         .where(EventParticipant.event_id == event_id)
     ).all()
+
 
 @router.post("", response_model=EventRead, status_code=status.HTTP_201_CREATED)
 def create_event(
@@ -57,7 +74,7 @@ def create_event(
         title=event_data.title,
         lineup=event_data.lineup,
         location=event_data.location,
-        official_link=str(event_data.official_link) if event_data.official_link else None,
+        official_link=event_data.official_link,
         start_datetime=event_data.start_datetime,
         end_datetime=event_data.end_datetime,
     )
@@ -67,6 +84,7 @@ def create_event(
     db.refresh(new_event)
 
     return serialize_event(new_event, current_user.username, [], False)
+
 
 @router.get("", response_model=list[EventRead], status_code=status.HTTP_200_OK)
 def list_events(
@@ -87,9 +105,8 @@ def list_events(
                 Event.title.ilike(search_term),
                 Event.lineup.ilike(search_term),
                 Event.location.ilike(search_term),
-            )       
+            )
         )
-
 
     if location:
         query = query.where(Event.location.ilike(f"%{location}%"))
@@ -113,19 +130,20 @@ def list_events(
         creator_username = creator.username if creator else "Unknown"
 
         participants_users = get_event_participants(db, event.id)
-        participant_names = [user.username for user in participants_users]
+        participants_data = serialize_participants(participants_users)
         is_joined = any(user.id == current_user.id for user in participants_users)
 
         result.append(
             serialize_event(
                 event,
                 creator_username,
-                participant_names,
+                participants_data,
                 is_joined,
             )
         )
 
     return result
+
 
 @router.post("/{event_id}/join", status_code=status.HTTP_201_CREATED)
 def join_event(
@@ -165,6 +183,7 @@ def join_event(
 
     return {"message": "Successfully joined event."}
 
+
 @router.delete("/{event_id}/leave", status_code=status.HTTP_200_OK)
 def leave_event(
     event_id: int,
@@ -197,6 +216,7 @@ def leave_event(
 
     return {"message": "Successfully left event."}
 
+
 @router.get("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
 def get_event_by_id(
     event_id: int,
@@ -215,16 +235,16 @@ def get_event_by_id(
     creator_username = creator.username if creator else "Unknown"
 
     participants_users = get_event_participants(db, event.id)
-    participant_names = [user.username for user in participants_users]
-
+    participants_data = serialize_participants(participants_users)
     is_joined = any(user.id == current_user.id for user in participants_users)
 
     return serialize_event(
         event,
         creator_username,
-        participant_names,
+        participants_data,
         is_joined,
     )
+
 
 @router.patch("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
 def update_event(
@@ -249,9 +269,6 @@ def update_event(
 
     update_data = event_data.model_dump(exclude_unset=True)
 
-    if "official_link" in update_data and update_data["official_link"] is not None:
-        update_data["official_link"] = str(update_data["official_link"])
-
     for field, value in update_data.items():
         setattr(event, field, value)
 
@@ -268,19 +285,17 @@ def update_event(
     creator_username = creator.username if creator else "Unknown"
 
     participants_users = get_event_participants(db, event.id)
-    participant_names = [user.username for user in participants_users]
+    participants_data = serialize_participants(participants_users)
     is_joined = any(user.id == current_user.id for user in participants_users)
 
     return serialize_event(
         event,
         creator_username,
-        participant_names,
+        participants_data,
         is_joined,
     )
 
 
-## spaeter maybe mit cascade loesen
-# WICHTIG: eventParticipants Eintraege werden ebenfalls geloescht
 @router.delete("/{event_id}", status_code=status.HTTP_200_OK)
 def delete_event(
     event_id: int,

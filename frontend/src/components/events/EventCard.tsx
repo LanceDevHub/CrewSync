@@ -32,15 +32,14 @@ export default function EventCard({ event }: EventCardProps) {
         </Text>
 
         {event.official_link && (
-          <Text fontSize="xs" color="teal.600">
-            Externer Event-Link verfügbar
+          <Text fontSize="xs" color="gray.500">
+            Offizielle Eventseite vorhanden
           </Text>
         )}
 
         <EventMeta
           creatorUsername={event.creator_username}
           location={event.location}
-          genre={event.genre}
           startDatetime={event.start_datetime}
           endDatetime={event.end_datetime}
         />
