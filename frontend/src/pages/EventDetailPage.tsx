@@ -236,6 +236,8 @@ export default function EventDetailPage() {
   }
 
   const isCreator = currentUser?.id === event.creator_id;
+  const isAdmin = currentUser?.is_admin === true;
+  const canManageEvent = isCreator || isAdmin;
   const visibleParticipants = showAllParticipants
     ? event.participants
     : event.participants.slice(0, 3);
@@ -451,7 +453,7 @@ export default function EventDetailPage() {
                     Event teilen
                   </Button>
 
-                  {isCreator && (
+                  {canManageEvent && (
                     <>
                       <Button
                         onClick={() => setIsEditing(true)}
@@ -480,6 +482,12 @@ export default function EventDetailPage() {
               {isCreator && (
                 <Text color="gray.600">
                   Du bist der Ersteller dieses Events.
+                </Text>
+              )}
+
+              {isAdmin && !isCreator && (
+                <Text color="gray.600">
+                  Du bearbeitest dieses Event als Admin.
                 </Text>
               )}
             </Stack>

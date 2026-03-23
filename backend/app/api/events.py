@@ -266,7 +266,7 @@ def update_event(
             detail="Event not found.",
         )
 
-    if event.creator_id != current_user.id:
+    if event.creator_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not allowed to edit this event.",
@@ -315,7 +315,7 @@ def delete_event(
             detail="Event not found.",
         )
 
-    if event.creator_id != current_user.id:
+    if event.creator_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not allowed to delete this event.",
