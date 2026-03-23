@@ -1,4 +1,12 @@
-import { Box, Button, Flex, Spacer, Stack, Text } from "@chakra-ui/react";
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Spacer,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import type { User } from "../../types/user";
@@ -84,9 +92,17 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
               isActive={location.pathname === "/me"}
             />
 
-            <Text fontSize="sm" color="gray.600">
-              Eingeloggt als: <strong>{currentUser.username}</strong>
-            </Text>
+            <Stack direction="row" gap="2" align="center">
+              <Text fontSize="sm" color="gray.600">
+                Eingeloggt als: <strong>{currentUser.username}</strong>
+              </Text>
+
+              {currentUser.is_admin && (
+                <Badge colorPalette="purple" variant="subtle">
+                  Admin
+                </Badge>
+              )}
+            </Stack>
 
             <Button onClick={onLogout} colorPalette="red" size="sm">
               Logout

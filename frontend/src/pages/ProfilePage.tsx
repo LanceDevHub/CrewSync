@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Badge,
   Box,
   Button,
   Field,
@@ -140,13 +141,21 @@ export default function ProfilePage() {
       description="Hier findest du deine Profildaten sowie deine erstellten und beigetretenen Events."
     >
       <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <Stack gap="2">
-          <Text>
-            <Text as="span" fontWeight="semibold">
-              Benutzername:
-            </Text>{" "}
-            {currentUser.username}
-          </Text>
+        <Stack gap="3">
+          <Stack direction="row" align="center" gap="2" flexWrap="wrap">
+            <Text>
+              <Text as="span" fontWeight="semibold">
+                Benutzername:
+              </Text>{" "}
+              {currentUser.username}
+            </Text>
+
+            {currentUser.is_admin && (
+              <Badge colorPalette="purple" variant="subtle">
+                Admin
+              </Badge>
+            )}
+          </Stack>
 
           <Text>
             <Text as="span" fontWeight="semibold">
