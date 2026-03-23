@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Button,
   Checkbox,
   Field,
-  Heading,
   Input,
-  Link,
   SimpleGrid,
   Stack,
-  Text,
 } from "@chakra-ui/react";
 
 import EventCard from "../components/events/EventCard";
@@ -27,10 +23,9 @@ export default function EventsPage() {
   const [error, setError] = useState("");
 
   const [q, setQ] = useState("");
-  const [location, setLocation] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [onlyFuture, setOnlyFuture] = useState(false);
+  const [onlyFuture, setOnlyFuture] = useState(true); // ✅ default TRUE
 
   async function loadEvents() {
     setIsLoading(true);
@@ -39,7 +34,6 @@ export default function EventsPage() {
     try {
       const data = await getEvents({
         q: q || undefined,
-        location: location || undefined,
         date_from: dateFrom || undefined,
         date_to: dateTo || undefined,
         only_future: onlyFuture || undefined,
@@ -57,96 +51,86 @@ export default function EventsPage() {
     }
   }
 
+  // ✅ INITIAL LOAD
   useEffect(() => {
     loadEvents();
   }, []);
 
-  async function handleFilterSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    await loadEvents();
-  }
+  // ✅ AUTO SEARCH (DEBOUNCE)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      loadEvents();
+    }, 400); // leicht verzögert für UX
+
+    return () => clearTimeout(timeout);
+  }, [q, dateFrom, dateTo, onlyFuture]);
 
   function resetFilters() {
     setQ("");
-    setLocation("");
     setDateFrom("");
     setDateTo("");
-    setOnlyFuture(false);
+    setOnlyFuture(true); // wichtig: zurück zum Default
   }
 
   return (
     <PageContainer
       title="Events"
-      description="Entdecke Events, filtere nach Ort und Lineup und sieh direkt, wer schon dabei ist."
+      description="Entdecke Events und sieh direkt, wer schon dabei ist."
     >
       <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-        <form onSubmit={handleFilterSubmit}>
-          <Stack gap="4">
-            <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-              <Field.Root>
-                <Field.Label>Suche</Field.Label>
-                <Input
-                  value={q}
-                  onChange={(event) => setQ(event.target.value)}
-                  placeholder="Titel, Line-up oder Ort"
-                />
-              </Field.Root>
+        <Stack gap="4">
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
+            {/* ✅ TEXT SUCHE */}
+            <Field.Root>
+              <Field.Label>Suche</Field.Label>
+              <Input
+                value={q}
+                onChange={(event) => setQ(event.target.value)}
+                placeholder="Titel, Line-up oder Ort"
+              />
+            </Field.Root>
 
-              <Field.Root>
-                <Field.Label>Ort</Field.Label>
-                <Input
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  placeholder="z. B. Berlin"
-                />
-              </Field.Root>
+            {/* ✅ DATE FROM */}
+            <Field.Root>
+              <Field.Label>Beginn ab</Field.Label>
+              <Input
+                type="datetime-local"
+                value={dateFrom || ""}
+                onChange={(event) => setDateFrom(event.target.value)}
+              />
+            </Field.Root>
 
-              <Field.Root>
-                <Field.Label>Beginn ab</Field.Label>
-                <Input
-                  type="datetime-local"
-                  value={dateFrom}
-                  onChange={(event) => setDateFrom(event.target.value)}
-                />
-              </Field.Root>
+            {/* ✅ DATE TO */}
+            <Field.Root>
+              <Field.Label>Beginn bis</Field.Label>
+              <Input
+                type="datetime-local"
+                value={dateTo || ""}
+                onChange={(event) => setDateTo(event.target.value)}
+              />
+            </Field.Root>
+          </SimpleGrid>
 
-              <Field.Root>
-                <Field.Label>Beginn bis</Field.Label>
-                <Input
-                  type="datetime-local"
-                  value={dateTo}
-                  onChange={(event) => setDateTo(event.target.value)}
-                />
-              </Field.Root>
-            </SimpleGrid>
-
-            <Checkbox.Root
-              checked={onlyFuture}
-              onCheckedChange={(details) =>
-                setOnlyFuture(Boolean(details.checked))
-              }
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label>Nur zukünftige Events</Checkbox.Label>
-            </Checkbox.Root>
-
-            <Stack direction={{ base: "column", sm: "row" }} gap="3">
-              <Button type="submit" colorPalette="teal" loading={isLoading}>
-                Filter anwenden
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={resetFilters}
-                disabled={isLoading}
-              >
-                Filter zurücksetzen
-              </Button>
-            </Stack>
-          </Stack>
-        </form>
+          {/* ✅ ONLY FUTURE */}
+          <Checkbox.Root
+            checked={onlyFuture}
+            onCheckedChange={(details) =>
+              setOnlyFuture(Boolean(details.checked))
+            }
+          >
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+            <Checkbox.Label>Nur zukünftige Events</Checkbox.Label>
+          </Checkbox.Root>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={resetFilters}
+            disabled={isLoading && !q && !dateFrom && !dateTo}
+          >
+            Filter zurücksetzen
+          </Button>
+        </Stack>
       </Box>
 
       {isLoading ? (
