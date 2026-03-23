@@ -1,24 +1,28 @@
-import { createSystem, defaultConfig } from "@chakra-ui/react";
+import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react";
 
-const config = {
+const config = defineConfig({
   theme: {
     tokens: {
+      fonts: {
+        heading: { value: "'preconnect', sans-serif" },
+        body: { value: "'preconnect', sans-serif" },
+      },
       colors: {
         brand: {
-          50: { value: "#e6f4f1" },
-          100: { value: "#b3ddd3" },
-          200: { value: "#80c5b5" },
-          300: { value: "#4dad97" },
-          400: { value: "#1a9679" },
+          50: { value: "#f8fbd9" },
+          100: { value: "#f0f7ad" },
+          200: { value: "#e8f381" },
+          300: { value: "#dff055" },
+          400: { value: "#d6ec39" },
           500: { value: "#DBF227" },
-          600: { value: "#00664c" },
-          700: { value: "#004c39" },
-          800: { value: "#003326" },
-          900: { value: "#001a13" },
+          600: { value: "#bfd11f" },
+          700: { value: "#9faa19" },
+          800: { value: "#7f8413" },
+          900: { value: "#5f620d" },
         },
       },
     },
   },
-};
+});
 
 export const system = createSystem(defaultConfig, config);

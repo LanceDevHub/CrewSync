@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Flex,
+  Image,
   Spacer,
   Stack,
   Text,
@@ -10,6 +11,7 @@ import {
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import type { User } from "../../types/user";
+import logo from "../../assets/logo/default_border.svg";
 
 type NavbarProps = {
   currentUser: User | null;
@@ -62,11 +64,41 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
       )}
 
       <Box>
-        <Text asChild fontWeight="bold" fontSize="lg" color="teal.600">
-          <RouterLink to={currentUser ? "/events" : "/login"}>
-            Music Events
-          </RouterLink>
-        </Text>
+        <RouterLink to={currentUser ? "/events" : "/login"}>
+          <Stack direction="row" gap="3" align="center">
+            <Image
+              src={logo}
+              alt="CrewSync Logo"
+              h="25px"
+              w="100px"
+              objectFit="contain"
+              style={{
+                filter: `
+      drop-shadow(1px 0 0 black)
+      drop-shadow(-1px 0 0 black)
+      drop-shadow(0 1px 0 black)
+      drop-shadow(0 -1px 0 black)
+    `,
+              }}
+            />
+            <Text
+              fontWeight="bold"
+              fontSize="lg"
+              color="brand.500"
+              objectFit="contain"
+              style={{
+                filter: `
+      drop-shadow(1px 0 0 black)
+      drop-shadow(-1px 0 0 black)
+      drop-shadow(0 1px 0 black)
+      drop-shadow(0 -1px 0 black)
+    `,
+              }}
+            >
+              Events
+            </Text>
+          </Stack>
+        </RouterLink>
       </Box>
 
       <Spacer />
