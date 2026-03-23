@@ -1,13 +1,14 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 
 class EventCreate(BaseModel):
     title: str = Field(min_length=3, max_length=150)
-    description: str = Field(min_length=10, max_length=2000)
+    lineup: str = Field(min_length=3, max_length=5000)
     location: str = Field(min_length=2, max_length=255)
     genre: str | None = Field(default=None, max_length=100)
+    official_link: HttpUrl | None = None
     start_datetime: datetime
     end_datetime: datetime | None = None
 
@@ -23,9 +24,10 @@ class EventRead(BaseModel):
     creator_id: int
     creator_username: str
     title: str
-    description: str
+    lineup: str
     location: str
     genre: str | None
+    official_link: str | None
     start_datetime: datetime
     end_datetime: datetime | None
     created_at: datetime
@@ -39,9 +41,10 @@ class EventRead(BaseModel):
 
 class EventUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=3, max_length=150)
-    description: str | None = Field(default=None, min_length=10, max_length=2000)
+    lineup: str | None = Field(default=None, min_length=3, max_length=5000)
     location: str | None = Field(default=None, min_length=2, max_length=255)
     genre: str | None = Field(default=None, max_length=100)
+    official_link: HttpUrl | None = None
     start_datetime: datetime | None = None
     end_datetime: datetime | None = None
 

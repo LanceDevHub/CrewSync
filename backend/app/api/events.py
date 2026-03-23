@@ -26,9 +26,10 @@ def serialize_event(
         creator_id=event.creator_id,
         creator_username=creator_username,
         title=event.title,
-        description=event.description,
+        lineup=event.lineup,
         location=event.location,
         genre=event.genre,
+        official_link=event.official_link,
         start_datetime=event.start_datetime,
         end_datetime=event.end_datetime,
         created_at=event.created_at,
@@ -55,9 +56,10 @@ def create_event(
     new_event = Event(
         creator_id=current_user.id,
         title=event_data.title,
-        description=event_data.description,
+        lineup=event_data.lineup,
         location=event_data.location,
         genre=event_data.genre,
+        official_link=str(event_data.official_link) if event_data.official_link else None,
         start_datetime=event_data.start_datetime,
         end_datetime=event_data.end_datetime,
     )
@@ -86,8 +88,10 @@ def list_events(
         query = query.where(
             or_(
                 Event.title.ilike(search_term),
-                Event.description.ilike(search_term),
+                Event.lineup.ilike(search_term),
                 Event.location.ilike(search_term),
+                Event.genre.ilike(search_term),
+                Event.official_link.ilike(search_term),
             )
         )
 
@@ -258,6 +262,9 @@ def update_event(
         )
 
     update_data = event_data.model_dump(exclude_unset=True)
+
+    if "official_link" in update_data and update_data["official_link"] is not None:
+        update_data["official_link"] = str(update_data["official_link"])
 
     for field, value in update_data.items():
         setattr(event, field, value)
