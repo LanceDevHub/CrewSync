@@ -7,6 +7,7 @@ import {
   Field,
   Heading,
   Input,
+  SimpleGrid,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -21,6 +22,8 @@ import AppButton from "../components/ui/AppButton";
 
 import type { Event } from "../types/event";
 import type { User } from "../types/user";
+
+const EVENTS_STEP = 6;
 
 function sortByStartAscending(events: Event[]) {
   return [...events].sort(
@@ -65,9 +68,14 @@ export default function ProfilePage() {
   const [createdSearch, setCreatedSearch] = useState("");
   const [joinedSearch, setJoinedSearch] = useState("");
 
+  const [showJoinedSection, setShowJoinedSection] = useState(true);
   const [showCreatedSection, setShowCreatedSection] = useState(false);
+
   const [joinedView, setJoinedView] = useState<EventSectionView>("upcoming");
   const [createdView, setCreatedView] = useState<EventSectionView>("upcoming");
+
+  const [visibleJoinedCount, setVisibleJoinedCount] = useState(EVENTS_STEP);
+  const [visibleCreatedCount, setVisibleCreatedCount] = useState(EVENTS_STEP);
 
   useEffect(() => {
     async function loadProfileData() {
@@ -115,6 +123,14 @@ export default function ProfilePage() {
     return sortByStartAscending(filterEvents(filtered, createdSearch));
   }, [createdEvents, createdSearch]);
 
+  useEffect(() => {
+    setVisibleJoinedCount(EVENTS_STEP);
+  }, [joinedSearch, joinedView, joinedEvents]);
+
+  useEffect(() => {
+    setVisibleCreatedCount(EVENTS_STEP);
+  }, [createdSearch, createdView, createdEvents]);
+
   if (isLoading) return <LoadingState message="Profil wird geladen..." />;
   if (error) return <EmptyState message={error} />;
   if (!currentUser) return <EmptyState message="Nicht eingeloggt." />;
@@ -124,6 +140,44 @@ export default function ProfilePage() {
 
   const visibleCreatedEvents =
     createdView === "upcoming" ? upcomingCreatedEvents : pastCreatedEvents;
+
+  const joinedEventsToRender = visibleJoinedEvents.slice(0, visibleJoinedCount);
+  const createdEventsToRender = visibleCreatedEvents.slice(
+    0,
+    visibleCreatedCount,
+  );
+
+  const showJoinedMoreButton =
+    visibleJoinedEvents.length > EVENTS_STEP &&
+    visibleJoinedCount < visibleJoinedEvents.length;
+
+  const showJoinedLessButton = visibleJoinedCount > EVENTS_STEP;
+
+  const showCreatedMoreButton =
+    visibleCreatedEvents.length > EVENTS_STEP &&
+    visibleCreatedCount < visibleCreatedEvents.length;
+
+  const showCreatedLessButton = visibleCreatedCount > EVENTS_STEP;
+
+  function handleShowMoreJoined() {
+    setVisibleJoinedCount((prev) =>
+      Math.min(prev + EVENTS_STEP, visibleJoinedEvents.length),
+    );
+  }
+
+  function handleShowLessJoined() {
+    setVisibleJoinedCount((prev) => Math.max(EVENTS_STEP, prev - EVENTS_STEP));
+  }
+
+  function handleShowMoreCreated() {
+    setVisibleCreatedCount((prev) =>
+      Math.min(prev + EVENTS_STEP, visibleCreatedEvents.length),
+    );
+  }
+
+  function handleShowLessCreated() {
+    setVisibleCreatedCount((prev) => Math.max(EVENTS_STEP, prev - EVENTS_STEP));
+  }
 
   return (
     <PageContainer
@@ -175,43 +229,106 @@ export default function ProfilePage() {
         borderColor="border"
       >
         <Stack gap="5">
-          <Heading size="md">
-            Beigetretene Events ({joinedEvents.length})
-          </Heading>
-
-          <Field.Root maxW="md">
-            <Field.Label>Suche</Field.Label>
-            <Input
-              value={joinedSearch}
-              onChange={(e) => setJoinedSearch(e.target.value)}
-            />
-          </Field.Root>
-
-          <Stack direction="row" gap="2">
-            <AppButton
-              appVariant={joinedView === "upcoming" ? "primary" : "secondary"}
-              onClick={() => setJoinedView("upcoming")}
-            >
-              Aktuell ({upcomingJoinedEvents.length})
-            </AppButton>
+          <Stack
+            direction={{ base: "column", sm: "row" }}
+            justify="space-between"
+            align={{ base: "start", sm: "center" }}
+            gap="3"
+          >
+            <Heading size="md">
+              Beigetretene Events ({joinedEvents.length})
+            </Heading>
 
             <AppButton
-              appVariant={joinedView === "past" ? "primary" : "secondary"}
-              onClick={() => setJoinedView("past")}
+              appVariant="secondary"
+              onClick={() => setShowJoinedSection((prev) => !prev)}
+              alignSelf={{ base: "stretch", sm: "auto" }}
             >
-              Vergangen ({pastJoinedEvents.length})
+              {showJoinedSection ? "Ausblenden" : "Anzeigen"}
             </AppButton>
           </Stack>
 
-          <Stack gap="6">
-            {visibleJoinedEvents.length === 0 ? (
-              <EmptyState message="Keine Events gefunden." />
-            ) : (
-              visibleJoinedEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))
-            )}
-          </Stack>
+          <Collapsible.Root open={showJoinedSection}>
+            <Collapsible.Content>
+              <Stack gap="5">
+                <Field.Root maxW="md">
+                  <Field.Label>Suche</Field.Label>
+                  <Input
+                    value={joinedSearch}
+                    onChange={(e) => setJoinedSearch(e.target.value)}
+                    color="text"
+                    bg="surface"
+                    borderColor="border"
+                    _placeholder={{ color: "textMuted" }}
+                    _focusVisible={{ borderColor: "brandAccent" }}
+                  />
+                </Field.Root>
+
+                <Stack direction="row" gap="2" flexWrap="wrap">
+                  <AppButton
+                    appVariant={
+                      joinedView === "upcoming" ? "primary" : "secondary"
+                    }
+                    onClick={() => setJoinedView("upcoming")}
+                  >
+                    Aktuell ({upcomingJoinedEvents.length})
+                  </AppButton>
+
+                  <AppButton
+                    appVariant={joinedView === "past" ? "primary" : "secondary"}
+                    onClick={() => setJoinedView("past")}
+                  >
+                    Vergangen ({pastJoinedEvents.length})
+                  </AppButton>
+                </Stack>
+
+                {visibleJoinedEvents.length === 0 ? (
+                  <EmptyState message="Keine Events gefunden." />
+                ) : (
+                  <Stack gap="6">
+                    <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
+                      {joinedEventsToRender.map((event) => (
+                        <EventCard key={event.id} event={event} />
+                      ))}
+                    </SimpleGrid>
+
+                    {(showJoinedLessButton || showJoinedMoreButton) && (
+                      <SimpleGrid
+                        columns={{
+                          base: 1,
+                          sm:
+                            showJoinedLessButton && showJoinedMoreButton
+                              ? 2
+                              : 1,
+                        }}
+                        gap="3"
+                      >
+                        {showJoinedLessButton && (
+                          <AppButton
+                            type="button"
+                            appVariant="secondary"
+                            onClick={handleShowLessJoined}
+                          >
+                            Weniger anzeigen
+                          </AppButton>
+                        )}
+
+                        {showJoinedMoreButton && (
+                          <AppButton
+                            type="button"
+                            appVariant="primary"
+                            onClick={handleShowMoreJoined}
+                          >
+                            Mehr anzeigen
+                          </AppButton>
+                        )}
+                      </SimpleGrid>
+                    )}
+                  </Stack>
+                )}
+              </Stack>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </Stack>
       </Box>
 
@@ -252,6 +369,11 @@ export default function ProfilePage() {
                   <Input
                     value={createdSearch}
                     onChange={(e) => setCreatedSearch(e.target.value)}
+                    color="text"
+                    bg="surface"
+                    borderColor="border"
+                    _placeholder={{ color: "textMuted" }}
+                    _focusVisible={{ borderColor: "brandAccent" }}
                   />
                 </Field.Root>
 
@@ -275,15 +397,50 @@ export default function ProfilePage() {
                   </AppButton>
                 </Stack>
 
-                <Stack gap="6">
-                  {visibleCreatedEvents.length === 0 ? (
-                    <EmptyState message="Keine Events gefunden." />
-                  ) : (
-                    visibleCreatedEvents.map((event) => (
-                      <EventCard key={event.id} event={event} />
-                    ))
-                  )}
-                </Stack>
+                {visibleCreatedEvents.length === 0 ? (
+                  <EmptyState message="Keine Events gefunden." />
+                ) : (
+                  <Stack gap="6">
+                    <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
+                      {createdEventsToRender.map((event) => (
+                        <EventCard key={event.id} event={event} />
+                      ))}
+                    </SimpleGrid>
+
+                    {(showCreatedLessButton || showCreatedMoreButton) && (
+                      <SimpleGrid
+                        columns={{
+                          base: 1,
+                          sm:
+                            showCreatedLessButton && showCreatedMoreButton
+                              ? 2
+                              : 1,
+                        }}
+                        gap="3"
+                      >
+                        {showCreatedLessButton && (
+                          <AppButton
+                            type="button"
+                            appVariant="secondary"
+                            onClick={handleShowLessCreated}
+                          >
+                            Weniger anzeigen
+                          </AppButton>
+                        )}
+
+                        {showCreatedMoreButton && (
+                          <AppButton
+                            type="button"
+                            appVariant="primary"
+                            onClick={handleShowMoreCreated}
+                          >
+                            Mehr anzeigen
+                          </AppButton>
+                        )}
+                      </SimpleGrid>
+                    )}
+                  </Stack>
+                )}
               </Stack>
             </Collapsible.Content>
           </Collapsible.Root>
