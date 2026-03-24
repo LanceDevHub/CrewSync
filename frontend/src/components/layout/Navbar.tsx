@@ -1,12 +1,10 @@
 import { Badge, Box, Flex, Image, Spacer, Stack, Text } from "@chakra-ui/react";
-
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import type { User } from "../../types/user";
 import logo from "../../assets/logo/default.svg";
 
 import AppButton from "../ui/AppButton";
-import ColorModeToggle from "../ui/ColorModeToggle";
 import { ColorModeButton } from "../ui/color-mode";
 
 type NavbarProps = {
