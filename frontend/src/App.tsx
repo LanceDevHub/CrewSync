@@ -85,21 +85,42 @@ export default function App() {
     return <p>Loading...</p>;
   }
 
+  const isLoggedIn = currentUser !== null;
+
   return (
     <AppLayout currentUser={currentUser} onLogout={handleLogout}>
       {authError && <p style={{ color: "red" }}>{authError}</p>}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/events" replace />} />
         <Route
-          path="/login"
-          element={<LoginPage onLoginSuccess={setCurrentUser} />}
+          path="/"
+          element={<Navigate to={isLoggedIn ? "/events" : "/login"} replace />}
         />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/:id" element={<EventDetailPage />} />
-        <Route path="/events/new" element={<CreateEventPage />} />
-        <Route path="/me" element={<ProfilePage />} />
+
+        {!isLoggedIn ? (
+          <>
+            <Route
+              path="/login"
+              element={<LoginPage onLoginSuccess={setCurrentUser} />}
+            />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </>
+        ) : (
+          <>
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/events/new" element={<CreateEventPage />} />
+            <Route path="/me" element={<ProfilePage />} />
+
+            <Route path="/login" element={<Navigate to="/events" replace />} />
+            <Route
+              path="/register"
+              element={<Navigate to="/events" replace />}
+            />
+            <Route path="*" element={<Navigate to="/events" replace />} />
+          </>
+        )}
       </Routes>
     </AppLayout>
   );
