@@ -169,52 +169,8 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
               </Box>
             </Box>
           ) : (
-            <Box position="relative" w="full">
-              <Flex w="full" align="center" justify="space-between" gap="2">
-                <HStack gap="2" flex="1" maxW="42%">
-                  <Box flex="1">
-                    <NavLinkButton
-                      to="/login"
-                      label="Login"
-                      isActive={location.pathname === "/login"}
-                      fullWidth
-                    />
-                  </Box>
-                </HStack>
-
-                <HStack gap="2" flexShrink={0} justify="flex-end" maxW="42%">
-                  <Box w="110px">
-                    <AppButton
-                      asChild
-                      appVariant={
-                        location.pathname === "/register"
-                          ? "primary"
-                          : "secondary"
-                      }
-                      bg={
-                        location.pathname === "/register"
-                          ? "mutedBg"
-                          : "transparent"
-                      }
-                      px={{ base: "2", sm: "3" }}
-                      h="32px"
-                      fontSize="sm"
-                      width="full"
-                    >
-                      <RouterLink to="/register">Register</RouterLink>
-                    </AppButton>
-                  </Box>
-
-                  <ColorModeButton />
-                </HStack>
-              </Flex>
-
-              <Box
-                position="absolute"
-                left="50%"
-                top="50%"
-                transform="translate(-50%, -50%)"
-              >
+            <Box w="full">
+              <Flex justify="center" mb="3">
                 <RouterLink to="/login">
                   <Image
                     src={logoSrc}
@@ -225,7 +181,42 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
                     style={logoStyle}
                   />
                 </RouterLink>
-              </Box>
+              </Flex>
+
+              <HStack w="full" gap="2" align="center">
+                <Box flex="1">
+                  <NavLinkButton
+                    to="/login"
+                    label="Login"
+                    isActive={location.pathname === "/login"}
+                    fullWidth
+                  />
+                </Box>
+
+                <Box flex="1">
+                  <AppButton
+                    asChild
+                    appVariant={
+                      location.pathname === "/register"
+                        ? "primary"
+                        : "secondary"
+                    }
+                    bg={
+                      location.pathname === "/register"
+                        ? "mutedBg"
+                        : "transparent"
+                    }
+                    px={{ base: "2", sm: "3" }}
+                    h="32px"
+                    fontSize="sm"
+                    width="full"
+                  >
+                    <RouterLink to="/register">Register</RouterLink>
+                  </AppButton>
+                </Box>
+
+                <ColorModeButton />
+              </HStack>
             </Box>
           )}
         </Box>
