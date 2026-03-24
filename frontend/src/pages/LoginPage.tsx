@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
-  Button,
   Field,
   Heading,
   Input,
@@ -13,6 +12,7 @@ import {
 
 import { loginUser } from "../api/auth";
 import type { User } from "../types/user";
+import AppButton from "../components/ui/AppButton";
 
 type LoginPageProps = {
   onLoginSuccess: (user: User) => void;
@@ -44,7 +44,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Login failed.");
+        setError("Login fehlgeschlagen.");
       }
     } finally {
       setIsLoading(false);
@@ -57,14 +57,16 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
       mx="auto"
       mt="10"
       p="8"
-      bg="white"
-      borderRadius="lg"
-      boxShadow="md"
+      bg="surface"
+      borderRadius="xl"
+      boxShadow="sm"
+      borderWidth="1px"
+      borderColor="border"
     >
       <Stack gap="6">
         <Box>
           <Heading size="lg">Login</Heading>
-          <Text color="gray.600" mt="2">
+          <Text color="textMuted" mt="2">
             Melde dich an, um Events zu sehen und daran teilzunehmen.
           </Text>
         </Box>
@@ -99,9 +101,9 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
               </Alert.Root>
             )}
 
-            <Button type="submit" colorPalette="teal" loading={isLoading}>
+            <AppButton type="submit" appVariant="primary" loading={isLoading}>
               Login
-            </Button>
+            </AppButton>
           </Stack>
         </form>
       </Stack>

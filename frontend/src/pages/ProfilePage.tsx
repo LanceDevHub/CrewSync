@@ -3,7 +3,6 @@ import {
   Avatar,
   Badge,
   Box,
-  Button,
   Collapsible,
   Field,
   Heading,
@@ -18,6 +17,8 @@ import EmptyState from "../components/common/EmptyState";
 import LoadingState from "../components/common/LoadingState";
 import PageContainer from "../components/common/PageContainer";
 import EventCard from "../components/events/EventCard";
+import AppButton from "../components/ui/AppButton";
+
 import type { Event } from "../types/event";
 import type { User } from "../types/user";
 
@@ -114,17 +115,9 @@ export default function ProfilePage() {
     return sortByStartAscending(filterEvents(filtered, createdSearch));
   }, [createdEvents, createdSearch]);
 
-  if (isLoading) {
-    return <LoadingState message="Profil wird geladen..." />;
-  }
-
-  if (error) {
-    return <EmptyState message={error} />;
-  }
-
-  if (!currentUser) {
-    return <EmptyState message="Nicht eingeloggt." />;
-  }
+  if (isLoading) return <LoadingState message="Profil wird geladen..." />;
+  if (error) return <EmptyState message={error} />;
+  if (!currentUser) return <EmptyState message="Nicht eingeloggt." />;
 
   const visibleJoinedEvents =
     joinedView === "upcoming" ? upcomingJoinedEvents : pastJoinedEvents;
@@ -137,12 +130,16 @@ export default function ProfilePage() {
       title="Mein Profil"
       description="Hier findest du deine Profildaten sowie deine beigetretenen und erstellten Events."
     >
-      <Box bg="white" p="6" borderRadius="xl" boxShadow="sm" borderWidth="1px">
-        <Stack
-          direction={{ base: "column", md: "row" }}
-          gap="5"
-          align={{ base: "start", md: "center" }}
-        >
+      {/* HEADER */}
+      <Box
+        bg="surface"
+        p="6"
+        borderRadius="xl"
+        boxShadow="sm"
+        borderWidth="1px"
+        borderColor="border"
+      >
+        <Stack direction={{ base: "column", md: "row" }} gap="5">
           <Avatar.Root size="2xl">
             <Avatar.Fallback
               name={`${currentUser.first_name} ${currentUser.last_name}`}
@@ -150,11 +147,7 @@ export default function ProfilePage() {
           </Avatar.Root>
 
           <Stack gap="2">
-            <Stack
-              direction={{ base: "column", sm: "row" }}
-              align={{ base: "start", sm: "center" }}
-              gap="2"
-            >
+            <Stack direction="row" align="center" gap="2">
               <Heading size="lg">
                 {currentUser.first_name} {currentUser.last_name}
               </Heading>
@@ -166,152 +159,131 @@ export default function ProfilePage() {
               )}
             </Stack>
 
-            <Text color="gray.600" fontSize="md">
-              @{currentUser.username}
-            </Text>
-
-            <Text color="gray.600">{currentUser.email}</Text>
+            <Text color="textMuted">@{currentUser.username}</Text>
+            <Text color="textMuted">{currentUser.email}</Text>
           </Stack>
         </Stack>
       </Box>
 
-      <Box bg="white" p="6" borderRadius="xl" boxShadow="sm" borderWidth="1px">
+      {/* JOINED EVENTS */}
+      <Box
+        bg="surface"
+        p="6"
+        borderRadius="xl"
+        boxShadow="sm"
+        borderWidth="1px"
+        borderColor="border"
+      >
         <Stack gap="5">
           <Heading size="md">
             Beigetretene Events ({joinedEvents.length})
           </Heading>
 
-          <Box maxW="md">
-            <Field.Root>
-              <Field.Label>Suche in beigetretenen Events</Field.Label>
-              <Input
-                placeholder="Titel, Line-up, Ort oder Creator"
-                value={joinedSearch}
-                onChange={(event) => setJoinedSearch(event.target.value)}
-              />
-            </Field.Root>
-          </Box>
+          <Field.Root maxW="md">
+            <Field.Label>Suche</Field.Label>
+            <Input
+              value={joinedSearch}
+              onChange={(e) => setJoinedSearch(e.target.value)}
+            />
+          </Field.Root>
 
-          <Stack direction="row" gap="2" flexWrap="wrap">
-            <Button
-              size="sm"
-              colorPalette="teal"
-              variant={joinedView === "upcoming" ? "solid" : "outline"}
+          <Stack direction="row" gap="2">
+            <AppButton
+              appVariant={joinedView === "upcoming" ? "primary" : "secondary"}
               onClick={() => setJoinedView("upcoming")}
             >
               Aktuell ({upcomingJoinedEvents.length})
-            </Button>
+            </AppButton>
 
-            <Button
-              size="sm"
-              colorPalette="teal"
-              variant={joinedView === "past" ? "solid" : "outline"}
+            <AppButton
+              appVariant={joinedView === "past" ? "primary" : "secondary"}
               onClick={() => setJoinedView("past")}
             >
               Vergangen ({pastJoinedEvents.length})
-            </Button>
+            </AppButton>
           </Stack>
 
-          <Box>
-            <Heading size="sm" mb="4">
-              {joinedView === "upcoming"
-                ? `Aktuelle beigetretene Events (${upcomingJoinedEvents.length})`
-                : `Vergangene beigetretene Events (${pastJoinedEvents.length})`}
-            </Heading>
-
+          <Stack gap="6">
             {visibleJoinedEvents.length === 0 ? (
-              <EmptyState
-                message={
-                  joinedView === "upcoming"
-                    ? "Du hast keine aktuellen beigetretenen Events."
-                    : "Du hast keine vergangenen beigetretenen Events."
-                }
-              />
+              <EmptyState message="Keine Events gefunden." />
             ) : (
-              <Stack gap="6">
-                {visibleJoinedEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </Stack>
+              visibleJoinedEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))
             )}
-          </Box>
+          </Stack>
         </Stack>
       </Box>
 
-      <Box bg="white" p="6" borderRadius="xl" boxShadow="sm" borderWidth="1px">
+      {/* CREATED EVENTS */}
+      <Box
+        bg="surface"
+        p="6"
+        borderRadius="xl"
+        boxShadow="sm"
+        borderWidth="1px"
+        borderColor="border"
+      >
         <Stack gap="5">
-          <Button
-            variant="ghost"
-            justifyContent="space-between"
-            width="full"
-            px="0"
-            onClick={() => setShowCreatedSection((prev) => !prev)}
+          <Stack
+            direction={{ base: "column", sm: "row" }}
+            justify="space-between"
+            align={{ base: "start", sm: "center" }}
+            gap="3"
           >
             <Heading size="md">
               Erstellte Events ({createdEvents.length})
             </Heading>
-            <Text fontSize="xl" lineHeight="1">
-              {showCreatedSection ? "−" : "+"}
-            </Text>
-          </Button>
+
+            <AppButton
+              appVariant="secondary"
+              onClick={() => setShowCreatedSection((prev) => !prev)}
+              alignSelf={{ base: "stretch", sm: "auto" }}
+            >
+              {showCreatedSection ? "Ausblenden" : "Anzeigen"}
+            </AppButton>
+          </Stack>
 
           <Collapsible.Root open={showCreatedSection}>
             <Collapsible.Content>
-              <Stack gap="5" pt="2">
-                <Box maxW="md">
-                  <Field.Root>
-                    <Field.Label>Suche in erstellten Events</Field.Label>
-                    <Input
-                      placeholder="Titel, Line-up oder Ort"
-                      value={createdSearch}
-                      onChange={(event) => setCreatedSearch(event.target.value)}
-                    />
-                  </Field.Root>
-                </Box>
+              <Stack gap="5">
+                <Field.Root maxW="md">
+                  <Field.Label>Suche</Field.Label>
+                  <Input
+                    value={createdSearch}
+                    onChange={(e) => setCreatedSearch(e.target.value)}
+                  />
+                </Field.Root>
 
                 <Stack direction="row" gap="2" flexWrap="wrap">
-                  <Button
-                    size="sm"
-                    colorPalette="teal"
-                    variant={createdView === "upcoming" ? "solid" : "outline"}
+                  <AppButton
+                    appVariant={
+                      createdView === "upcoming" ? "primary" : "secondary"
+                    }
                     onClick={() => setCreatedView("upcoming")}
                   >
                     Aktuell ({upcomingCreatedEvents.length})
-                  </Button>
+                  </AppButton>
 
-                  <Button
-                    size="sm"
-                    colorPalette="teal"
-                    variant={createdView === "past" ? "solid" : "outline"}
+                  <AppButton
+                    appVariant={
+                      createdView === "past" ? "primary" : "secondary"
+                    }
                     onClick={() => setCreatedView("past")}
                   >
                     Vergangen ({pastCreatedEvents.length})
-                  </Button>
+                  </AppButton>
                 </Stack>
 
-                <Box>
-                  <Heading size="sm" mb="4">
-                    {createdView === "upcoming"
-                      ? `Aktuelle erstellte Events (${upcomingCreatedEvents.length})`
-                      : `Vergangene erstellte Events (${pastCreatedEvents.length})`}
-                  </Heading>
-
+                <Stack gap="6">
                   {visibleCreatedEvents.length === 0 ? (
-                    <EmptyState
-                      message={
-                        createdView === "upcoming"
-                          ? "Du hast keine aktuellen erstellten Events."
-                          : "Du hast keine vergangenen erstellten Events."
-                      }
-                    />
+                    <EmptyState message="Keine Events gefunden." />
                   ) : (
-                    <Stack gap="6">
-                      {visibleCreatedEvents.map((event) => (
-                        <EventCard key={event.id} event={event} />
-                      ))}
-                    </Stack>
+                    visibleCreatedEvents.map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))
                   )}
-                </Box>
+                </Stack>
               </Stack>
             </Collapsible.Content>
           </Collapsible.Root>

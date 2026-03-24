@@ -16,9 +16,13 @@ export default function PageContainer({
     <Stack gap="8">
       {(title || description) && (
         <Box>
-          {title && <Heading size="lg">{title}</Heading>}
+          {title && (
+            <Heading size="lg" color="text">
+              {title}
+            </Heading>
+          )}
           {description && (
-            <Text color="gray.600" mt="2">
+            <Text color="textMuted" mt="2">
               {description}
             </Text>
           )}

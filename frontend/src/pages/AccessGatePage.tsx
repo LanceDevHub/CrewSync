@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Alert,
   Box,
-  Button,
   Field,
   Heading,
   Input,
@@ -11,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 
 import { unlockSiteAccess } from "../api/siteAccess";
+import AppButton from "../components/ui/AppButton";
 
 type AccessGatePageProps = {
   onAccessGranted: () => void;
@@ -48,14 +48,16 @@ export default function AccessGatePage({
       mx="auto"
       mt="16"
       p="8"
-      bg="white"
-      borderRadius="lg"
-      boxShadow="md"
+      bg="surface"
+      borderRadius="xl"
+      boxShadow="sm"
+      borderWidth="1px"
+      borderColor="border"
     >
       <Stack gap="6">
         <Box>
           <Heading size="lg">Zugang geschützt</Heading>
-          <Text color="gray.600" mt="2">
+          <Text color="textMuted" mt="2">
             Bitte gib das Masterpasswort ein, um die Website zu betreten.
           </Text>
         </Box>
@@ -81,9 +83,9 @@ export default function AccessGatePage({
               </Alert.Root>
             )}
 
-            <Button type="submit" colorPalette="teal" loading={isLoading}>
+            <AppButton type="submit" appVariant="primary" loading={isLoading}>
               Website entsperren
-            </Button>
+            </AppButton>
           </Stack>
         </form>
       </Stack>

@@ -17,6 +17,8 @@ import PageContainer from "../components/common/PageContainer";
 import { getEvents } from "../api/events";
 import type { Event } from "../types/event";
 
+import AppButton from "../components/ui/AppButton";
+
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,16 +53,14 @@ export default function EventsPage() {
     }
   }
 
-  // ✅ INITIAL LOAD
   useEffect(() => {
     loadEvents();
   }, []);
 
-  // ✅ AUTO SEARCH (DEBOUNCE)
   useEffect(() => {
     const timeout = setTimeout(() => {
       loadEvents();
-    }, 400); // leicht verzögert für UX
+    }, 400);
 
     return () => clearTimeout(timeout);
   }, [q, dateFrom, dateTo, onlyFuture]);
@@ -69,7 +69,7 @@ export default function EventsPage() {
     setQ("");
     setDateFrom("");
     setDateTo("");
-    setOnlyFuture(true); // wichtig: zurück zum Default
+    setOnlyFuture(true);
   }
 
   return (
@@ -80,7 +80,6 @@ export default function EventsPage() {
       <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
         <Stack gap="4">
           <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-            {/* ✅ TEXT SUCHE */}
             <Field.Root>
               <Field.Label>Suche</Field.Label>
               <Input
@@ -90,7 +89,6 @@ export default function EventsPage() {
               />
             </Field.Root>
 
-            {/* ✅ DATE FROM */}
             <Field.Root>
               <Field.Label>Beginn ab</Field.Label>
               <Input
@@ -100,7 +98,6 @@ export default function EventsPage() {
               />
             </Field.Root>
 
-            {/* ✅ DATE TO */}
             <Field.Root>
               <Field.Label>Beginn bis</Field.Label>
               <Input
@@ -111,7 +108,6 @@ export default function EventsPage() {
             </Field.Root>
           </SimpleGrid>
 
-          {/* ✅ ONLY FUTURE */}
           <Checkbox.Root
             checked={onlyFuture}
             onCheckedChange={(details) =>
@@ -122,14 +118,9 @@ export default function EventsPage() {
             <Checkbox.Control />
             <Checkbox.Label>Nur zukünftige Events</Checkbox.Label>
           </Checkbox.Root>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={resetFilters}
-            disabled={isLoading && !q && !dateFrom && !dateTo}
-          >
-            Filter zurücksetzen
-          </Button>
+          <AppButton type="button" appVariant="primary">
+            Zurücksetzen
+          </AppButton>
         </Stack>
       </Box>
 

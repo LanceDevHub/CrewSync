@@ -29,14 +29,18 @@ export default function EventCard({ event }: EventCardProps) {
 
   return (
     <Box
-      bg="white"
+      bg="surface"
       p="6"
       borderRadius="2xl"
       boxShadow="sm"
       borderWidth="1px"
-      borderColor="gray.200"
+      borderColor="border"
       transition="all 0.2s ease"
-      _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}
+      _hover={{
+        boxShadow: "md",
+        borderColor: "brandAccentHover",
+        transform: "translateY(-2px)",
+      }}
     >
       <Stack gap="4">
         <Stack gap="2">
@@ -46,30 +50,30 @@ export default function EventCard({ event }: EventCardProps) {
             _hover={{ textDecoration: "none" }}
           >
             <RouterLink to={`/events/${event.id}`}>
-              <Heading size="md" color="teal.600" lineClamp="2">
+              <Heading size="md" color="brandAccent" lineClamp="2">
                 {event.title}
               </Heading>
             </RouterLink>
           </Link>
 
-          <Text color="gray.700" lineClamp="2">
+          <Text color="text" lineClamp="2">
             {lineupPreview || "Kein Line-up angegeben"}
           </Text>
 
           {event.official_link && (
-            <Text fontSize="sm" color="gray.500">
+            <Text fontSize="sm" color="textMuted">
               Offizielle Eventseite vorhanden
             </Text>
           )}
         </Stack>
 
         <Box
-          bg="gray.50"
+          bg="mutedBg"
           borderRadius="xl"
           px="4"
           py="3"
           borderWidth="1px"
-          borderColor="gray.100"
+          borderColor="border"
         >
           <EventMeta
             creatorUsername={event.creator_username}
@@ -85,7 +89,7 @@ export default function EventCard({ event }: EventCardProps) {
             participantsCount={event.participants_count}
           />
 
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color="textMuted">
             {event.participants_count} Teilnehmer
           </Text>
         </Stack>
@@ -93,7 +97,7 @@ export default function EventCard({ event }: EventCardProps) {
         <Link
           asChild
           alignSelf="flex-start"
-          color="teal.600"
+          color="brandAccent"
           fontWeight="semibold"
           textDecoration="none"
           _hover={{ textDecoration: "underline" }}

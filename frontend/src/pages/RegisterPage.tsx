@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
-  Button,
   Field,
   Heading,
   Input,
@@ -12,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 
 import { registerUser } from "../api/auth";
+import AppButton from "../components/ui/AppButton";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -65,14 +65,16 @@ export default function RegisterPage() {
       mx="auto"
       mt="10"
       p="8"
-      bg="white"
-      borderRadius="lg"
-      boxShadow="md"
+      bg="surface"
+      borderRadius="xl"
+      boxShadow="sm"
+      borderWidth="1px"
+      borderColor="border"
     >
       <Stack gap="6">
         <Box>
           <Heading size="lg">Register</Heading>
-          <Text color="gray.600" mt="2">
+          <Text color="textMuted" mt="2">
             Erstelle ein Konto, um eigene Events anzulegen und Events
             beizutreten.
           </Text>
@@ -143,9 +145,9 @@ export default function RegisterPage() {
               </Alert.Root>
             )}
 
-            <Button type="submit" colorPalette="teal" loading={isLoading}>
+            <AppButton type="submit" appVariant="primary" loading={isLoading}>
               Register
-            </Button>
+            </AppButton>
           </Stack>
         </form>
       </Stack>

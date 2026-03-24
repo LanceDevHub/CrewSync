@@ -16,10 +16,10 @@ export default function AppLayout({
   onLogout,
 }: AppLayoutProps) {
   return (
-    <Box minHeight="100vh" bg="gray.50">
+    <Box minH="100vh" bg="bg" color="text">
       <Navbar currentUser={currentUser} onLogout={onLogout} />
 
-      <Container maxW="container.lg" py="2rem">
+      <Container maxW="container.lg" py={{ base: "6", md: "8" }}>
         {children}
       </Container>
     </Box>

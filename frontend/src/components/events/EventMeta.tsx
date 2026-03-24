@@ -21,23 +21,23 @@ export default function EventMeta({
   endDatetime,
 }: EventMetaProps) {
   return (
-    <Stack fontSize="sm" color="gray.600" gap="2">
+    <Stack fontSize="sm" color="textMuted" gap="2">
       <Text>
-        <Text as="span" fontWeight="semibold">
+        <Text as="span" fontWeight="semibold" color="text">
           Erstellt von:
         </Text>{" "}
         {creatorUsername}
       </Text>
 
       <Text>
-        <Text as="span" fontWeight="semibold">
+        <Text as="span" fontWeight="semibold" color="text">
           Ort:
         </Text>{" "}
         {location}
       </Text>
 
       <Text>
-        <Text as="span" fontWeight="semibold">
+        <Text as="span" fontWeight="semibold" color="text">
           Beginn:
         </Text>{" "}
         {formatDateTime(startDatetime)}
@@ -45,7 +45,7 @@ export default function EventMeta({
 
       {endDatetime && (
         <Text>
-          <Text as="span" fontWeight="semibold">
+          <Text as="span" fontWeight="semibold" color="text">
             Ende:
           </Text>{" "}
           {formatDateTime(endDatetime)}

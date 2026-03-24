@@ -1,17 +1,11 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Image,
-  Spacer,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Badge, Box, Flex, Image, Spacer, Stack, Text } from "@chakra-ui/react";
+
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import type { User } from "../../types/user";
 import logo from "../../assets/logo/default.svg";
+
+import AppButton from "../ui/AppButton";
 
 type NavbarProps = {
   currentUser: User | null;
@@ -26,14 +20,13 @@ type NavLinkButtonProps = {
 
 function NavLinkButton({ to, label, isActive }: NavLinkButtonProps) {
   return (
-    <Button
+    <AppButton
       asChild
-      variant={isActive ? "solid" : "ghost"}
-      colorPalette="teal"
-      size="sm"
+      appVariant={isActive ? "primary" : "secondary"}
+      bg={isActive ? "mutedBg" : "transparent"}
     >
       <RouterLink to={to}>{label}</RouterLink>
-    </Button>
+    </AppButton>
   );
 }
 
@@ -47,9 +40,9 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
   return (
     <Flex
       as="nav"
-      bg="white"
+      bg="surface"
       borderBottomWidth="1px"
-      borderColor="gray.200"
+      borderColor="border"
       px="6"
       py="4"
       align="center"
@@ -58,9 +51,9 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
       boxShadow="sm"
     >
       {showBackButton && (
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+        <AppButton appVariant="ghost" onClick={() => navigate(-1)}>
           ← Zurück
-        </Button>
+        </AppButton>
       )}
 
       <Box>
@@ -74,25 +67,24 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
               objectFit="contain"
               style={{
                 filter: `
-      drop-shadow(1px 0 0 black)
-      drop-shadow(-1px 0 0 black)
-      drop-shadow(0 1px 0 black)
-      drop-shadow(0 -1px 0 black)
-    `,
+                  drop-shadow(1px 0 0 black)
+                  drop-shadow(-1px 0 0 black)
+                  drop-shadow(0 1px 0 black)
+                  drop-shadow(0 -1px 0 black)
+                `,
               }}
             />
             <Text
               fontWeight="bold"
               fontSize="lg"
-              color="brand.500"
-              objectFit="contain"
+              color="brandAccent"
               style={{
                 filter: `
-      drop-shadow(1px 0 0 black)
-      drop-shadow(-1px 0 0 black)
-      drop-shadow(0 1px 0 black)
-      drop-shadow(0 -1px 0 black)
-    `,
+                  drop-shadow(1px 0 0 black)
+                  drop-shadow(-1px 0 0 black)
+                  drop-shadow(0 1px 0 black)
+                  drop-shadow(0 -1px 0 black)
+                `,
               }}
             >
               Events
@@ -125,7 +117,7 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
             />
 
             <Stack direction="row" gap="2" align="center">
-              <Text fontSize="sm" color="gray.600">
+              <Text fontSize="sm" color="textMuted">
                 Eingeloggt als: <strong>{currentUser.username}</strong>
               </Text>
 
@@ -136,9 +128,9 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
               )}
             </Stack>
 
-            <Button onClick={onLogout} colorPalette="red" size="sm">
+            <AppButton appVariant="danger" onClick={onLogout}>
               Logout
-            </Button>
+            </AppButton>
           </>
         ) : (
           <>
@@ -148,14 +140,15 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
               isActive={location.pathname === "/login"}
             />
 
-            <Button
+            <AppButton
               asChild
-              variant={location.pathname === "/register" ? "solid" : "outline"}
-              colorPalette="teal"
-              size="sm"
+              appVariant={
+                location.pathname === "/register" ? "primary" : "secondary"
+              }
+              bg={location.pathname === "/register" ? "mutedBg" : "transparent"}
             >
               <RouterLink to="/register">Register</RouterLink>
-            </Button>
+            </AppButton>
           </>
         )}
       </Stack>

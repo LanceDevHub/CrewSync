@@ -4,7 +4,6 @@ import {
   Alert,
   Avatar,
   Box,
-  Button,
   Field,
   Heading,
   Input,
@@ -28,6 +27,7 @@ import type { User } from "../types/user";
 import EventMeta from "../components/events/EventMeta";
 import EmptyState from "../components/common/EmptyState";
 import LoadingState from "../components/common/LoadingState";
+import AppButton from "../components/ui/AppButton";
 
 export default function EventDetailPage() {
   const { id } = useParams();
@@ -245,7 +245,14 @@ export default function EventDetailPage() {
   return (
     <Stack gap="6">
       {isEditing ? (
-        <Box bg="white" p="8" borderRadius="lg" boxShadow="md">
+        <Box
+          bg="surface"
+          p="8"
+          borderRadius="2xl"
+          boxShadow="sm"
+          borderWidth="1px"
+          borderColor="border"
+        >
           <Stack gap="6">
             <Heading size="lg">Event bearbeiten</Heading>
 
@@ -304,22 +311,22 @@ export default function EventDetailPage() {
                 </Field.Root>
 
                 <Stack direction={{ base: "column", sm: "row" }} gap="3">
-                  <Button
+                  <AppButton
                     type="submit"
-                    colorPalette="teal"
+                    appVariant="primary"
                     loading={actionLoading}
                   >
                     Änderungen speichern
-                  </Button>
+                  </AppButton>
 
-                  <Button
+                  <AppButton
                     type="button"
-                    variant="outline"
+                    appVariant="secondary"
                     onClick={() => setIsEditing(false)}
                     disabled={actionLoading}
                   >
                     Abbrechen
-                  </Button>
+                  </AppButton>
                 </Stack>
               </Stack>
             </form>
@@ -328,11 +335,12 @@ export default function EventDetailPage() {
       ) : (
         <>
           <Box
-            bg="white"
+            bg="surface"
             p="8"
             borderRadius="2xl"
             boxShadow="sm"
             borderWidth="1px"
+            borderColor="border"
           >
             <Stack gap="6">
               <Stack gap="3">
@@ -342,7 +350,7 @@ export default function EventDetailPage() {
                   <Box>
                     <Link
                       href={event.official_link}
-                      color="teal.600"
+                      color="brandAccent"
                       target="_blank"
                       rel="noopener noreferrer"
                       fontWeight="medium"
@@ -354,11 +362,11 @@ export default function EventDetailPage() {
               </Stack>
 
               <Box
-                bg="gray.50"
+                bg="mutedBg"
                 p="4"
                 borderRadius="xl"
                 borderWidth="1px"
-                borderColor="gray.100"
+                borderColor="border"
               >
                 <EventMeta
                   creatorUsername={event.creator_username}
@@ -380,13 +388,17 @@ export default function EventDetailPage() {
                     .filter(Boolean)
                     .map((artist, index) => (
                       <Box
+                        key={`${artist}-${index}`}
                         px="3"
                         py="1.5"
-                        bg="gray.50"
+                        bg="mutedBg"
                         borderRadius="full"
                         borderWidth="1px"
-                        borderColor="gray.200"
-                        _hover={{ bg: "gray.100" }}
+                        borderColor="border"
+                        _hover={{
+                          bg: "surface",
+                          borderColor: "brandAccentHover",
+                        }}
                       >
                         <Text fontSize="sm" fontWeight="medium">
                           {artist}
@@ -399,11 +411,12 @@ export default function EventDetailPage() {
           </Box>
 
           <Box
-            bg="white"
+            bg="surface"
             p="8"
             borderRadius="2xl"
             boxShadow="sm"
             borderWidth="1px"
+            borderColor="border"
           >
             <Stack gap="4">
               <Heading size="md">
@@ -411,7 +424,7 @@ export default function EventDetailPage() {
               </Heading>
 
               {event.participants.length === 0 ? (
-                <Text color="gray.600">Noch keine Teilnehmer.</Text>
+                <Text color="textMuted">Noch keine Teilnehmer.</Text>
               ) : (
                 <>
                   <Stack gap="3">
@@ -420,10 +433,10 @@ export default function EventDetailPage() {
                         key={participant.username}
                         px="4"
                         py="3"
-                        bg="gray.50"
+                        bg="mutedBg"
                         borderRadius="xl"
                         borderWidth="1px"
-                        borderColor="gray.100"
+                        borderColor="border"
                       >
                         <Stack direction="row" gap="3" align="center">
                           <Avatar.Root size="sm">
@@ -436,7 +449,7 @@ export default function EventDetailPage() {
                             <Text fontWeight="medium">
                               {participant.first_name} {participant.last_name}
                             </Text>
-                            <Text fontSize="sm" color="gray.600">
+                            <Text fontSize="sm" color="textMuted">
                               @{participant.username}
                             </Text>
                           </Box>
@@ -446,15 +459,15 @@ export default function EventDetailPage() {
                   </Stack>
 
                   {event.participants.length > 3 && (
-                    <Button
-                      variant="ghost"
+                    <AppButton
+                      appVariant="ghost"
                       alignSelf="flex-start"
                       onClick={() => setShowAllParticipants((prev) => !prev)}
                     >
                       {showAllParticipants
                         ? "Weniger anzeigen"
                         : "Mehr anzeigen"}
-                    </Button>
+                    </AppButton>
                   )}
                 </>
               )}
@@ -462,11 +475,12 @@ export default function EventDetailPage() {
           </Box>
 
           <Box
-            bg="white"
+            bg="surface"
             p="8"
             borderRadius="2xl"
             boxShadow="sm"
             borderWidth="1px"
+            borderColor="border"
           >
             <Stack gap="4">
               <Heading size="md">Aktionen</Heading>
@@ -478,63 +492,63 @@ export default function EventDetailPage() {
                   flexWrap="wrap"
                 >
                   {!event.is_joined && (
-                    <Button
+                    <AppButton
                       onClick={handleJoin}
-                      colorPalette="teal"
+                      appVariant="primary"
                       loading={actionLoading}
                     >
                       Event beitreten
-                    </Button>
+                    </AppButton>
                   )}
 
                   {event.is_joined && (
-                    <Button
+                    <AppButton
                       onClick={handleLeave}
-                      variant="outline"
+                      appVariant="secondary"
                       loading={actionLoading}
                     >
                       Event verlassen
-                    </Button>
+                    </AppButton>
                   )}
 
                   {canManageEvent && (
                     <>
-                      <Button
+                      <AppButton
                         onClick={() => setIsEditing(true)}
-                        variant="subtle"
+                        appVariant="secondary"
                         disabled={actionLoading}
                       >
                         Event bearbeiten
-                      </Button>
+                      </AppButton>
 
-                      <Button
+                      <AppButton
                         onClick={handleDelete}
-                        colorPalette="red"
+                        appVariant="danger"
                         disabled={actionLoading}
                       >
                         Event löschen
-                      </Button>
+                      </AppButton>
                     </>
                   )}
 
-                  <Button variant="outline" onClick={handleShare}>
+                  <AppButton appVariant="secondary" onClick={handleShare}>
                     Event teilen
-                  </Button>
+                  </AppButton>
                 </Stack>
               ) : (
-                <Text color="gray.600">
+                <Text color="textMuted">
                   Du musst eingeloggt sein, um mit diesem Event zu interagieren.
                 </Text>
               )}
 
               {isCreator && (
-                <Text color="gray.600">
+                <Text color="textMuted">
                   Du bist der Ersteller dieses Events.
                 </Text>
               )}
 
               {isAdmin && !isCreator && (
-                <Text color="gray.600">
+                <Text color="textMuted">
                   Du bearbeitest dieses Event mit Admin-Rechten.
                 </Text>
               )}

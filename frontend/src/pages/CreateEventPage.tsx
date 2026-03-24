@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
-  Button,
   Field,
   Heading,
   Input,
@@ -13,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 
 import { createEvent } from "../api/events";
+import AppButton from "../components/ui/AppButton";
 
 export default function CreateEventPage() {
   const navigate = useNavigate();
@@ -60,14 +60,16 @@ export default function CreateEventPage() {
       mx="auto"
       mt="10"
       p="8"
-      bg="white"
-      borderRadius="lg"
-      boxShadow="md"
+      bg="surface"
+      borderRadius="xl"
+      boxShadow="sm"
+      borderWidth="1px"
+      borderColor="border"
     >
       <Stack gap="6">
         <Box>
           <Heading size="lg">Event erstellen</Heading>
-          <Text color="gray.600" mt="2">
+          <Text color="textMuted" mt="2">
             Lege ein neues Event an und gib Beginn sowie optional ein Ende an.
           </Text>
         </Box>
@@ -122,7 +124,7 @@ export default function CreateEventPage() {
               <Field.Label>Ende (optional)</Field.Label>
               <Input
                 type="datetime-local"
-                value={endDatetime}
+                value={endDatetime || ""}
                 onChange={(event) => setEndDatetime(event.target.value)}
               />
             </Field.Root>
@@ -137,9 +139,9 @@ export default function CreateEventPage() {
               </Alert.Root>
             )}
 
-            <Button type="submit" colorPalette="teal" loading={isLoading}>
+            <AppButton type="submit" appVariant="primary" loading={isLoading}>
               Event erstellen
-            </Button>
+            </AppButton>
           </Stack>
         </form>
       </Stack>
