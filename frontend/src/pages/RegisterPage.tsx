@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
@@ -26,10 +27,24 @@ export default function RegisterPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const passwordsDoNotMatch = useMemo(() => {
+    if (!password || !confirmPassword) {
+      return false;
+    }
+
+    return password !== confirmPassword;
+  }, [password, confirmPassword]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setSuccessMessage("");
+
+    if (password !== confirmPassword) {
+      setError("Die Passwörter stimmen nicht überein.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -73,7 +88,9 @@ export default function RegisterPage() {
     >
       <Stack gap="6">
         <Box>
-          <Heading size="lg">Register</Heading>
+          <Heading size="lg" color="text">
+            Register
+          </Heading>
           <Text color="textMuted" mt="2">
             Erstelle ein Konto, um eigene Events anzulegen und Events
             beizutreten.
@@ -83,46 +100,93 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit}>
           <Stack gap="4">
             <Field.Root required>
-              <Field.Label>Benutzername</Field.Label>
+              <Field.Label color="text">Benutzername</Field.Label>
               <Input
                 type="text"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
+                color="text"
+                bg="surface"
+                borderColor="border"
+                _placeholder={{ color: "textMuted" }}
+                _focusVisible={{ borderColor: "brandAccent" }}
               />
             </Field.Root>
 
             <Field.Root required>
-              <Field.Label>Vorname</Field.Label>
+              <Field.Label color="text">Vorname</Field.Label>
               <Input
                 value={firstName}
                 onChange={(event) => setFirstName(event.target.value)}
+                color="text"
+                bg="surface"
+                borderColor="border"
+                _placeholder={{ color: "textMuted" }}
+                _focusVisible={{ borderColor: "brandAccent" }}
               />
             </Field.Root>
 
             <Field.Root required>
-              <Field.Label>Nachname</Field.Label>
+              <Field.Label color="text">Nachname</Field.Label>
               <Input
                 value={lastName}
                 onChange={(event) => setLastName(event.target.value)}
+                color="text"
+                bg="surface"
+                borderColor="border"
+                _placeholder={{ color: "textMuted" }}
+                _focusVisible={{ borderColor: "brandAccent" }}
               />
             </Field.Root>
 
             <Field.Root required>
-              <Field.Label>E-Mail</Field.Label>
+              <Field.Label color="text">E-Mail</Field.Label>
               <Input
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                color="text"
+                bg="surface"
+                borderColor="border"
+                _placeholder={{ color: "textMuted" }}
+                _focusVisible={{ borderColor: "brandAccent" }}
               />
             </Field.Root>
 
             <Field.Root required>
-              <Field.Label>Passwort</Field.Label>
+              <Field.Label color="text">Passwort</Field.Label>
               <Input
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                color="text"
+                bg="surface"
+                borderColor="border"
+                _placeholder={{ color: "textMuted" }}
+                _focusVisible={{ borderColor: "brandAccent" }}
               />
+            </Field.Root>
+
+            <Field.Root invalid={passwordsDoNotMatch} required>
+              <Field.Label color="text">Passwort wiederholen</Field.Label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                color="text"
+                bg="surface"
+                borderColor={passwordsDoNotMatch ? "red.500" : "border"}
+                _placeholder={{ color: "textMuted" }}
+                _focusVisible={{
+                  borderColor: passwordsDoNotMatch ? "red.500" : "brandAccent",
+                }}
+              />
+
+              {passwordsDoNotMatch && (
+                <Text mt="2" fontSize="sm" color="red.500">
+                  Die Passwörter stimmen nicht überein.
+                </Text>
+              )}
             </Field.Root>
 
             {error && (
@@ -145,7 +209,12 @@ export default function RegisterPage() {
               </Alert.Root>
             )}
 
-            <AppButton type="submit" appVariant="primary" loading={isLoading}>
+            <AppButton
+              type="submit"
+              appVariant="primary"
+              loading={isLoading}
+              disabled={passwordsDoNotMatch}
+            >
               Register
             </AppButton>
           </Stack>
