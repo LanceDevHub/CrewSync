@@ -8,10 +8,17 @@ export default function LoadingState({
   message = "Wird geladen...",
 }: LoadingStateProps) {
   return (
-    <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+    <Box
+      bg="surface"
+      p="6"
+      borderRadius="xl"
+      boxShadow="sm"
+      borderWidth="1px"
+      borderColor="border"
+    >
       <Stack gap="3" align="center">
-        <Spinner color="teal.500" />
-        <Text>{message}</Text>
+        <Spinner color="brandAccent" size="lg" />
+        <Text color="textMuted">{message}</Text>
       </Stack>
     </Box>
   );

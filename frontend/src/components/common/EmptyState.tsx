@@ -6,8 +6,18 @@ type EmptyStateProps = {
 
 export default function EmptyState({ message }: EmptyStateProps) {
   return (
-    <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
-      <Text>{message}</Text>
+    <Box
+      bg="surface"
+      p="6"
+      borderRadius="xl"
+      boxShadow="sm"
+      borderWidth="1px"
+      borderColor="border"
+      textAlign="center"
+    >
+      <Text fontSize="sm" color="textMuted">
+        {message}
+      </Text>
     </Box>
   );
 }

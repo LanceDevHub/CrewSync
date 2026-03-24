@@ -56,7 +56,9 @@ export default function AccessGatePage({
     >
       <Stack gap="6">
         <Box>
-          <Heading size="lg">Zugang geschützt</Heading>
+          <Heading size="lg" color="text">
+            Zugang geschützt
+          </Heading>
           <Text color="textMuted" mt="2">
             Bitte gib das Masterpasswort ein, um die Website zu betreten.
           </Text>
@@ -65,10 +67,15 @@ export default function AccessGatePage({
         <form onSubmit={handleSubmit}>
           <Stack gap="4">
             <Field.Root required>
-              <Field.Label>Masterpasswort</Field.Label>
+              <Field.Label color="text">Masterpasswort</Field.Label>
               <Input
                 type="password"
                 value={password}
+                color="text"
+                bg="surface"
+                borderColor="border"
+                _placeholder={{ color: "textMuted" }}
+                _focusVisible={{ borderColor: "brandAccent" }}
                 onChange={(event) => setPassword(event.target.value)}
               />
             </Field.Root>

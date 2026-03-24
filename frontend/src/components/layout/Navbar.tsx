@@ -6,6 +6,8 @@ import type { User } from "../../types/user";
 import logo from "../../assets/logo/default.svg";
 
 import AppButton from "../ui/AppButton";
+import ColorModeToggle from "../ui/ColorModeToggle";
+import { ColorModeButton } from "../ui/color-mode";
 
 type NavbarProps = {
   currentUser: User | null;
@@ -128,6 +130,8 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
               )}
             </Stack>
 
+            <ColorModeButton />
+
             <AppButton appVariant="danger" onClick={onLogout}>
               Logout
             </AppButton>
@@ -149,6 +153,8 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
             >
               <RouterLink to="/register">Register</RouterLink>
             </AppButton>
+
+            <ColorModeButton />
           </>
         )}
       </Stack>

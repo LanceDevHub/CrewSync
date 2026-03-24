@@ -77,7 +77,14 @@ export default function EventsPage() {
       title="Events"
       description="Entdecke Events und sieh direkt, wer schon dabei ist."
     >
-      <Box bg="white" p="6" borderRadius="lg" boxShadow="sm">
+      <Box
+        bg="surface"
+        p="6"
+        borderRadius="xl"
+        boxShadow="sm"
+        borderWidth="1px"
+        borderColor="border"
+      >
         <Stack gap="4">
           <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
             <Field.Root>
