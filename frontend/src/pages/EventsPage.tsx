@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Field,
@@ -19,6 +19,8 @@ import type { Event } from "../types/event";
 import AppButton from "../components/ui/AppButton";
 
 type TimeRangeFilter = "" | "24h" | "1w" | "2w" | "1m" | "3m" | "6m" | "later";
+
+const EVENTS_STEP = 6;
 
 function getDateRangeFromFilter(range: TimeRangeFilter): {
   dateFrom?: string;
@@ -73,7 +75,7 @@ export default function EventsPage() {
 
   const [q, setQ] = useState("");
   const [timeRange, setTimeRange] = useState<TimeRangeFilter>("");
-  const [onlyFuture, setOnlyFuture] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(EVENTS_STEP);
 
   async function loadEvents() {
     setIsLoading(true);
@@ -81,12 +83,13 @@ export default function EventsPage() {
 
     try {
       const { dateFrom, dateTo } = getDateRangeFromFilter(timeRange);
+      const shouldOnlyFuture = timeRange !== "";
 
       const data = await getEvents({
         q: q || undefined,
         date_from: dateFrom,
         date_to: dateTo,
-        only_future: onlyFuture || undefined,
+        only_future: shouldOnlyFuture || undefined,
       });
 
       setEvents(data);
@@ -108,16 +111,33 @@ export default function EventsPage() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       loadEvents();
+      setVisibleCount(EVENTS_STEP);
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [q, timeRange, onlyFuture]);
+  }, [q, timeRange]);
 
   function resetFilters() {
     setQ("");
     setTimeRange("");
-    setOnlyFuture(true);
+    setVisibleCount(EVENTS_STEP);
   }
+
+  function handleShowMore() {
+    setVisibleCount((prev) => Math.min(prev + EVENTS_STEP, events.length));
+  }
+
+  function handleShowLess() {
+    setVisibleCount((prev) => Math.max(EVENTS_STEP, prev - EVENTS_STEP));
+  }
+
+  const visibleEvents = useMemo(() => {
+    return events.slice(0, visibleCount);
+  }, [events, visibleCount]);
+
+  const showMoreButton =
+    events.length > EVENTS_STEP && visibleCount < events.length;
+  const showLessButton = visibleCount > EVENTS_STEP;
 
   return (
     <PageContainer
@@ -192,11 +212,43 @@ export default function EventsPage() {
       ) : events.length === 0 ? (
         <EmptyState message="Keine Events gefunden." />
       ) : (
-        <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </SimpleGrid>
+        <Stack gap="6">
+          <SimpleGrid columns={{ base: 1, lg: 2 }} gap="6">
+            {visibleEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </SimpleGrid>
+
+          {(showLessButton || showMoreButton) && (
+            <SimpleGrid
+              columns={{
+                base: 1,
+                sm: showLessButton && showMoreButton ? 2 : 1,
+              }}
+              gap="3"
+            >
+              {showLessButton && (
+                <AppButton
+                  type="button"
+                  appVariant="secondary"
+                  onClick={handleShowLess}
+                >
+                  Weniger anzeigen
+                </AppButton>
+              )}
+
+              {showMoreButton && (
+                <AppButton
+                  type="button"
+                  appVariant="primary"
+                  onClick={handleShowMore}
+                >
+                  Mehr anzeigen
+                </AppButton>
+              )}
+            </SimpleGrid>
+          )}
+        </Stack>
       )}
     </PageContainer>
   );
