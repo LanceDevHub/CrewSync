@@ -4,7 +4,6 @@ import {
   Flex,
   HStack,
   Image,
-  Stack,
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
@@ -92,71 +91,28 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
       }
     : undefined;
 
-  return (
-    <Box
-      as="nav"
-      bg="surface"
-      borderBottomWidth="1px"
-      borderColor="border"
-      boxShadow="sm"
-      px={{ base: "3", sm: "4", md: "6", lg: "8" }}
-      py={{ base: "3", md: "4" }}
-    >
-      {isMobile ? (
-        <Stack align="center" gap="2">
-          <Box>
-            <RouterLink to={currentUser ? "/events" : "/login"}>
-              <Image
-                src={logoSrc}
-                alt="CrewSync Logo"
-                h="25px"
-                w="80px"
-                objectFit="contain"
-                style={logoStyle}
-              />
-            </RouterLink>
-          </Box>
-
+  if (isMobile) {
+    return (
+      <>
+        <Box
+          as="nav"
+          bg="surface"
+          borderBottomWidth="1px"
+          borderColor="border"
+          boxShadow="sm"
+          px={{ base: "3", sm: "4" }}
+          py="3"
+        >
           {currentUser ? (
-            <>
-              <HStack gap="2" w="full">
-                <Box flex="1">
-                  <NavLinkButton
-                    to="/me"
-                    label={profileLabel ?? "Bereich"}
-                    isActive={location.pathname === "/me"}
-                    fullWidth
-                  />
-                </Box>
-
-                <Box flex="1">
-                  <NavLinkButton
-                    to="/events"
-                    label={searchLabel ?? "Suchen"}
-                    isActive={location.pathname === "/events"}
-                    fullWidth
-                  />
-                </Box>
-
-                <Box flex="1">
-                  <NavLinkButton
-                    to="/events/new"
-                    label={createLabel ?? "Erstellen"}
-                    isActive={location.pathname === "/events/new"}
-                    fullWidth
-                  />
-                </Box>
-              </HStack>
-
+            <Box position="relative" w="full">
               <Flex w="full" align="center" justify="space-between" gap="2">
-                {/* LEFT: Username */}
                 <HStack
-                  paddingLeft="2"
-                  gap="3"
+                  gap="2"
                   align="center"
                   minW={0}
                   flex="1"
                   overflow="hidden"
+                  maxW="34%"
                 >
                   <Text
                     fontSize="sm"
@@ -169,14 +125,17 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
                   </Text>
 
                   {currentUser.is_admin && (
-                    <Badge colorPalette="purple" variant="subtle">
+                    <Badge
+                      colorPalette="purple"
+                      variant="subtle"
+                      flexShrink={0}
+                    >
                       Admin
                     </Badge>
                   )}
                 </HStack>
 
-                {/* RIGHT: Actions */}
-                <HStack gap="4" flexShrink={0} paddingRight="2">
+                <HStack gap="2" flexShrink={0} justify="flex-end" maxW="34%">
                   <ColorModeButton />
 
                   <AppButton
@@ -190,129 +149,229 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
                   </AppButton>
                 </HStack>
               </Flex>
-            </>
+
+              <Box
+                position="absolute"
+                left="50%"
+                top="50%"
+                transform="translate(-50%, -50%)"
+              >
+                <RouterLink to="/events">
+                  <Image
+                    src={logoSrc}
+                    alt="CrewSync Logo"
+                    h="25px"
+                    w="80px"
+                    objectFit="contain"
+                    style={logoStyle}
+                  />
+                </RouterLink>
+              </Box>
+            </Box>
           ) : (
-            <Flex w="full" align="center" justify="space-between" gap="2">
+            <Box position="relative" w="full">
+              <Flex w="full" align="center" justify="space-between" gap="2">
+                <HStack gap="2" flex="1" maxW="42%">
+                  <Box flex="1">
+                    <NavLinkButton
+                      to="/login"
+                      label="Login"
+                      isActive={location.pathname === "/login"}
+                      fullWidth
+                    />
+                  </Box>
+                </HStack>
+
+                <HStack gap="2" flexShrink={0} justify="flex-end" maxW="42%">
+                  <Box w="110px">
+                    <AppButton
+                      asChild
+                      appVariant={
+                        location.pathname === "/register"
+                          ? "primary"
+                          : "secondary"
+                      }
+                      bg={
+                        location.pathname === "/register"
+                          ? "mutedBg"
+                          : "transparent"
+                      }
+                      px={{ base: "2", sm: "3" }}
+                      h="32px"
+                      fontSize="sm"
+                      width="full"
+                    >
+                      <RouterLink to="/register">Register</RouterLink>
+                    </AppButton>
+                  </Box>
+
+                  <ColorModeButton />
+                </HStack>
+              </Flex>
+
+              <Box
+                position="absolute"
+                left="50%"
+                top="50%"
+                transform="translate(-50%, -50%)"
+              >
+                <RouterLink to="/login">
+                  <Image
+                    src={logoSrc}
+                    alt="CrewSync Logo"
+                    h="25px"
+                    w="80px"
+                    objectFit="contain"
+                    style={logoStyle}
+                  />
+                </RouterLink>
+              </Box>
+            </Box>
+          )}
+        </Box>
+
+        {currentUser && (
+          <Box
+            position="sticky"
+            top="0"
+            zIndex="sticky"
+            bg="surface"
+            px={{ base: "3", sm: "4" }}
+            py="2"
+            borderBottomWidth="1px"
+            borderColor="border"
+            boxShadow="sm"
+          >
+            <HStack gap="2" w="full">
               <Box flex="1">
                 <NavLinkButton
-                  to="/login"
-                  label="Login"
-                  isActive={location.pathname === "/login"}
+                  to="/me"
+                  label={profileLabel ?? "Bereich"}
+                  isActive={location.pathname === "/me"}
                   fullWidth
                 />
               </Box>
 
               <Box flex="1">
-                <AppButton
-                  asChild
-                  appVariant={
-                    location.pathname === "/register" ? "primary" : "secondary"
-                  }
-                  bg={
-                    location.pathname === "/register"
-                      ? "mutedBg"
-                      : "transparent"
-                  }
-                  px={{ base: "2", sm: "3", md: "4" }}
-                  h={{ base: "32px", md: "36px" }}
-                  fontSize={{ base: "sm", md: "sm" }}
-                  width="full"
-                >
-                  <RouterLink to="/register">Register</RouterLink>
-                </AppButton>
-              </Box>
-
-              <ColorModeButton />
-            </Flex>
-          )}
-        </Stack>
-      ) : (
-        <Flex align="center" gap="4">
-          <Box>
-            <RouterLink to={currentUser ? "/events" : "/login"}>
-              <Image
-                src={logoSrc}
-                alt="CrewSync Logo"
-                h="25px"
-                w="100px"
-                objectFit="contain"
-                style={logoStyle}
-              />
-            </RouterLink>
-          </Box>
-
-          <Box flex="1" />
-
-          <HStack gap="3" align="center" flexWrap="nowrap">
-            {currentUser ? (
-              <>
-                <NavLinkButton
-                  to="/me"
-                  label="Mein Bereich"
-                  isActive={location.pathname === "/me"}
-                />
-
                 <NavLinkButton
                   to="/events"
-                  label="Event Suche"
+                  label={searchLabel ?? "Suchen"}
                   isActive={location.pathname === "/events"}
+                  fullWidth
                 />
+              </Box>
 
+              <Box flex="1">
                 <NavLinkButton
                   to="/events/new"
-                  label="Event erstellen"
+                  label={createLabel ?? "Erstellen"}
                   isActive={location.pathname === "/events/new"}
+                  fullWidth
                 />
+              </Box>
+            </HStack>
+          </Box>
+        )}
+      </>
+    );
+  }
 
-                <HStack gap="2" align="center">
-                  <Text fontSize="sm" color="textMuted" whiteSpace="nowrap">
-                    {userDisplayLabel}
-                  </Text>
+  return (
+    <Box
+      as="nav"
+      position="sticky"
+      top="0"
+      zIndex="sticky"
+      bg="surface"
+      borderBottomWidth="1px"
+      borderColor="border"
+      boxShadow="sm"
+      px={{ base: "3", sm: "4", md: "6", lg: "8" }}
+      py={{ base: "3", md: "4" }}
+    >
+      <Flex align="center" gap="4">
+        <Box>
+          <RouterLink to={currentUser ? "/events" : "/login"}>
+            <Image
+              src={logoSrc}
+              alt="CrewSync Logo"
+              h="25px"
+              w="100px"
+              objectFit="contain"
+              style={logoStyle}
+            />
+          </RouterLink>
+        </Box>
 
-                  {currentUser.is_admin && (
-                    <Badge colorPalette="purple" variant="subtle">
-                      Admin
-                    </Badge>
-                  )}
-                </HStack>
+        <Box flex="1" />
 
-                <ColorModeButton />
+        <HStack gap="3" align="center" flexWrap="nowrap">
+          {currentUser ? (
+            <>
+              <NavLinkButton
+                to="/me"
+                label="Mein Bereich"
+                isActive={location.pathname === "/me"}
+              />
 
-                <AppButton appVariant="danger" onClick={onLogout}>
-                  Logout
-                </AppButton>
-              </>
-            ) : (
-              <>
-                <NavLinkButton
-                  to="/login"
-                  label="Login"
-                  isActive={location.pathname === "/login"}
-                />
+              <NavLinkButton
+                to="/events"
+                label="Event Suche"
+                isActive={location.pathname === "/events"}
+              />
 
-                <AppButton
-                  asChild
-                  appVariant={
-                    location.pathname === "/register" ? "primary" : "secondary"
-                  }
-                  bg={
-                    location.pathname === "/register"
-                      ? "mutedBg"
-                      : "transparent"
-                  }
-                  px={{ base: "2", sm: "3", md: "4" }}
-                  h={{ base: "32px", md: "36px" }}
-                  fontSize={{ base: "sm", md: "sm" }}
-                >
-                  <RouterLink to="/register">Register</RouterLink>
-                </AppButton>
+              <NavLinkButton
+                to="/events/new"
+                label="Event erstellen"
+                isActive={location.pathname === "/events/new"}
+              />
 
-                <ColorModeButton />
-              </>
-            )}
-          </HStack>
-        </Flex>
-      )}
+              <HStack gap="2" align="center">
+                <Text fontSize="sm" color="textMuted" whiteSpace="nowrap">
+                  {userDisplayLabel}
+                </Text>
+
+                {currentUser.is_admin && (
+                  <Badge colorPalette="purple" variant="subtle">
+                    Admin
+                  </Badge>
+                )}
+              </HStack>
+
+              <ColorModeButton />
+
+              <AppButton appVariant="danger" onClick={onLogout}>
+                Logout
+              </AppButton>
+            </>
+          ) : (
+            <>
+              <NavLinkButton
+                to="/login"
+                label="Login"
+                isActive={location.pathname === "/login"}
+              />
+
+              <AppButton
+                asChild
+                appVariant={
+                  location.pathname === "/register" ? "primary" : "secondary"
+                }
+                bg={
+                  location.pathname === "/register" ? "mutedBg" : "transparent"
+                }
+                px={{ base: "2", sm: "3", md: "4" }}
+                h={{ base: "32px", md: "36px" }}
+                fontSize={{ base: "sm", md: "sm" }}
+              >
+                <RouterLink to="/register">Register</RouterLink>
+              </AppButton>
+
+              <ColorModeButton />
+            </>
+          )}
+        </HStack>
+      </Flex>
     </Box>
   );
 }
