@@ -2,16 +2,18 @@ import {
   Badge,
   Box,
   Flex,
+  HStack,
   Image,
-  Spacer,
   Stack,
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import { useTheme } from "next-themes";
 
 import type { User } from "../../types/user";
-import logo from "../../assets/logo/default.svg";
+import logoDark from "../../assets/logo/default.svg";
+import logoLight from "../../assets/logo/default_light.svg";
 
 import AppButton from "../ui/AppButton";
 import { ColorModeButton } from "../ui/color-mode";
@@ -25,14 +27,25 @@ type NavLinkButtonProps = {
   to: string;
   label: string;
   isActive: boolean;
+  fullWidth?: boolean;
 };
 
-function NavLinkButton({ to, label, isActive }: NavLinkButtonProps) {
+function NavLinkButton({
+  to,
+  label,
+  isActive,
+  fullWidth = false,
+}: NavLinkButtonProps) {
   return (
     <AppButton
       asChild
       appVariant={isActive ? "primary" : "secondary"}
       bg={isActive ? "mutedBg" : "transparent"}
+      px={{ base: "2", sm: "3", md: "4" }}
+      h={{ base: "32px", md: "36px" }}
+      fontSize={{ base: "sm", md: "sm" }}
+      flexShrink={0}
+      width={fullWidth ? "full" : "auto"}
     >
       <RouterLink to={to}>{label}</RouterLink>
     </AppButton>
@@ -41,6 +54,14 @@ function NavLinkButton({ to, label, isActive }: NavLinkButtonProps) {
 
 export default function Navbar({ currentUser, onLogout }: NavbarProps) {
   const location = useLocation();
+  const { resolvedTheme } = useTheme();
+
+  const isMobile = useBreakpointValue({ base: true, md: false }) ?? false;
+
+  const profileLabel = useBreakpointValue({
+    base: "Bereich",
+    md: "Mein Bereich",
+  });
 
   const searchLabel = useBreakpointValue({
     base: "Suchen",
@@ -52,119 +73,246 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
     md: "Event erstellen",
   });
 
+  const userDisplayLabel = useBreakpointValue({
+    base: currentUser?.username ?? "",
+    md: `Eingeloggt als: ${currentUser?.username ?? ""}`,
+  });
+
+  const isDark = resolvedTheme !== "light";
+  const logoSrc = isDark ? logoDark : logoLight;
+
+  const logoStyle = isDark
+    ? {
+        filter: `
+          drop-shadow(1px 0 0 black)
+          drop-shadow(-1px 0 0 black)
+          drop-shadow(0 1px 0 black)
+          drop-shadow(0 -1px 0 black)
+        `,
+      }
+    : undefined;
+
   return (
-    <Flex
+    <Box
       as="nav"
       bg="surface"
       borderBottomWidth="1px"
       borderColor="border"
-      px="6"
-      py="4"
-      align="center"
-      gap="4"
-      wrap="wrap"
       boxShadow="sm"
+      px={{ base: "3", sm: "4", md: "6", lg: "8" }}
+      py={{ base: "3", md: "4" }}
     >
-      <Box>
-        <RouterLink to={currentUser ? "/events" : "/login"}>
-          <Stack direction="row" gap="3" align="center">
-            <Image
-              src={logo}
-              alt="CrewSync Logo"
-              h="25px"
-              w="100px"
-              objectFit="contain"
-              style={{
-                filter: `
-                  drop-shadow(1px 0 0 black)
-                  drop-shadow(-1px 0 0 black)
-                  drop-shadow(0 1px 0 black)
-                  drop-shadow(0 -1px 0 black)
-                `,
-              }}
-            />
-            <Text
-              fontWeight="bold"
-              fontSize="lg"
-              color="brandAccent"
-              style={{
-                filter: `
-                  drop-shadow(1px 0 0 black)
-                  drop-shadow(-1px 0 0 black)
-                  drop-shadow(0 1px 0 black)
-                  drop-shadow(0 -1px 0 black)
-                `,
-              }}
-            >
-              Events
-            </Text>
-          </Stack>
-        </RouterLink>
-      </Box>
+      {isMobile ? (
+        <Stack align="center" gap="2">
+          <Box>
+            <RouterLink to={currentUser ? "/events" : "/login"}>
+              <Image
+                src={logoSrc}
+                alt="CrewSync Logo"
+                h="25px"
+                w="80px"
+                objectFit="contain"
+                style={logoStyle}
+              />
+            </RouterLink>
+          </Box>
 
-      <Spacer />
+          {currentUser ? (
+            <>
+              <HStack gap="2" w="full">
+                <Box flex="1">
+                  <NavLinkButton
+                    to="/me"
+                    label={profileLabel ?? "Bereich"}
+                    isActive={location.pathname === "/me"}
+                    fullWidth
+                  />
+                </Box>
 
-      <Stack direction="row" gap="3" align="center" flexWrap="wrap">
-        {currentUser ? (
-          <>
-            <NavLinkButton
-              to="/me"
-              label="Mein Bereich"
-              isActive={location.pathname === "/me"}
-            />
+                <Box flex="1">
+                  <NavLinkButton
+                    to="/events"
+                    label={searchLabel ?? "Suchen"}
+                    isActive={location.pathname === "/events"}
+                    fullWidth
+                  />
+                </Box>
 
-            <NavLinkButton
-              to="/events"
-              label={searchLabel ?? "Event Suche"}
-              isActive={location.pathname === "/events"}
-            />
+                <Box flex="1">
+                  <NavLinkButton
+                    to="/events/new"
+                    label={createLabel ?? "Erstellen"}
+                    isActive={location.pathname === "/events/new"}
+                    fullWidth
+                  />
+                </Box>
+              </HStack>
 
-            <NavLinkButton
-              to="/events/new"
-              label={createLabel ?? "Event erstellen"}
-              isActive={location.pathname === "/events/new"}
-            />
+              <Flex w="full" align="center" justify="space-between" gap="2">
+                {/* LEFT: Username */}
+                <HStack
+                  paddingLeft="2"
+                  gap="3"
+                  align="center"
+                  minW={0}
+                  flex="1"
+                  overflow="hidden"
+                >
+                  <Text
+                    fontSize="sm"
+                    color="textMuted"
+                    whiteSpace="nowrap"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                  >
+                    {userDisplayLabel}
+                  </Text>
 
-            <Stack direction="row" gap="2" align="center">
-              <Text fontSize="sm" color="textMuted">
-                Eingeloggt als: <strong>{currentUser.username}</strong>
-              </Text>
+                  {currentUser.is_admin && (
+                    <Badge colorPalette="purple" variant="subtle">
+                      Admin
+                    </Badge>
+                  )}
+                </HStack>
 
-              {currentUser.is_admin && (
-                <Badge colorPalette="purple" variant="subtle">
-                  Admin
-                </Badge>
-              )}
-            </Stack>
+                {/* RIGHT: Actions */}
+                <HStack gap="4" flexShrink={0} paddingRight="2">
+                  <ColorModeButton />
 
-            <ColorModeButton />
+                  <AppButton
+                    appVariant="danger"
+                    onClick={onLogout}
+                    px="3"
+                    h="32px"
+                    fontSize="sm"
+                  >
+                    Logout
+                  </AppButton>
+                </HStack>
+              </Flex>
+            </>
+          ) : (
+            <Flex w="full" align="center" justify="space-between" gap="2">
+              <Box flex="1">
+                <NavLinkButton
+                  to="/login"
+                  label="Login"
+                  isActive={location.pathname === "/login"}
+                  fullWidth
+                />
+              </Box>
 
-            <AppButton appVariant="danger" onClick={onLogout}>
-              Logout
-            </AppButton>
-          </>
-        ) : (
-          <>
-            <NavLinkButton
-              to="/login"
-              label="Login"
-              isActive={location.pathname === "/login"}
-            />
+              <Box flex="1">
+                <AppButton
+                  asChild
+                  appVariant={
+                    location.pathname === "/register" ? "primary" : "secondary"
+                  }
+                  bg={
+                    location.pathname === "/register"
+                      ? "mutedBg"
+                      : "transparent"
+                  }
+                  px={{ base: "2", sm: "3", md: "4" }}
+                  h={{ base: "32px", md: "36px" }}
+                  fontSize={{ base: "sm", md: "sm" }}
+                  width="full"
+                >
+                  <RouterLink to="/register">Register</RouterLink>
+                </AppButton>
+              </Box>
 
-            <AppButton
-              asChild
-              appVariant={
-                location.pathname === "/register" ? "primary" : "secondary"
-              }
-              bg={location.pathname === "/register" ? "mutedBg" : "transparent"}
-            >
-              <RouterLink to="/register">Register</RouterLink>
-            </AppButton>
+              <ColorModeButton />
+            </Flex>
+          )}
+        </Stack>
+      ) : (
+        <Flex align="center" gap="4">
+          <Box>
+            <RouterLink to={currentUser ? "/events" : "/login"}>
+              <Image
+                src={logoSrc}
+                alt="CrewSync Logo"
+                h="25px"
+                w="100px"
+                objectFit="contain"
+                style={logoStyle}
+              />
+            </RouterLink>
+          </Box>
 
-            <ColorModeButton />
-          </>
-        )}
-      </Stack>
-    </Flex>
+          <Box flex="1" />
+
+          <HStack gap="3" align="center" flexWrap="nowrap">
+            {currentUser ? (
+              <>
+                <NavLinkButton
+                  to="/me"
+                  label="Mein Bereich"
+                  isActive={location.pathname === "/me"}
+                />
+
+                <NavLinkButton
+                  to="/events"
+                  label="Event Suche"
+                  isActive={location.pathname === "/events"}
+                />
+
+                <NavLinkButton
+                  to="/events/new"
+                  label="Event erstellen"
+                  isActive={location.pathname === "/events/new"}
+                />
+
+                <HStack gap="2" align="center">
+                  <Text fontSize="sm" color="textMuted" whiteSpace="nowrap">
+                    {userDisplayLabel}
+                  </Text>
+
+                  {currentUser.is_admin && (
+                    <Badge colorPalette="purple" variant="subtle">
+                      Admin
+                    </Badge>
+                  )}
+                </HStack>
+
+                <ColorModeButton />
+
+                <AppButton appVariant="danger" onClick={onLogout}>
+                  Logout
+                </AppButton>
+              </>
+            ) : (
+              <>
+                <NavLinkButton
+                  to="/login"
+                  label="Login"
+                  isActive={location.pathname === "/login"}
+                />
+
+                <AppButton
+                  asChild
+                  appVariant={
+                    location.pathname === "/register" ? "primary" : "secondary"
+                  }
+                  bg={
+                    location.pathname === "/register"
+                      ? "mutedBg"
+                      : "transparent"
+                  }
+                  px={{ base: "2", sm: "3", md: "4" }}
+                  h={{ base: "32px", md: "36px" }}
+                  fontSize={{ base: "sm", md: "sm" }}
+                >
+                  <RouterLink to="/register">Register</RouterLink>
+                </AppButton>
+
+                <ColorModeButton />
+              </>
+            )}
+          </HStack>
+        </Flex>
+      )}
+    </Box>
   );
 }
