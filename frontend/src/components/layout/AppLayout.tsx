@@ -2,6 +2,7 @@ import { Box, Container } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
 import Navbar from "./Navbar";
+import ScrollToTopButton from "../ui/ScrollToTopButton";
 import type { User } from "../../types/user";
 
 type AppLayoutProps = {
@@ -22,6 +23,8 @@ export default function AppLayout({
       <Container maxW="container.lg" py={{ base: "6", md: "8" }}>
         {children}
       </Container>
+
+      <ScrollToTopButton />
     </Box>
   );
 }
