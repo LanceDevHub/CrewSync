@@ -1,5 +1,14 @@
-import { Badge, Box, Flex, Image, Spacer, Stack, Text } from "@chakra-ui/react";
-import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  Badge,
+  Box,
+  Flex,
+  Image,
+  Spacer,
+  Stack,
+  Text,
+  useBreakpointValue,
+} from "@chakra-ui/react";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import type { User } from "../../types/user";
 import logo from "../../assets/logo/default.svg";
@@ -32,10 +41,16 @@ function NavLinkButton({ to, label, isActive }: NavLinkButtonProps) {
 
 export default function Navbar({ currentUser, onLogout }: NavbarProps) {
   const location = useLocation();
-  const navigate = useNavigate();
 
-  const showBackButton =
-    location.pathname !== "/events" && location.pathname !== "/login";
+  const searchLabel = useBreakpointValue({
+    base: "Suchen",
+    md: "Event Suche",
+  });
+
+  const createLabel = useBreakpointValue({
+    base: "Erstellen",
+    md: "Event erstellen",
+  });
 
   return (
     <Flex
@@ -50,12 +65,6 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
       wrap="wrap"
       boxShadow="sm"
     >
-      {showBackButton && (
-        <AppButton appVariant="ghost" onClick={() => navigate(-1)}>
-          ← Zurück
-        </AppButton>
-      )}
-
       <Box>
         <RouterLink to={currentUser ? "/events" : "/login"}>
           <Stack direction="row" gap="3" align="center">
@@ -99,21 +108,21 @@ export default function Navbar({ currentUser, onLogout }: NavbarProps) {
         {currentUser ? (
           <>
             <NavLinkButton
+              to="/me"
+              label="Mein Bereich"
+              isActive={location.pathname === "/me"}
+            />
+
+            <NavLinkButton
               to="/events"
-              label="Event Suche"
+              label={searchLabel ?? "Event Suche"}
               isActive={location.pathname === "/events"}
             />
 
             <NavLinkButton
               to="/events/new"
-              label="Event erstellen"
+              label={createLabel ?? "Event erstellen"}
               isActive={location.pathname === "/events/new"}
-            />
-
-            <NavLinkButton
-              to="/me"
-              label="Mein Bereich"
-              isActive={location.pathname === "/me"}
             />
 
             <Stack direction="row" gap="2" align="center">
