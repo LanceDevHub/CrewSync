@@ -17,3 +17,15 @@ class UserRead(BaseModel):
     last_name: str
     is_active: bool
     is_admin: bool
+
+    class Config:
+        from_attributes = True
+
+
+class UsernameUpdateRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str = Field(min_length=1, max_length=255)
+    new_password: str = Field(min_length=6, max_length=255)

@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps.auth import get_current_user
 from app.api.deps.site_access import require_site_access
 from app.core.database import get_db
+from app.core.security import get_password_hash, verify_password
 from app.models.event import Event
 from app.models.event_participant import EventParticipant
 from app.models.user import User
 from app.schemas.event import EventParticipantPreview, EventRead
+from app.schemas.user import PasswordChangeRequest, UsernameUpdateRequest, UserRead
 
 router = APIRouter(
     prefix="/users",
@@ -123,3 +125,61 @@ def get_my_joined_events(
         )
 
     return result
+
+
+@router.patch("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
+def update_my_username(
+    payload: UsernameUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    normalized_username = payload.username.strip()
+
+    if not normalized_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Benutzername darf nicht leer sein.",
+        )
+
+    existing_user = db.scalar(
+        select(User).where(
+            User.username == normalized_username,
+            User.id != current_user.id,
+        )
+    )
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Benutzername ist bereits vergeben.",
+        )
+
+    current_user.username = normalized_username
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user
+
+
+@router.post("/change-password", status_code=status.HTTP_200_OK)
+def change_my_password(
+    payload: PasswordChangeRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(payload.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Aktuelles Passwort ist nicht korrekt.",
+        )
+
+    if payload.current_password == payload.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Das neue Passwort muss sich vom alten unterscheiden.",
+        )
+
+    current_user.password_hash = get_password_hash(payload.new_password)
+    db.commit()
+
+    return {"message": "Passwort erfolgreich geändert."}
