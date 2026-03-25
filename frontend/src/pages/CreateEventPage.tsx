@@ -1,18 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Alert,
-  Box,
-  Field,
-  Heading,
-  Input,
-  Stack,
-  Text,
-  Textarea,
-} from "@chakra-ui/react";
+import { Alert, Box, Heading, Stack, Text } from "@chakra-ui/react";
 
 import { createEvent } from "../api/events";
 import AppButton from "../components/ui/AppButton";
+import EventFormFields from "../components/events/EventFormFields";
 
 export default function CreateEventPage() {
   const navigate = useNavigate();
@@ -30,6 +22,32 @@ export default function CreateEventPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+
+    if (!title.trim()) {
+      setError("Titel darf nicht leer sein.");
+      return;
+    }
+
+    if (!lineup.trim()) {
+      setError("Line-up darf nicht leer sein.");
+      return;
+    }
+
+    if (!location.trim()) {
+      setError("Ort darf nicht leer sein.");
+      return;
+    }
+
+    if (!startDatetime) {
+      setError("Startdatum ist erforderlich.");
+      return;
+    }
+
+    if (endDatetime && endDatetime < startDatetime) {
+      setError("Enddatum darf nicht vor dem Startdatum liegen.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -74,70 +92,32 @@ export default function CreateEventPage() {
           </Text>
         </Box>
 
+        {error && (
+          <Alert.Root status="error">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>Event konnte nicht erstellt werden</Alert.Title>
+              <Alert.Description>{error}</Alert.Description>
+            </Alert.Content>
+          </Alert.Root>
+        )}
+
         <form onSubmit={handleSubmit}>
           <Stack gap="4">
-            <Field.Root required>
-              <Field.Label>Titel</Field.Label>
-              <Input
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label>Interpreten / Line-up</Field.Label>
-              <Textarea
-                placeholder="Ein Name pro Zeile"
-                value={lineup}
-                onChange={(event) => setLineup(event.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root>
-              <Field.Label>Offizielle Eventseite (optional)</Field.Label>
-              <Input
-                type="text"
-                placeholder="z. B. www.eventseite.de"
-                value={officialLink}
-                onChange={(event) => setOfficialLink(event.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label>Ort</Field.Label>
-              <Input
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label>Beginn</Field.Label>
-              <Input
-                type="datetime-local"
-                value={startDatetime}
-                onChange={(event) => setStartDatetime(event.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root>
-              <Field.Label>Ende (optional)</Field.Label>
-              <Input
-                type="datetime-local"
-                value={endDatetime || ""}
-                onChange={(event) => setEndDatetime(event.target.value)}
-              />
-            </Field.Root>
-
-            {error && (
-              <Alert.Root status="error">
-                <Alert.Indicator />
-                <Alert.Content>
-                  <Alert.Title>Event konnte nicht erstellt werden</Alert.Title>
-                  <Alert.Description>{error}</Alert.Description>
-                </Alert.Content>
-              </Alert.Root>
-            )}
+            <EventFormFields
+              title={title}
+              lineup={lineup}
+              officialLink={officialLink}
+              location={location}
+              startDatetime={startDatetime}
+              endDatetime={endDatetime}
+              onTitleChange={setTitle}
+              onLineupChange={setLineup}
+              onOfficialLinkChange={setOfficialLink}
+              onLocationChange={setLocation}
+              onStartDatetimeChange={setStartDatetime}
+              onEndDatetimeChange={setEndDatetime}
+            />
 
             <AppButton type="submit" appVariant="primary" loading={isLoading}>
               Event erstellen

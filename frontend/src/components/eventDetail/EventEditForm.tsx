@@ -1,16 +1,8 @@
 import { useState } from "react";
-import {
-  Alert,
-  Box,
-  Field,
-  Heading,
-  Input,
-  Stack,
-  Text,
-  Textarea,
-} from "@chakra-ui/react";
+import { Alert, Box, Heading, Stack } from "@chakra-ui/react";
 
 import AppButton from "../ui/AppButton";
+import EventFormFields from "../events/EventFormFields";
 import type { Event } from "../../types/event";
 
 type EventEditFormProps = {
@@ -50,7 +42,6 @@ export default function EventEditForm({
     formEvent.preventDefault();
     setFormError("");
 
-    // 🔴 Frontend Validation
     if (!title.trim()) {
       setFormError("Titel darf nicht leer sein.");
       return;
@@ -118,65 +109,20 @@ export default function EventEditForm({
 
         <form onSubmit={handleSubmit}>
           <Stack gap="4">
-            <Field.Root required invalid={!title.trim()}>
-              <Field.Label>Titel</Field.Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-              {!title.trim() && (
-                <Text fontSize="sm" color="red.500">
-                  Pflichtfeld
-                </Text>
-              )}
-            </Field.Root>
-
-            <Field.Root required invalid={!lineup.trim()}>
-              <Field.Label>Line-up</Field.Label>
-              <Textarea
-                placeholder="Ein Interpret pro Zeile"
-                value={lineup}
-                onChange={(e) => setLineup(e.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root required invalid={!location.trim()}>
-              <Field.Label>Ort</Field.Label>
-              <Input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root>
-              <Field.Label>Offizielle Eventseite (optional)</Field.Label>
-              <Input
-                type="url"
-                value={officialLink}
-                onChange={(e) => setOfficialLink(e.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label>Beginn</Field.Label>
-              <Input
-                type="datetime-local"
-                value={startDatetime}
-                onChange={(e) => setStartDatetime(e.target.value)}
-              />
-            </Field.Root>
-
-            <Field.Root invalid={!!endDatetime && endDatetime < startDatetime}>
-              <Field.Label>Ende (optional)</Field.Label>
-              <Input
-                type="datetime-local"
-                value={endDatetime}
-                onChange={(e) => setEndDatetime(e.target.value)}
-              />
-
-              {endDatetime && endDatetime < startDatetime && (
-                <Text fontSize="sm" color="red.500">
-                  Enddatum liegt vor dem Startdatum
-                </Text>
-              )}
-            </Field.Root>
+            <EventFormFields
+              title={title}
+              lineup={lineup}
+              officialLink={officialLink}
+              location={location}
+              startDatetime={startDatetime}
+              endDatetime={endDatetime}
+              onTitleChange={setTitle}
+              onLineupChange={setLineup}
+              onOfficialLinkChange={setOfficialLink}
+              onLocationChange={setLocation}
+              onStartDatetimeChange={setStartDatetime}
+              onEndDatetimeChange={setEndDatetime}
+            />
 
             <Stack direction={{ base: "column", sm: "row" }} gap="3">
               <AppButton type="submit" appVariant="primary" loading={loading}>

@@ -1,17 +1,10 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Alert,
-  Box,
-  Field,
-  Heading,
-  Input,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Alert, Field, Input, Stack, Text } from "@chakra-ui/react";
 
 import { registerUser } from "../api/auth";
 import AppButton from "../components/ui/AppButton";
+import AuthFormCard from "../components/auth/AuthFormCard";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -75,151 +68,132 @@ export default function RegisterPage() {
   }
 
   return (
-    <Box
-      maxW="md"
-      mx="auto"
-      mt="10"
-      p="8"
-      bg="surface"
-      borderRadius="xl"
-      boxShadow="sm"
-      borderWidth="1px"
-      borderColor="border"
+    <AuthFormCard
+      title="Register"
+      description="Erstelle ein Konto, um eigene Events anzulegen und Events beizutreten."
     >
-      <Stack gap="6">
-        <Box>
-          <Heading size="lg" color="text">
+      <form onSubmit={handleSubmit}>
+        <Stack gap="4">
+          <Field.Root required>
+            <Field.Label color="text">Benutzername</Field.Label>
+            <Input
+              type="text"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              color="text"
+              bg="surface"
+              borderColor="border"
+              _placeholder={{ color: "textMuted" }}
+              _focusVisible={{ borderColor: "brandAccent" }}
+            />
+          </Field.Root>
+
+          <Field.Root required>
+            <Field.Label color="text">Vorname</Field.Label>
+            <Input
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
+              color="text"
+              bg="surface"
+              borderColor="border"
+              _placeholder={{ color: "textMuted" }}
+              _focusVisible={{ borderColor: "brandAccent" }}
+            />
+          </Field.Root>
+
+          <Field.Root required>
+            <Field.Label color="text">Nachname</Field.Label>
+            <Input
+              value={lastName}
+              onChange={(event) => setLastName(event.target.value)}
+              color="text"
+              bg="surface"
+              borderColor="border"
+              _placeholder={{ color: "textMuted" }}
+              _focusVisible={{ borderColor: "brandAccent" }}
+            />
+          </Field.Root>
+
+          <Field.Root required>
+            <Field.Label color="text">E-Mail</Field.Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              color="text"
+              bg="surface"
+              borderColor="border"
+              _placeholder={{ color: "textMuted" }}
+              _focusVisible={{ borderColor: "brandAccent" }}
+            />
+          </Field.Root>
+
+          <Field.Root required>
+            <Field.Label color="text">Passwort</Field.Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              color="text"
+              bg="surface"
+              borderColor="border"
+              _placeholder={{ color: "textMuted" }}
+              _focusVisible={{ borderColor: "brandAccent" }}
+            />
+          </Field.Root>
+
+          <Field.Root invalid={passwordsDoNotMatch} required>
+            <Field.Label color="text">Passwort wiederholen</Field.Label>
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              color="text"
+              bg="surface"
+              borderColor={passwordsDoNotMatch ? "red.500" : "border"}
+              _placeholder={{ color: "textMuted" }}
+              _focusVisible={{
+                borderColor: passwordsDoNotMatch ? "red.500" : "brandAccent",
+              }}
+            />
+
+            {passwordsDoNotMatch && (
+              <Text mt="2" fontSize="sm" color="red.500">
+                Die Passwörter stimmen nicht überein.
+              </Text>
+            )}
+          </Field.Root>
+
+          {error && (
+            <Alert.Root status="error">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>Registrierung fehlgeschlagen</Alert.Title>
+                <Alert.Description>{error}</Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )}
+
+          {successMessage && (
+            <Alert.Root status="success">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>Erfolgreich</Alert.Title>
+                <Alert.Description>{successMessage}</Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )}
+
+          <AppButton
+            type="submit"
+            appVariant="primary"
+            loading={isLoading}
+            disabled={passwordsDoNotMatch}
+          >
             Register
-          </Heading>
-          <Text color="textMuted" mt="2">
-            Erstelle ein Konto, um eigene Events anzulegen und Events
-            beizutreten.
-          </Text>
-        </Box>
-
-        <form onSubmit={handleSubmit}>
-          <Stack gap="4">
-            <Field.Root required>
-              <Field.Label color="text">Benutzername</Field.Label>
-              <Input
-                type="text"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                color="text"
-                bg="surface"
-                borderColor="border"
-                _placeholder={{ color: "textMuted" }}
-                _focusVisible={{ borderColor: "brandAccent" }}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label color="text">Vorname</Field.Label>
-              <Input
-                value={firstName}
-                onChange={(event) => setFirstName(event.target.value)}
-                color="text"
-                bg="surface"
-                borderColor="border"
-                _placeholder={{ color: "textMuted" }}
-                _focusVisible={{ borderColor: "brandAccent" }}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label color="text">Nachname</Field.Label>
-              <Input
-                value={lastName}
-                onChange={(event) => setLastName(event.target.value)}
-                color="text"
-                bg="surface"
-                borderColor="border"
-                _placeholder={{ color: "textMuted" }}
-                _focusVisible={{ borderColor: "brandAccent" }}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label color="text">E-Mail</Field.Label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                color="text"
-                bg="surface"
-                borderColor="border"
-                _placeholder={{ color: "textMuted" }}
-                _focusVisible={{ borderColor: "brandAccent" }}
-              />
-            </Field.Root>
-
-            <Field.Root required>
-              <Field.Label color="text">Passwort</Field.Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                color="text"
-                bg="surface"
-                borderColor="border"
-                _placeholder={{ color: "textMuted" }}
-                _focusVisible={{ borderColor: "brandAccent" }}
-              />
-            </Field.Root>
-
-            <Field.Root invalid={passwordsDoNotMatch} required>
-              <Field.Label color="text">Passwort wiederholen</Field.Label>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                color="text"
-                bg="surface"
-                borderColor={passwordsDoNotMatch ? "red.500" : "border"}
-                _placeholder={{ color: "textMuted" }}
-                _focusVisible={{
-                  borderColor: passwordsDoNotMatch ? "red.500" : "brandAccent",
-                }}
-              />
-
-              {passwordsDoNotMatch && (
-                <Text mt="2" fontSize="sm" color="red.500">
-                  Die Passwörter stimmen nicht überein.
-                </Text>
-              )}
-            </Field.Root>
-
-            {error && (
-              <Alert.Root status="error">
-                <Alert.Indicator />
-                <Alert.Content>
-                  <Alert.Title>Registrierung fehlgeschlagen</Alert.Title>
-                  <Alert.Description>{error}</Alert.Description>
-                </Alert.Content>
-              </Alert.Root>
-            )}
-
-            {successMessage && (
-              <Alert.Root status="success">
-                <Alert.Indicator />
-                <Alert.Content>
-                  <Alert.Title>Erfolgreich</Alert.Title>
-                  <Alert.Description>{successMessage}</Alert.Description>
-                </Alert.Content>
-              </Alert.Root>
-            )}
-
-            <AppButton
-              type="submit"
-              appVariant="primary"
-              loading={isLoading}
-              disabled={passwordsDoNotMatch}
-            >
-              Register
-            </AppButton>
-          </Stack>
-        </form>
-      </Stack>
-    </Box>
+          </AppButton>
+        </Stack>
+      </form>
+    </AuthFormCard>
   );
 }
