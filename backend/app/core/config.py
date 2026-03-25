@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    mail_from: str = "noreply@crewsync.local"
+    mailtrap_smtp_host: str
+    mailtrap_smtp_port: int = 587
+    mailtrap_smtp_username: str
+    mailtrap_smtp_password: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",

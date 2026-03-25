@@ -16,3 +16,14 @@ export function getCurrentUser() {
 export function logoutUser() {
   return post<{ message: string }>("/auth/logout");
 }
+
+export function forgotPassword(email: string) {
+  return post<{ message: string }>("/auth/forgot-password", { email });
+}
+
+export function resetPassword(token: string, newPassword: string) {
+  return post<{ message: string }>("/auth/reset-password", {
+    token,
+    new_password: newPassword,
+  });
+}

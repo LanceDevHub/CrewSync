@@ -11,6 +11,20 @@ from app.models.user import User
 from app.schemas.auth import LoginRequest
 from app.schemas.user import UserCreate, UserRead
 
+from datetime import datetime, timedelta
+from secrets import token_urlsafe
+from app.services.email import send_password_reset_email
+
+
+from app.schemas.user import (
+    UserCreate,
+    UserRead,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+)
+
+
+
 router = APIRouter(
     prefix="/auth",
     tags=["auth"],
@@ -100,3 +114,69 @@ def read_current_user(current_user: User = Depends(get_current_user)):
 def logout_user(response: Response):
     response.delete_cookie(key="access_token")
     return {"message": "Logout successful."}
+
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    user = db.scalar(
+        select(User).where(User.email == payload.email)
+    )
+
+    if not user:
+        return {
+            "message": "Falls ein Konto existiert, wurde ein Reset-Link erstellt."
+        }
+
+    reset_token = token_urlsafe(32)
+    expires_at = datetime.utcnow() + timedelta(minutes=30)
+
+    user.password_reset_token = reset_token
+    user.password_reset_expires_at = expires_at
+
+    db.commit()
+
+    reset_link = f"{settings.frontend_url}/reset-password?token={reset_token}"
+
+    send_password_reset_email(
+        to_email=user.email,
+        reset_link=reset_link,
+    )
+
+    return {
+        "message": "Falls ein Konto existiert, wurde ein Reset-Link erstellt."
+    }
+
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    user = db.scalar(
+        select(User).where(User.password_reset_token == payload.token)
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ungültiger oder abgelaufener Reset-Token.",
+        )
+
+    if (
+        user.password_reset_expires_at is None
+        or user.password_reset_expires_at < datetime.utcnow()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ungültiger oder abgelaufener Reset-Token.",
+        )
+
+    user.password_hash = get_password_hash(payload.new_password)
+    user.password_reset_token = None
+    user.password_reset_expires_at = None
+
+    db.commit()
+
+    return {"message": "Passwort erfolgreich zurückgesetzt."}

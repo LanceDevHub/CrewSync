@@ -1,39 +1,31 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Alert, Field, Input, Stack } from "@chakra-ui/react";
 
-import { loginUser } from "../api/auth";
-import type { User } from "../types/user";
+import { forgotPassword } from "../api/auth";
 import AppButton from "../components/ui/AppButton";
 import AuthFormCard from "../components/auth/AuthFormCard";
 
-import { Link as RouterLink } from "react-router-dom";
-import { Link } from "@chakra-ui/react";
-
-type LoginPageProps = {
-  onLoginSuccess: (user: User) => void;
-};
-
-export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
-  const navigate = useNavigate();
-
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setSuccessMessage("");
     setIsLoading(true);
 
     try {
-      const user = await loginUser({ email, password });
-      onLoginSuccess(user);
-      navigate("/events");
+      const result = await forgotPassword(email);
+      setSuccessMessage(result.message);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login fehlgeschlagen.");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Reset konnte nicht angefordert werden.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -41,8 +33,8 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   return (
     <AuthFormCard
-      title="Login"
-      description="Melde dich an, um Events zu sehen und daran teilzunehmen."
+      title="Passwort vergessen"
+      description="Gib deine E-Mail ein. Falls ein Konto existiert, wird ein Reset-Link erstellt."
     >
       <form onSubmit={handleSubmit}>
         <Stack gap="4">
@@ -52,15 +44,11 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-            />
-          </Field.Root>
-
-          <Field.Root required>
-            <Field.Label>Passwort</Field.Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              color="text"
+              bg="surface"
+              borderColor="border"
+              _placeholder={{ color: "textMuted" }}
+              _focusVisible={{ borderColor: "brandAccent" }}
             />
           </Field.Root>
 
@@ -68,19 +56,25 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             <Alert.Root status="error">
               <Alert.Indicator />
               <Alert.Content>
-                <Alert.Title>Login fehlgeschlagen</Alert.Title>
+                <Alert.Title>Fehler</Alert.Title>
                 <Alert.Description>{error}</Alert.Description>
               </Alert.Content>
             </Alert.Root>
           )}
 
-          <AppButton type="submit" appVariant="primary" loading={isLoading}>
-            Login
-          </AppButton>
+          {successMessage && (
+            <Alert.Root status="success">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>Erfolgreich</Alert.Title>
+                <Alert.Description>{successMessage}</Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )}
 
-          <Link asChild color="brandAccent" fontSize="sm">
-            <RouterLink to="/forgot-password">Passwort vergessen?</RouterLink>
-          </Link>
+          <AppButton type="submit" appVariant="primary" loading={isLoading}>
+            Reset-Link anfordern
+          </AppButton>
         </Stack>
       </form>
     </AuthFormCard>
