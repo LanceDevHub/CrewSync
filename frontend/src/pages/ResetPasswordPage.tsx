@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert, Field, Input, Stack, Text } from "@chakra-ui/react";
+import {
+  useNavigate,
+  useSearchParams,
+  Link as RouterLink,
+} from "react-router-dom";
+import { Alert, Field, Input, Link, Stack, Text } from "@chakra-ui/react";
 
 import { resetPassword } from "../api/auth";
 import AppButton from "../components/ui/AppButton";
@@ -27,13 +31,22 @@ export default function ResetPasswordPage() {
     return newPassword !== confirmPassword;
   }, [newPassword, confirmPassword]);
 
+  const tokenMissing = token.trim() === "";
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setSuccessMessage("");
 
-    if (!token) {
-      setError("Kein Reset-Token gefunden.");
+    if (tokenMissing) {
+      setError(
+        "Kein Reset-Token gefunden. Bitte öffne den Link direkt aus der E-Mail.",
+      );
+      return;
+    }
+
+    if (!newPassword.trim() || !confirmPassword.trim()) {
+      setError("Bitte fülle beide Passwortfelder aus.");
       return;
     }
 
@@ -46,11 +59,13 @@ export default function ResetPasswordPage() {
 
     try {
       const result = await resetPassword(token, newPassword);
-      setSuccessMessage(result.message);
+      setSuccessMessage(
+        result.message || "Passwort erfolgreich zurückgesetzt.",
+      );
 
       setTimeout(() => {
         navigate("/login");
-      }, 1200);
+      }, 1500);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -65,10 +80,23 @@ export default function ResetPasswordPage() {
   return (
     <AuthFormCard
       title="Neues Passwort setzen"
-      description="Gib dein neues Passwort ein."
+      description="Vergib ein neues Passwort für dein Konto."
     >
       <form onSubmit={handleSubmit}>
         <Stack gap="4">
+          {tokenMissing && (
+            <Alert.Root status="warning">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>Ungültiger Aufruf</Alert.Title>
+                <Alert.Description>
+                  Es wurde kein Reset-Token gefunden. Öffne die Seite bitte
+                  direkt über den Link aus deiner E-Mail.
+                </Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )}
+
           <Field.Root required>
             <Field.Label>Neues Passwort</Field.Label>
             <Input
@@ -120,7 +148,9 @@ export default function ResetPasswordPage() {
               <Alert.Indicator />
               <Alert.Content>
                 <Alert.Title>Erfolgreich</Alert.Title>
-                <Alert.Description>{successMessage}</Alert.Description>
+                <Alert.Description>
+                  {successMessage} Du wirst gleich zum Login weitergeleitet.
+                </Alert.Description>
               </Alert.Content>
             </Alert.Root>
           )}
@@ -129,10 +159,19 @@ export default function ResetPasswordPage() {
             type="submit"
             appVariant="primary"
             loading={isLoading}
-            disabled={passwordsDoNotMatch}
+            disabled={passwordsDoNotMatch || tokenMissing}
           >
             Passwort zurücksetzen
           </AppButton>
+
+          <Link
+            asChild
+            color="brandAccent"
+            fontSize="sm"
+            alignSelf="flex-start"
+          >
+            <RouterLink to="/login">Zurück zum Login</RouterLink>
+          </Link>
         </Stack>
       </form>
     </AuthFormCard>

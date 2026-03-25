@@ -5,6 +5,9 @@ import { forgotPassword } from "../api/auth";
 import AppButton from "../components/ui/AppButton";
 import AuthFormCard from "../components/auth/AuthFormCard";
 
+import { Link } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -75,6 +78,15 @@ export default function ForgotPasswordPage() {
           <AppButton type="submit" appVariant="primary" loading={isLoading}>
             Reset-Link anfordern
           </AppButton>
+
+          <Link
+            asChild
+            color="brandAccent"
+            fontSize="sm"
+            alignSelf="flex-start"
+          >
+            <RouterLink to="/login">Zurück zum Login</RouterLink>
+          </Link>
         </Stack>
       </form>
     </AuthFormCard>
