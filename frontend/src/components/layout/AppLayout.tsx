@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import Navbar from "./Navbar";
 import ScrollToTopButton from "../ui/ScrollToTopButton";
+import { Toaster } from "../ui/toaster";
 import type { User } from "../../types/user";
 
 type AppLayoutProps = {
@@ -25,6 +26,7 @@ export default function AppLayout({
       </Container>
 
       <ScrollToTopButton />
+      <Toaster />
     </Box>
   );
 }
