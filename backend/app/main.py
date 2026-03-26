@@ -12,7 +12,7 @@ app = FastAPI(title=settings.app_name)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
+        "http://crewsyncr.de",
     ],
     allow_credentials=True,
     allow_methods=["*"],
