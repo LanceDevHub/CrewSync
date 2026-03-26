@@ -18,9 +18,10 @@ def unlock_site_access(payload: SiteAccessRequest, response: Response):
         key="site_access",
         value="granted",
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="none",
+        secure=True,
         max_age=60 * 60 * 24 * 7,
+        path="/",
     )
 
     return {"message": "Site access granted."}
@@ -28,7 +29,12 @@ def unlock_site_access(payload: SiteAccessRequest, response: Response):
 
 @router.post("/lock", response_model=SiteAccessResponse, status_code=status.HTTP_200_OK)
 def lock_site_access(response: Response):
-    response.delete_cookie(key="site_access")
+    response.delete_cookie(
+    key="site_access",
+    path="/",
+    samesite="none",
+    secure=True,
+    )
     return {"message": "Site access removed."}
 
 
