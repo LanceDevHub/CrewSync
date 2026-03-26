@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
-    mail_from: str = "noreply@crewsync.local"
+    mail_from: str = "webmaster@crewsyncr.de"
     mailtrap_smtp_host: str
     mailtrap_smtp_port: int = 587
     mailtrap_smtp_username: str
