@@ -98,7 +98,7 @@ def login_user(
         value=access_token,
         httponly=True,
         secure=False,
-        samesite="lax",
+        samesite="none",
         max_age=60 * settings.access_token_expire_minutes,
     )
 
