@@ -26,6 +26,7 @@ __pycache__/
 # =========================
 backend/.env
 frontend/.env
+frontend/.env.production
 
 # =========================
 # OS / EDITOR
