@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     database_url: str
     secret_key: str
     master_password: str
-    frontend_url: str = "http://crewsyncr.de"
+    frontend_url: str = "https://crewsyncr.de"
 
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
