@@ -12,7 +12,10 @@ app = FastAPI(title=settings.app_name)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://crewsyncr.de",
         "http://crewsyncr.de",
+        "https://www.crewsyncr.de",
+        "http://www.crewsyncr.de",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -26,7 +29,6 @@ def root():
         "app_name": settings.app_name,
         "debug": settings.debug,
     }
-
 
 app.include_router(auth_router)
 app.include_router(events_router)
