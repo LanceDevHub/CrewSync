@@ -97,9 +97,10 @@ def login_user(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,
+        secure=True,
         samesite="none",
         max_age=60 * settings.access_token_expire_minutes,
+        path="/",
     )
 
     return user
