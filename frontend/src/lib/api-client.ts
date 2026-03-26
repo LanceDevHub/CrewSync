@@ -1,5 +1,4 @@
-const API_BASE_URL = "http://localhost:8000";
-
+const API_BASE_URL = "https://crewsync-f5vv.onrender.com"
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
 };
