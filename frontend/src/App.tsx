@@ -14,30 +14,63 @@ import CreateEventPage from "./pages/CreateEventPage";
 import ProfilePage from "./pages/ProfilePage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import LoadingPage from "./pages/LoadingPage";
 
 import AppLayout from "./components/layout/AppLayout";
 
 export default function App() {
   const [hasSiteAccess, setHasSiteAccess] = useState(false);
   const [siteAccessChecked, setSiteAccessChecked] = useState(false);
+  const [backendWakingUp, setBackendWakingUp] = useState(false);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState("");
 
   useEffect(() => {
+    let retryInterval: number | undefined;
+
     async function checkSiteAccess() {
       try {
         const result = await getSiteAccessStatus();
         setHasSiteAccess(result.has_access);
-      } catch {
-        setHasSiteAccess(false);
-      } finally {
+        setBackendWakingUp(false);
         setSiteAccessChecked(true);
+
+        if (retryInterval) {
+          window.clearInterval(retryInterval);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message === "Failed to fetch") {
+          setBackendWakingUp(true);
+          setSiteAccessChecked(true);
+
+          if (!retryInterval) {
+            retryInterval = window.setInterval(async () => {
+              try {
+                const result = await getSiteAccessStatus();
+                setHasSiteAccess(result.has_access);
+                setBackendWakingUp(false);
+                window.clearInterval(retryInterval);
+              } catch {
+                // weiter versuchen
+              }
+            }, 3000);
+          }
+        } else {
+          setHasSiteAccess(false);
+          setSiteAccessChecked(true);
+        }
       }
     }
 
     checkSiteAccess();
+
+    return () => {
+      if (retryInterval) {
+        window.clearInterval(retryInterval);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -75,8 +108,12 @@ export default function App() {
     }
   }
 
+  if (backendWakingUp) {
+    return <LoadingPage />;
+  }
+
   if (!siteAccessChecked) {
-    return <p>Loading...</p>;
+    return <LoadingPage />;
   }
 
   if (!hasSiteAccess) {
@@ -84,7 +121,7 @@ export default function App() {
   }
 
   if (!authChecked) {
-    return <p>Loading...</p>;
+    return <LoadingPage />;
   }
 
   const isLoggedIn = currentUser !== null;
