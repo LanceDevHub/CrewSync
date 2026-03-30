@@ -79,8 +79,6 @@ Um dennoch einen Eindruck zu vermitteln, sind unten Screenshots eingebunden 👇
 
 ## 📸 Screenshots
 
-> Hier eigene Screenshots einfügen
-
 ### 🗂 Event Übersicht
 
 ![Events](./docs/screenshots/events.png)
@@ -112,7 +110,7 @@ Um dennoch einen Eindruck zu vermitteln, sind unten Screenshots eingebunden 👇
 ### 1. Repository klonen
 
 ```bash
-git clone https://github.com/DEIN_USERNAME/crewsyncr.git
+git clone https://github.com/LanceDevHub/CrewSync.git
 cd crewsyncr
 ```
 
@@ -176,11 +174,9 @@ http://localhost:8000/docs
 
 ## 🔮 Nächste Schritte
 
-- Vollständiger CSRF-Schutz
 - Admin-Funktionalitäten
 - Erweiterte Event-Suche / Filter
 - Benachrichtigungssystem
-- CI/CD Pipeline
 
 ---
 
