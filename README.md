@@ -89,6 +89,10 @@ Um dennoch einen Eindruck zu vermitteln, sind unten Screenshots eingebunden 👇
 
 ![Event Detail](./docs/screenshots/event-detail.png)
 
+### 🎵 Profile Page
+
+![Profile Page](./docs/screenshots/profile.png)
+
 ### 🔐 Login / Registrierung
 
 ![Login](./docs/screenshots/login.png)
