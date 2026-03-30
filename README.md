@@ -186,13 +186,6 @@ http://localhost:8000/docs
 
 ## 👨‍💻 Entwickler
 
-**Dein Name**
+**Leonard Emter**
 
-- GitHub: https://github.com/DEIN_USERNAME
-- LinkedIn: (optional)
-
----
-
-## 📄 Lizenz
-
-MIT License
+- GitHub: https://github.com/LanceDevHub
