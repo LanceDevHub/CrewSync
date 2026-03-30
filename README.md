@@ -1,39 +1,187 @@
-# Projektdokumentation
+# 🎧 CrewSyncr — Plattform für Musik-Events
 
-Diese Dokumentation ist in mehrere Bereiche gegliedert:
+Eine moderne Webanwendung zur Organisation und Teilnahme an Musik-Events.
 
-- `01-overview/` → Überblick und Architektur
-- `02-setup/` → lokales Setup
-- `03-backend/` → Backend-Implementierung
-- `04-frontend/` → Frontend-Implementierung
-- `05-operations/` → Produktion, Sicherheit, Betrieb
+---
 
-## Empfohlene Lesereihenfolge
+## 🚀 Überblick
 
-1. `01-overview/architecture.md`
-2. `02-setup/local-setup.md`
-3. `03-backend/database-model.md`
-4. `03-backend/database-migrations.md`
-5. `03-backend/backend-auth.md`
-6. `03-backend/backend-events.md`
-7. `04-frontend/frontend-auth.md`
-8. `04-frontend/frontend-events.md`
-9. `05-operations/production-readiness.md`
+CrewSyncr ermöglicht es Nutzern, Musik-Events zu erstellen, zu entdecken und daran teilzunehmen.
+Der Fokus liegt auf einem klar strukturierten MVP mit sauberer Architektur und Erweiterbarkeit.
 
-## Tech Stack
+---
 
-Frontend:
+## ✨ Funktionen
+
+- Registrierung und Login
+- Authentifizierung via JWT (HttpOnly-Cookies)
+- Events erstellen, durchsuchen und verwalten
+- Join / Leave Funktion für Events
+- Nutzerprofile und Teilnehmerübersicht
+- Responsives, modernes UI
+
+---
+
+## 🧱 Tech Stack
+
+### Frontend
 
 - React
 - TypeScript
 - Vite
-- Chakra
+- Chakra UI
 
-Backend:
+### Backend
 
 - FastAPI
 - Python
 
-Database:
+### Datenbank
 
-- PostgreSQL (aktuell SQLite, da in Entwicklung)
+- PostgreSQL
+- SQLAlchemy
+- Alembic (Migrationen)
+
+---
+
+## 🧠 Architektur
+
+```text
+Frontend (React)
+   ↓
+API (FastAPI)
+   ↓
+PostgreSQL
+```
+
+- Klare Trennung von UI, Logik und Datenhaltung
+- Sicherheitskritische Logik im Backend
+- Modularer Monolith für schnelles MVP
+
+---
+
+## 🔐 Sicherheit
+
+- JWT-Authentifizierung über HttpOnly-Cookies
+- Sichere Cookie-Konfiguration (`secure`, `SameSite`)
+- Backend-basierte Zugriffskontrolle
+- Vorbereitung für CSRF-Schutz
+
+---
+
+## 🌐 Demo
+
+> ⚠️ Die Anwendung ist aktuell durch ein Master-Passwort geschützt (Entwicklungsphase).
+
+Um dennoch einen Eindruck zu vermitteln, sind unten Screenshots eingebunden 👇
+
+---
+
+## 📸 Screenshots
+
+### 🗂 Event Übersicht
+
+![Events](./docs/screenshots/events.png)
+
+### 🎵 Event Detail
+
+![Event Detail](./docs/screenshots/event-detail.png)
+
+### 🎵 Profile Page
+
+![Profile Page](./docs/screenshots/profile.png)
+
+### 🔐 Login / Registrierung
+
+![Login](./docs/screenshots/login.png)
+
+---
+
+## ⚙️ Lokales Setup
+
+### Voraussetzungen
+
+- Node.js & npm
+- Python 3.10+
+- PostgreSQL
+
+---
+
+### 1. Repository klonen
+
+```bash
+git clone https://github.com/LanceDevHub/CrewSync.git
+cd crewsyncr
+```
+
+---
+
+### 2. Backend starten
+
+```bash
+cd backend
+
+python -m venv .venv
+source .venv/bin/activate
+
+pip install -r requirements.txt
+alembic upgrade head
+
+uvicorn app.main:app --reload
+```
+
+---
+
+### 3. Frontend starten
+
+```bash
+cd frontend
+
+npm install
+npm run dev
+```
+
+---
+
+## 🚀 Deployment
+
+- VPS (Ubuntu Server)
+- Nginx als Reverse Proxy
+- systemd für Prozessmanagement
+- HTTPS via Let's Encrypt
+- Subdomain für API (`api.*`)
+
+---
+
+## 🧪 API Dokumentation
+
+FastAPI stellt automatisch eine API-Dokumentation bereit:
+
+```text
+http://localhost:8000/docs
+```
+
+---
+
+## 📌 Projektstatus
+
+- Kernfunktionen implementiert ✔
+- Backend & Datenbank stabil ✔
+- Deployment eingerichtet ✔
+- Sicherheits- und Produktionsoptimierung in Arbeit ⚠️
+
+---
+
+## 🔮 Nächste Schritte
+
+- Admin-Funktionalitäten
+- Erweiterte Event-Suche / Filter
+- Benachrichtigungssystem
+
+---
+
+## 👨‍💻 Entwickler
+
+**Leonard Emter**
+
+- GitHub: https://github.com/LanceDevHub

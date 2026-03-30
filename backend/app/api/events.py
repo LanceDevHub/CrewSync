@@ -328,6 +328,8 @@ def delete_event(
     for participation in participations:
         db.delete(participation)
 
+    db.flush()  # wichtig
+
     db.delete(event)
     db.commit()
 

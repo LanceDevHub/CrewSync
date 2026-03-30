@@ -7,12 +7,12 @@ class Settings(BaseSettings):
     database_url: str
     secret_key: str
     master_password: str
-    frontend_url: str = "http://localhost:5173"
+    frontend_url: str = "https://crewsyncr.com"
 
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
-    mail_from: str = "noreply@crewsync.local"
+    mail_from: str = "webmaster@crewsyncr.de"
     mailtrap_smtp_host: str
     mailtrap_smtp_port: int = 587
     mailtrap_smtp_username: str

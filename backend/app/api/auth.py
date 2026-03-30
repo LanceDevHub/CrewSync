@@ -97,9 +97,10 @@ def login_user(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=True,
+        samesite="none",
         max_age=60 * settings.access_token_expire_minutes,
+        path="/",
     )
 
     return user
@@ -112,7 +113,12 @@ def read_current_user(current_user: User = Depends(get_current_user)):
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 def logout_user(response: Response):
-    response.delete_cookie(key="access_token")
+    response.delete_cookie(
+    key="access_token",
+    path="/",
+    samesite="none",
+    secure=True,
+    )
     return {"message": "Logout successful."}
 
 @router.post("/forgot-password", status_code=status.HTTP_200_OK)
